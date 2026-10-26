@@ -1,0 +1,31 @@
+/* ทิศทาง C — ป้ายตลาดพิมพ์มือ (Market Poster)
+   อารมณ์: สนุก ตรงๆ เป็นกันเอง เหมือนโปสเตอร์/สติกเกอร์ตลาด · พื้นกระดาษ เส้นดำหนา */
+[data-dir="poster"] {
+  --bg: #f3eee3;          /* กระดาษ */
+  --surface: #ffffff;
+  --surface-2: #e8e1d2;
+  --ink: #141414;
+  --muted: #5a554b;
+  --line: #141414;
+  --brand: #84e62d;
+  --accent: #ff4a2e;      /* แดงมะเขือเทศ */
+  --accent-2: #ffc93c;    /* เหลืองทานตะวัน */
+  --on-brand: #141414;
+  --wm-ink: #141414;
+  --wm-go: #141414;       /* บนพื้นสว่าง GO เป็นดำ แล้ววางบนแถบเขียว — ดูตัวอย่างในหน้า */
+
+  --font-head: "Kanit", sans-serif;
+  --font-body: "IBM Plex Sans Thai", sans-serif;
+  --font-accent: "Bebas Neue", "Kanit", sans-serif;  /* ตัวเลข/อังกฤษ */
+  --head-weight: 800;
+
+  --radius: 4px;
+  --radius-lg: 8px;
+  --space: 8px;
+  --border-w: 3px;
+  --shadow: 5px 5px 0 #141414;   /* เงาแข็ง ไม่เบลอ */
+
+  --ease: cubic-bezier(.34,1.56,.64,1);   /* เด้งเกินนิดหนึ่ง */
+  --dur: 520ms;
+  --motion-note: "แปะสติกเกอร์ เด้ง · ป้ายวิ่ง · เลื่อนแนวนอน";
+}

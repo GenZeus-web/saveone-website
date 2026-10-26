@@ -1,0 +1,32 @@
+/* ผสม 3 — เรียบ + สติกเกอร์ (D + C, ไม่มีแถบเลื่อน)
+   โครงเรียบแบบ D · ลูกเล่นจาก C: ป้ายสติกเกอร์สีเอียงนิดๆ แปะเด้ง · รถวิ่งเข้าฉาก */
+[data-dir="m3"] {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #f1efe8;
+  --ink: #15171a;
+  --muted: #5e646b;
+  --line: #e4e4de;
+  --brand: #84e62d;
+  --brand-text: #3d7a0f;
+  --accent: #ff4a2e;      /* แดงมะเขือเทศ (จาก C) */
+  --accent-2: #ffc93c;    /* เหลืองทานตะวัน (จาก C) */
+  --on-brand: #15171a;
+  --wm-ink: #15171a;
+  --wm-go: #3d7a0f;
+
+  --font-head: "Kanit", sans-serif;            /* หัวข้อเป็นมิตรขึ้น แต่ใช้น้ำหนักกลาง */
+  --font-body: "IBM Plex Sans Thai", sans-serif;
+  --font-accent: "Kanit", sans-serif;
+  --head-weight: 600;
+
+  --radius: 12px;
+  --radius-lg: 18px;
+  --space: 8px;
+  --border-w: 2px;
+  --shadow: 3px 3px 0 #15171a;   /* เงาแข็งแบบ C แต่บางลง ใช้เฉพาะสติกเกอร์ */
+
+  --ease: cubic-bezier(.34,1.4,.64,1);   /* เด้งนิดเดียว */
+  --dur: 550ms;
+  --motion-note: "สติกเกอร์แปะเด้งเบาๆ · รถวิ่งเข้าฉาก · ไม่มีแถบเลื่อน";
+}

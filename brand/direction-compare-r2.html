@@ -1,0 +1,635 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เทียบทิศทางแบรนด์ รอบ 2 — ตลาดเซฟวัน GO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&family=Kanit:wght@400;600;700&family=Noto+Serif+Thai:wght@500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;1,500&display=swap">
+<link rel="stylesheet" href="directions/m1-clean-dusk.css">
+<link rel="stylesheet" href="directions/m2-night-luxe.css">
+<link rel="stylesheet" href="directions/m3-clean-sticker.css">
+<style>
+/* ---------- กรอบหน้าเทียบ ---------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:"IBM Plex Sans Thai",system-ui,sans-serif;background:#e9e9e4;color:#1a1a1a;line-height:1.6}
+img{max-width:100%;display:block}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:8px;padding:8px 16px;background:rgba(18,18,18,.94);color:#fff;backdrop-filter:blur(8px);overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.topbar strong{font-size:14px;margin-right:auto;padding-right:12px}
+.topbar a{color:#fff;text-decoration:none;font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid #444}
+.topbar a:hover{background:#333}
+.wrap{max-width:1120px;margin:0 auto;padding:0 16px}
+@media (min-width:768px){.wrap{padding:0 32px}}
+.intro{padding:56px 0 48px}
+.intro h1{font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.3;margin-bottom:12px}
+.intro p{max-width:68ch;color:#444;margin-bottom:8px}
+.intro ul{margin:12px 0 0 20px;color:#444}
+.note{font-size:13px;color:#6b6b6b}
+.heard{background:#fff;border:1px solid #d6d6cf;border-radius:12px;padding:16px 20px;margin-top:16px;max-width:760px}
+.heard li{margin-left:18px}
+
+/* ---------- ส่วนประกอบร่วม (อ่านค่าจาก token) ---------- */
+.dir{background:var(--bg);color:var(--ink);font-family:var(--font-body);border-top:6px solid #121212}
+.dir h1,.dir h2,.dir h3{font-family:var(--font-head);font-weight:var(--head-weight);line-height:1.3}
+.dir-head{display:flex;gap:16px;align-items:flex-start;padding-top:48px;padding-bottom:32px}
+.dir-letter{flex:none;display:grid;place-items:center;width:56px;height:56px;border-radius:var(--radius);background:var(--brand);color:var(--on-brand);font:700 22px/1 var(--font-accent)}
+.dir-head h2{font-size:clamp(1.5rem,3.4vw,2.2rem)}
+.dir-head h2 small{font:500 .55em var(--font-accent);color:var(--muted);margin-left:8px}
+.mood{font-size:1.05rem;margin-top:4px}
+.from{color:var(--muted);font-size:.95rem;margin-top:4px}
+
+.hero{position:relative;overflow:hidden;min-height:min(86svh,760px);display:flex;align-items:center;padding:72px 0}
+.hero-inner{position:relative;z-index:2;display:grid;gap:40px;align-items:center;width:100%}
+@media (min-width:900px){.hero-inner{grid-template-columns:1fr 1.05fr}}
+.wm{display:block;width:min(280px,70%)}
+.wm svg{display:block;width:100%;height:auto}
+.eyebrow{font:600 13px/1 var(--font-accent);letter-spacing:.14em;text-transform:uppercase;margin-top:32px}
+.hero-title{font-size:clamp(2.2rem,4.8vw,3.9rem);margin:12px 0 8px;letter-spacing:-.005em}
+.hero-time{font:600 clamp(1.3rem,2.6vw,1.8rem)/1.3 var(--font-accent)}
+.hero-sub{margin:14px 0 28px;color:var(--muted);font-size:1.05rem}
+.btn{display:inline-block;padding:14px 28px;border-radius:var(--radius);font-weight:600}
+.btn2{display:inline-block;margin-left:18px;font-weight:600}
+
+.demo-label{position:absolute;top:14px;left:16px;right:16px;z-index:6;font-size:13px;opacity:.75;font-family:var(--font-body)}
+.section-title{font-size:1.2rem;margin-bottom:16px}
+.tokens{display:grid;gap:24px;padding-top:56px;padding-bottom:56px}
+@media (min-width:900px){.tokens{grid-template-columns:1.1fr 1fr}}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:24px}
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+.sw{font-size:13px;line-height:1.4}
+.sw .chip{display:block;height:56px;border-radius:var(--radius);border:1px solid rgba(128,128,128,.35);margin-bottom:6px}
+.sw code{display:block;color:var(--muted);font-size:12px}
+.t-head{font-family:var(--font-head);font-weight:var(--head-weight);font-size:clamp(2rem,5vw,3rem);line-height:1.3}
+.t-en{font-family:var(--font-accent);font-size:1.4rem;margin-top:4px}
+.t-body{margin:12px 0;max-width:52ch}
+.t-accent{font-family:var(--font-accent);font-size:1.8rem;line-height:1.2}
+.fontnames{font-size:13px;color:var(--muted);margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.motionnote{display:block;margin-top:8px;font-size:14px}
+.shapes{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.shapes span{display:grid;place-items:center;width:96px;height:64px;font-size:12px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink)}
+.shapes span:nth-child(1){border-radius:var(--radius)}
+.shapes span:nth-child(2){border-radius:var(--radius-lg)}
+.shapes span:nth-child(3){border-radius:var(--radius);box-shadow:var(--shadow);background:var(--surface)}
+.dark-chip .shapes span:nth-child(-n+2){color:#fff}
+
+.samples{display:grid;gap:24px;padding-top:8px;padding-bottom:72px}
+@media (min-width:900px){.samples{grid-template-columns:repeat(3,1fr)}}
+.price-row{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+.price-row b{font:600 2rem/1 var(--font-accent)}
+.price-row b small{font-size:.5em;font-weight:400;margin-left:4px;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;padding:2px 10px;border-radius:999px;margin-bottom:10px;border:1px solid var(--line);color:var(--muted)}
+.photo{position:relative;aspect-ratio:4/3;border-radius:var(--radius);overflow:hidden;margin-bottom:12px}
+.photo img{position:absolute;left:10%;right:10%;bottom:14%;width:80%}
+.logo-tiles{display:grid;gap:12px}
+.logo-tile{border-radius:var(--radius);padding:20px;border:1px solid rgba(128,128,128,.3)}
+.logo-tile .wm{width:100%}
+.logo-tile p{font-size:12px;margin-top:8px;opacity:.75}
+
+.pin{position:relative}
+.pin-stage{position:sticky;top:var(--top,52px);height:calc(100svh - var(--top,52px));overflow:hidden}
+
+/* ไฟระย้า (ใช้ใน ผสม 1) */
+.string{position:absolute;left:0;right:0;top:0;height:80px;z-index:2;pointer-events:none}
+.string svg{position:absolute;inset:0;width:100%;height:80px}
+.bulb{position:absolute;width:10px;height:13px;margin-left:-5px;border-radius:50% 50% 45% 45%;background:#4a3f6a;transition:background .4s,box-shadow .4s}
+.bulb.on{background:var(--bulb);box-shadow:0 0 8px var(--bulb),0 0 22px rgba(255,211,107,.6)}
+.twinkle .bulb{background:var(--bulb);box-shadow:0 0 8px var(--bulb),0 0 22px rgba(255,211,107,.6);animation:twinkle 3s ease-in-out infinite;animation-delay:calc(var(--i) * -.37s)}
+@keyframes twinkle{50%{opacity:.55}}
+
+/* โผล่ตอนเลื่อนถึง */
+.js .rv{opacity:0;transition:opacity var(--dur) var(--ease),transform var(--dur) var(--ease),filter var(--dur) var(--ease);transition-delay:var(--d,0ms)}
+.js .rv.in{opacity:1;transform:none;filter:none}
+.js [data-dir="m1"] .rv:not(.in){transform:translateY(18px)}
+.js [data-dir="m2"] .rv:not(.in){transform:translateY(12px);filter:blur(4px)}
+.js [data-dir="m3"] .rv:not(.in){transform:translateY(16px)}
+.js [data-dir="m3"] .stk.rv:not(.in){transform:scale(.55) rotate(-12deg)}
+
+/* ================= ผสม 1 · เรียบหรู + ฟ้าเย็น ================= */
+[data-dir="m1"] .eyebrow{color:var(--accent-2)}
+[data-dir="m1"] .hero-time{color:var(--accent)}
+[data-dir="m1"] .btn{background:var(--ink);color:#fff}
+[data-dir="m1"] .btn2{color:var(--ink);border-bottom:2px solid var(--accent)}
+[data-dir="m1"] .dir-letter{background:linear-gradient(160deg,var(--accent-2),var(--accent));color:#fff}
+.skypanel{position:relative;overflow:hidden;border-radius:var(--radius-lg);aspect-ratio:4/3;background:linear-gradient(180deg,#5b3a96 0%,#c46a8a 55%,#ffb27a 100%);box-shadow:var(--shadow)}
+.skypanel .string{top:14px}
+.skypanel .ground{position:absolute;left:0;right:0;bottom:0;height:22%;background:#16122f}
+.skypanel .truck{position:absolute;left:50%;bottom:16%;width:76%;transform:translateX(-50%);filter:brightness(0);z-index:1}
+.skypanel .sun{position:absolute;left:58%;width:30%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fff3c4 0%,#ffc86b 55%,rgba(255,160,90,0) 72%)}
+.skypanel .stars{position:absolute;inset:0;opacity:0;background-image:radial-gradient(1.5px 1.5px at 12% 22%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 28% 12%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 44% 40%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 70% 28%,#fff 50%,transparent 51%),radial-gradient(1.5px 1.5px at 86% 44%,#fff 50%,transparent 51%),radial-gradient(1px 1px at 92% 20%,#fff 50%,transparent 51%)}
+.skypanel .clock{position:absolute;top:auto;bottom:4%;left:4%;z-index:3;font:600 14px/1 var(--font-accent);color:#fff;background:rgba(0,0,0,.35);padding:8px 12px;border-radius:999px}
+.split-stage{display:grid;align-content:center;gap:24px;height:100%;padding:56px 16px 24px;max-width:1120px;margin:0 auto}
+@media (min-width:900px){.split-stage{grid-template-columns:1fr 1.15fr;align-items:center;padding:0 32px}}
+.split-stage .skypanel{max-height:54svh;width:100%;justify-self:center}
+.steps{position:relative;min-height:180px}
+.step{position:absolute;inset:0;opacity:0;transform:translateY(24px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.step.active{opacity:1;transform:none}
+.step .num{font:600 14px/1 var(--font-accent);letter-spacing:.1em;color:var(--accent)}
+.step h3{font-size:clamp(1.7rem,4vw,2.7rem);margin:12px 0}
+.step p{color:var(--muted);max-width:40ch}
+.bar{height:3px;background:var(--line);border-radius:3px;margin-top:8px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2))}
+[data-dir="m1"] .photo{background:linear-gradient(180deg,#6b3fa0,#ff9e6b 75%,#ffd38a)}
+[data-dir="m1"] .photo img{filter:brightness(0) opacity(.85)}
+[data-dir="m1"] .t-accent{color:var(--accent)}
+
+/* ================= ผสม 2 · หรูยามค่ำ ================= */
+[data-dir="m2"] .hero{text-align:center;background:radial-gradient(70% 55% at 50% 100%,#2a2150,transparent 70%),var(--bg)}
+[data-dir="m2"] .hero-inner{grid-template-columns:1fr;justify-items:center;max-width:820px}
+[data-dir="m2"] .wm{margin:0 auto;width:min(240px,62%)}
+[data-dir="m2"] .rule{display:block;width:72px;height:1px;background:var(--gold);margin:28px auto 0}
+[data-dir="m2"] .eyebrow{color:var(--gold);margin-top:20px;letter-spacing:.3em}
+[data-dir="m2"] .hero-title{font-size:clamp(2.2rem,5.2vw,4.2rem);line-height:1.35}
+[data-dir="m2"] .hero-time{color:var(--gold);font-weight:500;font-style:italic;font-size:clamp(1.5rem,3vw,2.2rem)}
+[data-dir="m2"] .btn{border:1px solid var(--gold);color:var(--gold);background:transparent;letter-spacing:.04em}
+[data-dir="m2"] .btn2{color:var(--ink);opacity:.8}
+[data-dir="m2"] .truck{width:min(420px,78vw);margin:8px auto 0;filter:brightness(.62) sepia(1) saturate(1.6)} /* = ทอง #e2bd7a ใกล้ --gold */
+[data-dir="m2"] .dir-letter{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+[data-dir="m2"] .box{background:var(--surface)}
+[data-dir="m2"] .t-accent,[data-dir="m2"] .price-row b{color:var(--gold)}
+[data-dir="m2"] .t-accent{font-style:italic}
+.bokeh{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.bokeh i{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(227,189,120,.45),rgba(227,189,120,0) 68%);animation:drift var(--t,18s) ease-in-out infinite alternate}
+.bokeh i.warm{background:radial-gradient(circle,rgba(255,158,107,.35),rgba(255,158,107,0) 68%)}
+@keyframes drift{to{transform:translate(var(--dx,20px),var(--dy,-30px))}}
+.luxe-stage{display:grid;place-items:center;text-align:center;background:var(--bg)}
+.lines{position:relative;z-index:2;padding:0 16px}
+.lines p{font:600 clamp(1.8rem,5vw,3.6rem)/1.45 var(--font-head);opacity:.12;transition:opacity 1s var(--ease)}
+.lines p.on{opacity:1}
+.lines .gold-line{display:block;height:1px;width:0;margin:28px auto 0;background:var(--gold)}
+[data-dir="m2"] .photo{background:radial-gradient(60% 50% at 50% 90%,#3a2c5a,#12102a)}
+[data-dir="m2"] .photo img{filter:brightness(.62) sepia(1) saturate(1.6)}
+
+/* ================= ผสม 3 · เรียบ + สติกเกอร์ ================= */
+[data-dir="m3"] .eyebrow{color:var(--brand-text)}
+[data-dir="m3"] .btn{background:var(--ink);color:#fff}
+[data-dir="m3"] .btn2{color:var(--ink);border-bottom:2px solid var(--brand)}
+.stk{display:inline-block;font:600 1rem/1.2 var(--font-head);padding:8px 16px;border:var(--border-w) solid var(--ink);border-radius:10px;box-shadow:var(--shadow);background:var(--c,#fff);color:var(--ink);transform:rotate(var(--r,-3deg))}
+.js .stk.rv.in{transform:rotate(var(--r,-3deg))}
+[data-dir="m3"] .hero-time{display:inline-block;margin-top:8px}
+[data-dir="m3"] .hero-time.stk{font-size:clamp(1.4rem,3vw,2rem);padding:8px 18px;--c:var(--accent-2)}
+[data-dir="m3"] .hero-art{position:relative;display:grid;place-items:center;min-height:min(80vw,440px)}
+[data-dir="m3"] .hero-art::before{content:"";position:absolute;width:min(76vw,420px);aspect-ratio:1;border-radius:50%;background:var(--brand)}
+.drive{position:relative;width:min(560px,92%);filter:brightness(0);transform:translateX(-110vw);transition:transform 1.4s cubic-bezier(.2,.8,.25,1)}
+.drive.in{transform:none;animation:bump .5s 1.35s ease-out}
+@keyframes bump{40%{transform:translateY(-6px) rotate(-.6deg)}100%{transform:none}}
+.hero-art .stk{position:absolute;z-index:2}
+.hero-art .s1{top:8%;left:6%;--c:var(--accent);color:#fff;--r:-6deg}
+.hero-art .s2{top:14%;right:4%;--c:#fff;--r:5deg}
+.hero-art .s3{bottom:6%;right:12%;--c:var(--accent-2);--r:-3deg}
+[data-dir="m3"] .dir-letter{border:var(--border-w) solid var(--ink);box-shadow:var(--shadow)}
+.how3{padding:72px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--surface)}
+.how3 h3.big{font-size:clamp(1.8rem,4vw,2.6rem);margin-bottom:32px}
+.how3-grid{display:grid;gap:24px}
+@media (min-width:800px){.how3-grid{grid-template-columns:repeat(3,1fr)}}
+.how3-card{border:1px solid var(--line);border-radius:var(--radius-lg);padding:28px 24px;background:var(--bg)}
+.how3-card .stk{font-size:2rem;padding:4px 18px;margin-bottom:16px}
+.how3-card h4{font:600 1.3rem/1.3 var(--font-head);margin-bottom:6px}
+.how3-card p{color:var(--muted)}
+[data-dir="m3"] .photo{background:var(--surface-2);border:1px solid var(--line)}
+[data-dir="m3"] .photo::before{content:"";position:absolute;width:60%;aspect-ratio:1;left:20%;top:12%;border-radius:50%;background:var(--accent-2)}
+[data-dir="m3"] .photo img{filter:brightness(0) drop-shadow(3px 0 0 #fff) drop-shadow(-3px 0 0 #fff) drop-shadow(0 3px 0 #fff) drop-shadow(0 -3px 0 #fff)}
+[data-dir="m3"] .t-accent{color:var(--brand-text)}
+
+/* ---------- สรุป ---------- */
+.summary{padding:64px 0 96px}
+.summary h2{font-size:1.6rem;margin-bottom:16px}
+.table-scroll{overflow-x:auto;background:#fff;border-radius:12px;border:1px solid #d6d6cf}
+table{border-collapse:collapse;width:100%;min-width:720px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid #e6e6e0}
+thead th{background:#f3f3ef;font-size:15px}
+tbody th{width:120px;color:#555;font-weight:600}
+.how{margin-top:24px;background:#121212;color:#fff;border-radius:12px;padding:24px}
+.how h3{margin-bottom:8px}
+.how ul{margin-left:20px}
+
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .js .rv,.js .rv.in{opacity:1;transform:none;filter:none;transition:none}
+  .js .stk.rv{transform:rotate(var(--r,-3deg))}
+  .drive,.drive.in{transform:none;transition:none;animation:none}
+  .bokeh i,.twinkle .bulb{animation:none}
+  .step,.lines p{transition:none}
+}
+</style>
+</head>
+<body>
+<template id="wm-tpl"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2824 624" role="img" aria-label="ตลาดเซฟวัน GO"><g><path style="fill:var(--wm-ink,#ffffff)" fill-rule="evenodd" d="M 37 23.594 C 24.832 28.865, 23.567 32.892, 23.174 67.602 C 22.742 105.707, 23.889 111.313, 33.282 117.025 C 52.591 128.768, 71.057 111.897, 52.327 99.626 C 45.221 94.971, 45.032 94.251, 45.015 71.806 C 45 52.543, 45.052 52.051, 47.359 49.369 L 49.718 46.626 56.765 47.956 C 62.233 48.987, 64.826 49.029, 68.348 48.143 C 74.713 46.540, 75.766 46.676, 78.545 49.455 L 81 51.909 81 81.553 C 81 113.776, 81.370 116.255, 86.597 119.052 C 93.483 122.737, 100.287 118.958, 101.509 110.769 C 103.050 100.445, 101.589 35.663, 99.739 32.279 C 94.347 22.414, 83.235 19.431, 69.600 24.190 L 63.325 26.380 56.842 24.190 C 49.337 21.655, 41.987 21.434, 37 23.594 M 265 22.676 C 259.377 24.846, 256.858 31.331, 259.336 37.261 C 262.081 43.831, 264.267 44.500, 283.001 44.500 C 300.794 44.500, 305 45.545, 305 49.966 C 305 52.894, 301.682 54.649, 287.983 58.968 C 262.046 67.145, 255 74.822, 255 94.903 C 255 115.062, 260.368 120.486, 280.330 120.495 L 291.160 120.500 294.080 117.234 C 300.351 110.221, 296.554 101.060, 286.767 99.592 C 274.640 97.774, 274.310 87.007, 286.214 81.493 C 307.739 71.519, 311.991 74.206, 312.015 97.797 C 312.032 114.514, 312.639 116.582, 318.356 119.379 C 321.646 120.989, 322.754 121.091, 326.102 120.088 C 333.200 117.961, 333.205 117.934, 333.290 82.251 L 333.365 50.477 330.762 44.792 C 327.181 36.970, 320.515 30.625, 311.206 26.180 L 303.500 22.500 285 22.298 C 274.825 22.187, 265.825 22.357, 265 22.676 M 490.500 22.894 C 481.088 26.988, 482.875 40.355, 493.190 43.017 C 495.286 43.558, 498.739 44.450, 500.865 45 C 512.320 47.963, 513.054 50.322, 513.297 84.962 L 513.500 113.840 515.940 116.437 C 521.382 122.228, 530.715 121.644, 534.105 115.299 C 536.807 110.244, 536.046 52.925, 533.183 45.798 C 526.897 30.151, 503.133 17.399, 490.500 22.894 M 715.831 24.334 C 704.505 29.082, 697.652 35.696, 692.911 46.450 C 690.849 51.129, 690.726 52.897, 690.666 78.613 L 690.604 105.825 693.561 110.608 C 698.504 118.604, 711.188 123.073, 720.353 120.049 C 729.806 116.929, 729.531 104.862, 719.895 99.946 C 712.728 96.290, 712.008 93.951, 712.004 74.315 C 712 56.491, 712.567 53.184, 716.317 49.153 C 724.718 40.120, 739.952 41.347, 745.713 51.520 C 747.901 55.384, 747.968 56.313, 747.984 83.349 C 748.004 117.867, 748.746 120.273, 759.373 120.273 C 762.606 120.273, 763.913 119.662, 766.233 117.066 L 769.098 113.859 768.799 80.179 C 768.506 47.209, 768.451 46.409, 766.193 42.179 C 757.466 25.829, 732.969 17.149, 715.831 24.334 M 1950.766 27.918 L 1947.500 30.836 1947.500 307 L 1947.500 583.164 1950.766 586.082 C 1956.958 591.615, 1969.808 589.845, 1973.248 582.986 C 1975.679 578.140, 1976.003 37.336, 1973.579 31.534 C 1970.615 24.440, 1957.062 22.292, 1950.766 27.918 M 1219.065 41.782 C 1216.428 44.419, 1216.245 45.203, 1215.548 56.871 C 1212.733 104.040, 1225.010 132.469, 1254 145.909 C 1270.652 153.630, 1279.706 154.137, 1394.500 153.782 C 1494.502 153.472, 1489.965 153.761, 1492.805 147.528 C 1494.648 143.484, 1494.460 94.036, 1492.585 89.548 C 1489.939 83.217, 1494.606 83.547, 1400 83 L 1313.500 82.500 1309.351 80.281 C 1302.540 76.639, 1301.001 73.066, 1300.994 60.882 C 1300.982 38.186, 1302.630 39.009, 1257.173 39.004 L 1221.846 39 1219.065 41.782 M 981.500 67.945 C 974.837 70.673, 971.225 88.970, 967.079 141 C 966.531 147.875, 965.182 160.250, 964.080 168.500 C 962.978 176.750, 961.599 190.925, 961.015 200 C 960.431 209.075, 959.309 220.100, 958.523 224.500 C 957.217 231.803, 956.170 242.850, 954.022 272 C 953.596 277.775, 952.549 288.125, 951.696 295 C 950.842 301.875, 949.414 316.050, 948.522 326.500 C 947.630 336.950, 946.279 350.675, 945.519 357 C 944.759 363.325, 943.855 373.900, 943.509 380.500 C 943.164 387.100, 942.449 395.865, 941.919 399.977 C 941.390 404.089, 940.061 417.589, 938.967 429.977 C 936.966 452.618, 935.254 461.715, 932.572 463.940 C 929.806 466.236, 926.456 456.627, 924.963 442.112 C 923.972 432.480, 919.176 411.411, 915.377 400 C 914.003 395.875, 911.819 388.378, 910.524 383.341 C 909.228 378.303, 907.735 373.353, 907.206 372.341 C 906.677 371.328, 904.582 364.200, 902.550 356.500 C 897.329 336.719, 893.544 323.490, 888.818 308.500 C 880.566 282.329, 877.713 273.312, 874.894 264.500 C 873.311 259.550, 870.448 249.435, 868.533 242.022 C 862.564 218.924, 865.003 220.004, 818.797 220.002 C 779.521 220, 779.001 220.072, 776.062 225.947 C 773.280 231.506, 764.453 260.885, 761.007 276.054 C 760.063 280.208, 758.557 285.833, 757.661 288.554 C 755.660 294.622, 746.612 329.684, 743.356 343.984 C 742.043 349.749, 740.078 356.847, 738.990 359.757 C 737.901 362.666, 735.876 369.423, 734.488 374.773 C 733.101 380.123, 730.404 390.350, 728.495 397.500 C 722.857 418.618, 720.144 430.675, 714.994 457.487 C 709.852 484.259, 705.482 483.476, 703.897 455.500 C 702.420 429.439, 700.009 407.870, 695.011 376 C 686.644 322.653, 683.641 304.405, 681.433 293.500 C 680.097 286.900, 678.517 276.775, 677.921 271 C 677.326 265.225, 675.747 255.685, 674.414 249.801 C 673.081 243.916, 671.308 232.891, 670.474 225.301 C 667.320 196.581, 669.893 198, 620.973 198 L 583.846 198 580.923 200.923 C 577.137 204.709, 577.139 207.745, 580.939 228.500 C 582.550 237.300, 584.596 249.900, 585.485 256.500 C 586.374 263.100, 587.970 272.801, 589.031 278.059 C 590.092 283.316, 591.849 293.666, 592.936 301.059 C 594.022 308.451, 595.569 317.425, 596.373 321 C 597.177 324.575, 598.352 331.532, 598.983 336.460 C 599.614 341.388, 601.405 351.063, 602.964 357.960 C 604.522 364.857, 606.079 373.650, 606.424 377.500 C 606.768 381.350, 608.150 390.800, 609.495 398.500 C 610.839 406.200, 613.502 422.175, 615.412 434 C 617.321 445.825, 619.608 459.775, 620.493 465 C 621.377 470.225, 623.185 481.553, 624.511 490.173 C 625.836 498.794, 627.574 508.694, 628.372 512.173 C 629.171 515.653, 630.120 521.200, 630.482 524.500 C 630.844 527.800, 632.671 538.375, 634.542 548 C 636.414 557.625, 638.394 569.210, 638.943 573.744 C 641.233 592.640, 639.309 591.992, 693.115 591.996 C 741.874 592, 739.144 592.391, 743.840 584.734 C 747.988 577.969, 761.859 534.049, 773.601 490.500 C 774.936 485.550, 778.962 472.725, 782.548 462 C 794.509 426.224, 795.939 421.576, 799.008 408.500 C 800.687 401.350, 802.720 393, 803.527 389.945 C 804.334 386.889, 805.681 379.500, 806.519 373.524 C 807.358 367.547, 808.912 359.247, 809.971 355.079 C 811.031 350.911, 812.376 343.450, 812.960 338.500 C 816.044 312.355, 820.989 310.174, 825.531 332.954 C 826.867 339.656, 828.444 346.934, 829.034 349.127 C 829.625 351.320, 830.924 356.801, 831.921 361.307 C 832.918 365.813, 834.890 373.550, 836.305 378.500 C 837.719 383.450, 840.971 395.150, 843.532 404.500 C 850.402 429.580, 854.480 443.626, 860.083 461.500 C 862.841 470.300, 866.720 482.675, 868.703 489 C 870.686 495.325, 873.579 504.325, 875.133 509 C 876.687 513.675, 879.580 523.350, 881.563 530.500 C 883.546 537.650, 886.960 549.350, 889.149 556.500 C 891.339 563.650, 894.182 573.016, 895.467 577.313 C 900.036 592.590, 897.881 592.001, 949.200 591.996 C 1003.558 591.991, 999.356 593.986, 1001.594 567.120 C 1002.355 557.979, 1003.657 545.775, 1004.487 540 C 1005.317 534.225, 1006.454 524.100, 1007.013 517.500 C 1008.402 501.096, 1009.819 489.988, 1011.593 481.583 C 1012.416 477.687, 1013.978 465.275, 1015.064 454 C 1016.151 442.725, 1017.899 428.775, 1018.950 423 C 1020 417.225, 1021.132 408.675, 1021.465 404 C 1021.798 399.325, 1023.411 385.991, 1025.051 374.368 C 1026.690 362.745, 1028.450 347.895, 1028.963 341.368 C 1029.475 334.841, 1030.326 327.250, 1030.853 324.500 C 1031.381 321.750, 1032.551 311.400, 1033.454 301.500 C 1034.358 291.600, 1035.975 276.525, 1037.049 268 C 1038.123 259.475, 1039.680 245.279, 1040.509 236.454 C 1041.339 227.628, 1042.900 215.771, 1043.980 210.105 C 1045.060 204.439, 1046.202 195.685, 1046.520 190.652 C 1047.248 179.098, 1048.624 167.729, 1051.119 152.654 C 1052.198 146.138, 1053.750 133.763, 1054.570 125.154 C 1055.389 116.544, 1056.946 104.275, 1058.030 97.889 C 1061.518 77.330, 1060.587 71.397, 1053.401 68.394 C 1049.638 66.822, 985.228 66.419, 981.500 67.945 M 1201.500 191.997 C 1169.536 195.364, 1140.440 204.117, 1110.537 219.362 C 1084.103 232.839, 1084.387 232.115, 1093.610 262.500 C 1106.049 303.475, 1107.107 304.587, 1123.730 294.169 C 1186.662 254.729, 1264.400 259.467, 1293.521 304.518 C 1307.158 325.614, 1311.537 340.397, 1314.550 375.500 C 1316.709 400.647, 1314.244 437.336, 1309.441 451.544 C 1296.605 489.516, 1281.460 507.168, 1252.328 518.111 C 1234.851 524.675, 1202.529 526.127, 1184 521.179 C 1179.875 520.078, 1173.041 518.242, 1168.813 517.100 C 1160.784 514.931, 1140.197 506.862, 1126.500 500.515 C 1106.564 491.277, 1107.433 490.825, 1099.637 514.500 C 1085.307 558.016, 1084.936 561.974, 1094.500 569.220 C 1109.389 580.499, 1149.268 593.677, 1175.636 596.031 C 1182.161 596.613, 1192 597.504, 1197.500 598.011 C 1312.232 608.583, 1388.257 552.565, 1404.012 445.845 C 1426.766 291.717, 1359.738 193.455, 1230.500 191.476 C 1218.950 191.299, 1205.900 191.534, 1201.500 191.997 M 183.073 197.635 C 180.403 201.029, 179.829 251.849, 182.405 256.800 C 185.007 261.801, 201.809 272.553, 217 278.938 C 220.025 280.209, 225.526 282.768, 229.225 284.625 C 240.118 290.092, 243.060 289.295, 248.610 279.370 C 262.813 253.972, 279.968 262.669, 272.467 291.465 C 269.971 301.049, 257.989 318.508, 235.198 345.771 C 219.021 365.122, 207.721 387.731, 206.124 403.945 C 204.972 415.635, 205.612 479.359, 206.971 488.317 C 216.226 549.315, 259.583 590.886, 319.344 596.061 C 325.480 596.592, 334.088 597.471, 338.474 598.013 C 348.382 599.239, 372.217 599.236, 385.500 598.007 C 409.931 595.747, 416.245 594.768, 428 591.420 C 477.217 577.398, 509.912 538.934, 517.606 486 C 519.724 471.431, 520.762 393.183, 519.058 376.648 C 515.981 346.802, 502.498 322.581, 481.500 309.177 C 466.676 299.714, 466.535 297.827, 479.508 282.500 C 484.207 276.948, 503.810 251.055, 508.698 243.943 C 510.421 241.437, 515.759 234.687, 520.560 228.943 C 546.449 197.974, 546.473 198, 491.766 198 C 446.424 198, 447.100 197.894, 441.598 205.855 C 439.894 208.320, 435.991 213.759, 432.924 217.940 C 429.856 222.122, 421.382 234.703, 414.091 245.898 C 406.801 257.093, 398.692 269.008, 396.073 272.376 C 373.797 301.020, 372.079 306.408, 379.601 324.027 C 386.044 339.119, 390.761 342.979, 402.782 342.994 C 414.659 343.010, 422.794 351.345, 425.036 365.794 C 426.920 377.935, 425.770 474.940, 423.647 483 C 416.872 508.721, 397.251 522.443, 365.500 523.663 C 346.593 524.389, 341.338 523.436, 328 516.860 C 301.967 504.026, 298.024 493.845, 298.031 439.500 C 298.037 391.703, 300.081 385.612, 327.366 352.090 C 333.184 344.942, 339.339 336.423, 351.721 318.379 C 366.386 297.008, 368.636 252.883, 356.370 227.211 C 338.518 189.847, 283.149 183.146, 247.465 214.030 C 240.165 220.349, 238.130 219.727, 200 199.543 C 189.993 194.245, 186.085 193.805, 183.073 197.635 M 33.659 200.054 C 28.777 203.894, 28.895 198.656, 29.206 397.832 L 29.500 586.164 32.766 589.082 L 36.032 592 74.766 591.996 C 118.744 591.992, 118.764 591.989, 120.991 584.298 C 122.887 577.750, 121.930 206.149, 120.009 203.250 C 116.653 198.183, 115.059 198, 74.234 198 C 37.453 198, 36.188 198.064, 33.659 200.054 M 1484.230 199.551 C 1483.012 200.404, 1481.546 201.979, 1480.973 203.050 C 1479.659 205.506, 1479.646 463.077, 1480.959 483.500 C 1485.091 547.755, 1522.484 589.012, 1583.774 596.940 C 1634.051 603.444, 1676.076 592.124, 1708 563.478 C 1725.028 548.199, 1727.828 549.203, 1731.433 571.880 C 1734.743 592.705, 1733.119 591.992, 1777.194 591.996 L 1811.888 592 1814.694 589.587 L 1817.500 587.173 1817.500 395.505 L 1817.500 203.836 1814.234 200.918 L 1810.968 198 1772.885 198 C 1731.247 198, 1729.773 198.186, 1726.889 203.798 C 1725.733 206.047, 1725.416 228.126, 1725 335.500 L 1724.500 464.500 1722.268 469 C 1697.070 519.799, 1621.283 541.248, 1587.458 507.152 C 1571.309 490.874, 1570.977 487.097, 1571.108 321.371 C 1571.207 197.106, 1571.424 202.305, 1566.020 199.510 C 1561.594 197.221, 1487.504 197.259, 1484.230 199.551"/><path style="fill:var(--wm-go,#84e62d)" fill-rule="evenodd" d="M 2219.570 27.127 C 2215.682 28.022, 2208.374 29.048, 2203.331 29.407 C 2180.003 31.068, 2156.983 48.789, 2146.198 73.388 C 2138.444 91.075, 2138.849 77.219, 2139.194 313 L 2139.500 522.500 2142.833 529.360 C 2144.667 533.133, 2146.822 538.758, 2147.624 541.860 C 2152.627 561.226, 2178.389 581.460, 2203.159 585.477 C 2214.169 587.263, 2375.227 587.723, 2387.117 586.003 C 2393.017 585.150, 2401.390 582.356, 2413.496 577.201 C 2420.318 574.297, 2438.222 556.126, 2441.528 548.752 C 2443.070 545.313, 2445.659 540.341, 2447.282 537.701 C 2449.864 533.500, 2450.340 531.508, 2451.103 521.701 C 2451.582 515.541, 2452.650 508.025, 2453.475 505 C 2456.070 495.492, 2455.679 281.093, 2453.057 275.316 C 2449.548 267.589, 2454.135 268, 2371.365 268 C 2298.105 268, 2297.603 268.014, 2293.218 270.137 C 2284.620 274.299, 2284.940 272.070, 2285.238 325.827 L 2285.500 373.155 2289.156 376.504 C 2294.163 381.093, 2298.269 381.988, 2314.327 381.994 L 2328.154 382 2331.077 384.923 L 2334 387.846 2334 427.989 C 2334 453.609, 2333.627 468.828, 2332.970 470.055 C 2330.496 474.679, 2328.039 475, 2295.105 475 L 2264.112 475 2261.306 472.587 L 2258.500 470.173 2258.500 307.500 L 2258.500 144.827 2261.306 142.413 L 2264.112 140 2294.588 140 C 2337.587 140, 2334.287 137.346, 2334.071 171.754 C 2333.972 187.594, 2334.314 197.421, 2335.042 199.627 C 2337.145 206, 2336.091 205.886, 2394.865 206.061 C 2453.067 206.234, 2451.773 206.359, 2454.045 200.383 C 2455.748 195.901, 2455.244 110.482, 2453.476 104 C 2452.650 100.975, 2451.538 94.083, 2451.005 88.684 C 2448.333 61.656, 2420.811 33.065, 2394.411 29.894 C 2390.060 29.371, 2383.350 28.248, 2379.500 27.397 C 2368.638 24.999, 2229.838 24.764, 2219.570 27.127 M 2557.065 27.183 C 2553.508 28.108, 2546.751 29.360, 2542.049 29.965 C 2528.615 31.693, 2522.948 34.981, 2508.546 49.406 C 2501.904 56.058, 2495.713 63.075, 2494.787 65 C 2493.861 66.925, 2491.168 72.775, 2488.802 78 L 2484.500 87.500 2484.239 304.956 C 2484.009 496.148, 2484.159 523.037, 2485.483 527.589 C 2493.847 556.359, 2515.727 578.141, 2542.938 584.786 C 2551.308 586.829, 2716.543 587.889, 2730.925 585.991 C 2761.652 581.936, 2792.479 552.765, 2795.591 524.798 C 2795.976 521.334, 2797.013 516.700, 2797.896 514.500 C 2800.704 507.498, 2800.877 114.873, 2798.077 103 C 2796.974 98.325, 2795.640 90.933, 2795.112 86.573 C 2793.744 75.281, 2778.994 50.428, 2769.717 43.786 C 2757.250 34.858, 2746.954 30.384, 2736.814 29.486 C 2732.791 29.130, 2727.118 28.182, 2724.206 27.379 C 2715.588 25.002, 2566.121 24.826, 2557.065 27.183 M 2606.942 141.472 C 2601.832 144.251, 2602.032 137.541, 2601.985 308.026 C 2601.939 474.302, 2601.838 470.372, 2606.230 473.449 C 2609.113 475.468, 2669.180 475.787, 2673.528 473.805 C 2679.325 471.164, 2679 481.039, 2679 307.597 C 2679 136.573, 2679.236 144.208, 2673.855 141.425 C 2669.874 139.367, 2610.736 139.408, 2606.942 141.472"/></g></svg></template>
+
+<nav class="topbar">
+  <strong>ทิศทางแบรนด์ รอบ 2</strong>
+  <a href="#m1">1 เรียบหรู+ฟ้าเย็น</a><a href="#m2">2 หรูยามค่ำ</a><a href="#m3">3 เรียบ+สติกเกอร์</a><a href="#sum">สรุปเทียบ</a>
+</nav>
+
+<header class="intro wrap">
+  <h1>รอบ 2 — แบบผสม 3 ทาง</h1>
+  <div class="heard">
+    <b>จากที่เจ้าของบอก:</b>
+    <ul>
+      <li>ไม่เอาแสงนีออนแบบ A → ต้องดู<b>ทางการ เรียบหรู</b></li>
+      <li>D สวย แต่อยากได้<b>ลูกเล่นเพิ่ม</b></li>
+      <li>B เย็นย่ำ สวย → เก็บไว้</li>
+      <li>C โปสเตอร์ สวย แต่<b>เอาแถบเลื่อนออก</b> (ป้ายวิ่ง + การ์ดเลื่อนแนวนอน)</li>
+    </ul>
+  </div>
+  <ul class="note">
+    <li>ยังไม่มีรูปถ่ายจริงของตลาด — ช่องภาพใช้รูปรถจากโลโก้แทน</li>
+    <li>ราคา/ข้อความเป็นตัวอย่าง (ราคาจาก Wix มิ.ย. 69 ยังไม่ได้เทียบของล่าสุด)</li>
+    <li>รอบ 1 ยังเปิดดูได้ที่ <code>direction-compare.html</code></li>
+  </ul>
+</header>
+
+<!-- ======================= ผสม 1 ======================= -->
+<section class="dir" data-dir="m1" id="m1">
+  <div class="dir-head wrap">
+    <span class="dir-letter">1</span>
+    <div>
+      <h2>เรียบหรู + ฟ้าเย็น <small>Clean Dusk</small></h2>
+      <p class="mood">ทางการ สะอาดตา แต่มีช่วงฟ้าเย็นเปลี่ยนเป็นกลางคืนเป็นจุดเด่น</p>
+      <p class="from">มาจาก: โครง/ฟอนต์ของ D + ฟ้าเย็นและไฟระย้าของ B</p>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-inner wrap">
+      <div>
+        <span class="wm rv"></span>
+        <p class="eyebrow rv" style="--d:100ms">Night Market · Bangkok</p>
+        <h1 class="hero-title rv" style="--d:150ms">ตลาดเย็นใกล้บ้าน<br>เปิดทุกวัน</h1>
+        <p class="hero-time rv" style="--d:300ms">16:00–23:00 น.</p>
+        <p class="hero-sub rv" style="--d:400ms">สตรีทฟู้ด · เปิดท้าย · สาขาประตูกรุงเทพ และบางนา</p>
+        <span class="rv" style="--d:500ms"><span class="btn">ดูวิธีจองล็อก</span><span class="btn2">ติดต่อบริษัท</span></span>
+      </div>
+      <div class="rv" style="--d:250ms">
+        <div class="skypanel">
+          <div class="string twinkle"><svg viewBox="0 0 300 80" preserveAspectRatio="none"><path d="M0 12 Q50 112 100 12 Q150 112 200 12 Q250 112 300 12" fill="none" stroke="#2a1f4a" stroke-width="1" vector-effect="non-scaling-stroke"/></svg></div>
+          <div class="ground"></div>
+          <img class="truck" src="ref-logos/logo.png" alt="">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pin" data-demo="m1" style="height:340vh">
+    <div class="pin-stage">
+      <p class="demo-label" style="color:var(--muted)">ท่าเลื่อน · เลื่อนลง → ข้อความเปลี่ยนทีละขั้น ภาพข้างๆ ฟ้าค่อยๆ มืด ไฟระย้าติด</p>
+      <div class="split-stage">
+        <div>
+          <div class="steps">
+            <div class="step active"><span class="num">16:00</span><h3>ร้านเริ่มตั้ง</h3><p>ผู้ค้าเข้าล็อกที่จองไว้ล่วงหน้า ตลาดพร้อมก่อนฟ้ามืด</p></div>
+            <div class="step"><span class="num">18:30</span><h3>ไฟติด ลูกค้าเริ่มมา</h3><p>แวะหลังเลิกงาน ของกินเพียบ เดินสบาย</p></div>
+            <div class="step"><span class="num">ถึง 23:00</span><h3>คึกคักถึงห้าทุ่ม</h3><p>สตรีทฟู้ดและเปิดท้าย ในที่เดียว</p></div>
+          </div>
+          <div class="bar"><i></i></div>
+        </div>
+        <div class="skypanel" data-sky>
+          <div class="stars"></div>
+          <div class="sun"></div>
+          <div class="string"><svg viewBox="0 0 300 80" preserveAspectRatio="none"><path d="M0 12 Q50 112 100 12 Q150 112 200 12 Q250 112 300 12" fill="none" stroke="#2a1f4a" stroke-width="1" vector-effect="non-scaling-stroke"/></svg></div>
+          <div class="ground"></div>
+          <img class="truck" src="ref-logos/logo.png" alt="">
+          <span class="clock">16:00</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tokens wrap">
+    <div class="box rv">
+      <h3 class="section-title">สี</h3>
+      <div class="swatches" data-vars="bg surface ink muted line brand-text accent accent-2 surface-2"></div>
+      <h3 class="section-title" style="margin-top:24px">มุม · เงา</h3>
+      <div class="shapes"><span>มุมปุ่ม</span><span>มุมการ์ด</span><span>เงา</span></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <h3 class="section-title">ฟอนต์</h3>
+      <p class="t-head">ตลาดเซฟวัน โก</p>
+      <p class="t-en">Night Market · Street Food</p>
+      <p class="t-body">จองล็อกออนไลน์ได้ทุกวัน ระบบสุ่มล็อกให้ ไม่มีล็อกประจำ มาตั้งร้านแล้วขายได้ถึงห้าทุ่ม</p>
+      <p class="t-accent">16:00–23:00 · 100 ฿</p>
+      <p class="fontnames"></p>
+      <span class="motionnote"></span>
+    </div>
+  </div>
+  <div class="samples wrap">
+    <div class="box rv">
+      <span class="tag">ตัวอย่างการ์ดราคา</span>
+      <h3 class="section-title">สตรีทฟู้ด · จองออนไลน์</h3>
+      <div class="price-row"><span>จันทร์–พฤหัส</span><b>100<small>฿/ล็อก</small></b></div>
+      <div class="price-row"><span>ศุกร์–อาทิตย์</span><b>130<small>฿/ล็อก</small></b></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <span class="tag">ภาพ</span>
+      <div class="photo"><img src="ref-logos/logo.png" alt=""></div>
+      <p>รูปถ่ายช่วงพระอาทิตย์ตกถึงหัวค่ำ โทนอุ่น จัดวางเรียบ เว้นที่ว่างเยอะ · ภาพประกอบเป็นเงาดำตัดฟ้า</p>
+    </div>
+    <div class="box rv" style="--d:240ms">
+      <span class="tag">ใช้กับโลโก้</span>
+      <div class="logo-tiles">
+        <div class="logo-tile" style="background:#fbf8f3;--wm-ink:#1a1530;--wm-go:#3d7a0f"><span class="wm"></span><p>บนขาวอุ่น GO เขียวเข้ม</p></div>
+        <div class="logo-tile" style="background:#1b1640;--wm-ink:#fff;--wm-go:#84e62d"><span class="wm"></span><p style="color:#fff">สีเดิม บนฟ้ากลางคืน ✓</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ผสม 2 ======================= -->
+<section class="dir" data-dir="m2" id="m2">
+  <div class="dir-head wrap">
+    <span class="dir-letter">2</span>
+    <div>
+      <h2>หรูยามค่ำ <small>Night Luxe</small></h2>
+      <p class="mood">ทางการที่สุดใน 3 แบบ · กลางคืนสีคราม แสงทองนุ่มๆ แทนนีออน</p>
+      <p class="from">มาจาก: สีกลางคืนของ B + ความเรียบของ D · หัวข้อใช้ฟอนต์มีหัว</p>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="bokeh" data-bokeh="16"></div>
+    <div class="hero-inner wrap">
+      <span class="wm rv"></span>
+      <span class="rule rv" style="--d:150ms"></span>
+      <p class="eyebrow rv" style="--d:200ms">Night Market</p>
+      <h1 class="hero-title rv" style="--d:300ms">ตลาดยามเย็น<br>ที่ดูแลอย่างใส่ใจ</h1>
+      <p class="hero-time rv" style="--d:450ms">16:00 – 23:00</p>
+      <p class="hero-sub rv" style="--d:550ms">สตรีทฟู้ด · เปิดท้าย · ประตูกรุงเทพ · บางนา</p>
+      <span class="rv" style="--d:650ms"><span class="btn">ดูวิธีจองล็อก</span><span class="btn2">ติดต่อบริษัท</span></span>
+      <div class="rv" style="--d:800ms"><img class="truck" src="ref-logos/logo.png" alt=""></div>
+    </div>
+  </div>
+
+  <div class="pin" data-demo="m2" style="height:300vh">
+    <div class="pin-stage luxe-stage">
+      <p class="demo-label">ท่าเลื่อน · เลื่อนลง → ข้อความสว่างขึ้นทีละบรรทัด แสงไฟเบลอค่อยๆ มา เส้นทองลากใต้</p>
+      <div class="bokeh" data-bokeh="22"></div>
+      <div class="lines">
+        <p>เมื่อฟ้าเริ่มมืด</p>
+        <p>แสงไฟค่อยๆ สว่าง</p>
+        <p>ตลาดเซฟวัน โก ก็เริ่มขึ้น</p>
+        <span class="gold-line"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tokens wrap">
+    <div class="box rv dark-chip">
+      <h3 class="section-title">สี</h3>
+      <div class="swatches" data-vars="bg surface ink muted line gold accent-2 brand"></div>
+      <h3 class="section-title" style="margin-top:24px">มุม · เงา</h3>
+      <div class="shapes"><span>มุมปุ่ม</span><span>มุมการ์ด</span><span>เงา</span></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <h3 class="section-title">ฟอนต์</h3>
+      <p class="t-head">ตลาดเซฟวัน โก</p>
+      <p class="t-en">Night Market · Street Food</p>
+      <p class="t-body">จองล็อกออนไลน์ได้ทุกวัน ระบบสุ่มล็อกให้ ไม่มีล็อกประจำ มาตั้งร้านแล้วขายได้ถึงห้าทุ่ม</p>
+      <p class="t-accent">16:00 – 23:00 · 100 ฿</p>
+      <p class="fontnames"></p>
+      <span class="motionnote"></span>
+    </div>
+  </div>
+  <div class="samples wrap">
+    <div class="box rv">
+      <span class="tag">ตัวอย่างการ์ดราคา</span>
+      <h3 class="section-title">สตรีทฟู้ด · จองออนไลน์</h3>
+      <div class="price-row"><span>จันทร์–พฤหัส</span><b>100<small>฿/ล็อก</small></b></div>
+      <div class="price-row"><span>ศุกร์–อาทิตย์</span><b>130<small>฿/ล็อก</small></b></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <span class="tag">ภาพ</span>
+      <div class="photo"><img src="ref-logos/logo.png" alt=""></div>
+      <p>รูปกลางคืน แสงไฟเบลอด้านหลัง (โบเก้) โทนครามกับทอง ถ่ายแบบนิตยสาร · ภาพประกอบเป็นลายเส้นสีทอง</p>
+    </div>
+    <div class="box rv" style="--d:240ms">
+      <span class="tag">ใช้กับโลโก้</span>
+      <div class="logo-tiles">
+        <div class="logo-tile" style="background:#12102a;--wm-ink:#f6f1e7;--wm-go:#84e62d"><span class="wm"></span><p style="color:#f6f1e7">สีเดิม บนคราม ✓</p></div>
+        <div class="logo-tile" style="background:#12102a;--wm-ink:#f6f1e7;--wm-go:#e3bd78"><span class="wm"></span><p style="color:#f6f1e7">GO เป็นทอง (ทางเลือก ถ้าอยากหรูขึ้น)</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= ผสม 3 ======================= -->
+<section class="dir" data-dir="m3" id="m3">
+  <div class="dir-head wrap">
+    <span class="dir-letter">3</span>
+    <div>
+      <h2>เรียบ + สติกเกอร์ <small>Clean Playful</small></h2>
+      <p class="mood">เรียบเหมือน D แต่มีป้ายสติกเกอร์สีสดแปะเด้งๆ และรถวิ่งเข้าฉาก — สนุกสุดใน 3 แบบ</p>
+      <p class="from">มาจาก: โครงของ D + สี/สติกเกอร์ของ C (เอาแถบเลื่อนออกแล้ว)</p>
+    </div>
+  </div>
+  <div class="hero">
+    <div class="hero-inner wrap">
+      <div>
+        <span class="wm rv"></span>
+        <p class="eyebrow rv" style="--d:100ms">Night Market · Bangkok</p>
+        <h1 class="hero-title rv" style="--d:150ms">ตลาดเย็น<br>ของกินเพียบ ทุกวัน</h1>
+        <p class="hero-time stk rv" style="--d:350ms;--r:-3deg">16:00–23:00</p>
+        <p class="hero-sub rv" style="--d:450ms">สตรีทฟู้ด · เปิดท้าย · สาขาประตูกรุงเทพ และบางนา</p>
+        <span class="rv" style="--d:550ms"><span class="btn">ดูวิธีจองล็อก</span><span class="btn2">ติดต่อบริษัท</span></span>
+      </div>
+      <div class="hero-art" data-drive>
+        <span class="stk s1 rv" style="--d:1500ms">สตรีทฟู้ด</span>
+        <span class="stk s2 rv" style="--d:1650ms">เปิดท้าย</span>
+        <span class="stk s3 rv" style="--d:1800ms">เริ่ม 100 ฿</span>
+        <img class="drive" src="ref-logos/logo.png" alt="">
+      </div>
+    </div>
+  </div>
+
+  <div class="how3">
+    <div class="wrap">
+      <p class="demo-label" style="position:static;color:var(--muted);margin-bottom:12px">ท่าเลื่อน · เลื่อนถึงแล้วสติกเกอร์ตัวเลขแปะเด้งทีละอัน (ไม่มีแถบเลื่อน ไม่มีค้างจอ)</p>
+      <h3 class="big rv">จองล็อก 3 ขั้น</h3>
+      <div class="how3-grid">
+        <div class="how3-card rv"><span class="stk rv" style="--c:var(--brand);--r:-4deg;--d:200ms">1</span><h4>จองออนไลน์</h4><p>ช่วง 10:00–15:00 น. จ่ายผ่านระบบ</p></div>
+        <div class="how3-card rv" style="--d:150ms"><span class="stk rv" style="--c:var(--accent-2);--r:3deg;--d:450ms">2</span><h4>ระบบสุ่มล็อกให้</h4><p>ไม่มีล็อกประจำ สลับทุกวัน</p></div>
+        <div class="how3-card rv" style="--d:300ms"><span class="stk rv" style="--c:var(--accent);--r:-2deg;--d:700ms;color:#fff">3</span><h4>มาตั้งร้าน ขายถึงห้าทุ่ม</h4><p>เปิดขาย 16:00–23:00 น.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tokens wrap">
+    <div class="box rv">
+      <h3 class="section-title">สี</h3>
+      <div class="swatches" data-vars="bg surface ink muted line brand brand-text accent accent-2"></div>
+      <h3 class="section-title" style="margin-top:24px">มุม · เงา</h3>
+      <div class="shapes"><span>มุมปุ่ม</span><span>มุมการ์ด</span><span>เงาสติกเกอร์</span></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <h3 class="section-title">ฟอนต์</h3>
+      <p class="t-head">ตลาดเซฟวัน โก</p>
+      <p class="t-en">Night Market · Street Food</p>
+      <p class="t-body">จองล็อกออนไลน์ได้ทุกวัน ระบบสุ่มล็อกให้ ไม่มีล็อกประจำ มาตั้งร้านแล้วขายได้ถึงห้าทุ่ม</p>
+      <p class="t-accent">16:00–23:00 · 100 ฿</p>
+      <p class="fontnames"></p>
+      <span class="motionnote"></span>
+    </div>
+  </div>
+  <div class="samples wrap">
+    <div class="box rv">
+      <span class="tag">ตัวอย่างการ์ดราคา</span>
+      <h3 class="section-title">สตรีทฟู้ด · จองออนไลน์ <span class="stk" style="--c:var(--accent-2);font-size:.75rem;padding:2px 10px;margin-left:6px">ถูกสุด</span></h3>
+      <div class="price-row"><span>จันทร์–พฤหัส</span><b>100<small>฿/ล็อก</small></b></div>
+      <div class="price-row"><span>ศุกร์–อาทิตย์</span><b>130<small>฿/ล็อก</small></b></div>
+    </div>
+    <div class="box rv" style="--d:120ms">
+      <span class="tag">ภาพ</span>
+      <div class="photo"><img src="ref-logos/logo.png" alt=""></div>
+      <p>รูปจริงพื้นหลังสะอาด บางรูปตัดขอบขาวแบบสติกเกอร์วางบนวงกลมสี · ไม่มีลายจุดเยอะแบบ C</p>
+    </div>
+    <div class="box rv" style="--d:240ms">
+      <span class="tag">ใช้กับโลโก้</span>
+      <div class="logo-tiles">
+        <div class="logo-tile" style="background:#fff;--wm-ink:#15171a;--wm-go:#3d7a0f"><span class="wm"></span><p>บนขาว GO เขียวเข้ม</p></div>
+        <div class="logo-tile" style="background:#15171a;--wm-ink:#fff;--wm-go:#84e62d"><span class="wm"></span><p style="color:#fff">สีเดิม บนดำ ✓</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= สรุป ======================= -->
+<section class="summary wrap" id="sum">
+  <h2>สรุปเทียบ รอบ 2</h2>
+  <div class="table-scroll">
+    <table>
+      <thead><tr><th></th><th>1 เรียบหรู + ฟ้าเย็น</th><th>2 หรูยามค่ำ</th><th>3 เรียบ + สติกเกอร์</th></tr></thead>
+      <tbody>
+        <tr><th>ความทางการ</th><td>●●●●○</td><td>●●●●●</td><td>●●●○○</td></tr>
+        <tr><th>ลูกเล่น</th><td>●●●○○ ฟ้าเปลี่ยนสี ไฟติด</td><td>●●○○○ นุ่มๆ ช้าๆ</td><td>●●●●○ สติกเกอร์เด้ง รถวิ่ง</td></tr>
+        <tr><th>"ตลาดเย็น"</th><td>ชัด (ฟ้าเย็น→กลางคืน)</td><td>ชัด (พื้นกลางคืนทั้งเว็บ)</td><td>น้อย ต้องใช้รูปช่วย</td></tr>
+        <tr><th>พื้นเว็บ</th><td>สว่าง (ขาวอุ่น)</td><td>มืด (คราม)</td><td>สว่าง (ขาว)</td></tr>
+        <tr><th>ฟอนต์</th><td>IBM Plex Sans Thai</td><td>Noto Serif Thai + IBM Plex Sans Thai + Playfair</td><td>Kanit + IBM Plex Sans Thai</td></tr>
+        <tr><th>ข้อควรระวัง</th><td>ต้องมีรูปช่วงเย็นสวยๆ</td><td>พื้นมืดทั้งเว็บ อ่านตารางระเบียบยาวๆ จะเหนื่อยกว่าพื้นขาว · ต้องมีรูปกลางคืนคุณภาพดี</td><td>ถ้าใส่สติกเกอร์เยอะเกินจะดูไม่ทางการ ต้องคุมจำนวน</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="how">
+    <h3>บอกเลือกยังไง</h3>
+    <ul>
+      <li>เลือกแบบเดียว เช่น "เอา 1"</li>
+      <li>หรือผสมต่อ เช่น "หน้าตาแบบ 1 + สติกเกอร์ของ 3" หรือ "สีของ 2 แต่ฟอนต์แบบ 1"</li>
+      <li>หรือบอกส่วนที่ไม่ชอบ แล้วจะทำรอบ 3</li>
+    </ul>
+  </div>
+</section>
+
+<script>
+document.documentElement.classList.add('js');
+
+const tpl = document.getElementById('wm-tpl');
+document.querySelectorAll('.wm').forEach(el => el.appendChild(tpl.content.cloneNode(true)));
+
+// ช่องสี + ชื่อฟอนต์ อ่านจากไฟล์ token จริง
+const ROLE = { bg:'พื้นหลัง', surface:'พื้นการ์ด', 'surface-2':'พื้นรอง/แผงภาพ', ink:'ตัวหนังสือ', muted:'ตัวหนังสือรอง', line:'เส้น',
+  brand:'เขียว GO (โลโก้)', 'brand-text':'เขียวสำหรับตัวหนังสือ', accent:'สีเน้น 1', 'accent-2':'สีเน้น 2', gold:'ทองแสงไฟ' };
+const first = s => s.split(',')[0].replace(/["']/g, '').trim();
+document.querySelectorAll('.dir').forEach(sec => {
+  const cs = getComputedStyle(sec);
+  const v = name => cs.getPropertyValue('--' + name).trim();
+  sec.querySelectorAll('.swatches').forEach(box => {
+    box.innerHTML = box.dataset.vars.split(' ').map(n =>
+      `<div class="sw"><span class="chip" style="background:${v(n)}"></span><b>${ROLE[n] || n}</b><code>${v(n)}</code></div>`).join('');
+  });
+  sec.querySelectorAll('.fontnames').forEach(el => {
+    el.innerHTML = `หัวข้อ <b>${first(v('font-head'))}</b> · เนื้อความ <b>${first(v('font-body'))}</b> · ตัวเลข/อังกฤษ <b>${first(v('font-accent'))}</b> · มุม ${v('radius')} / ${v('radius-lg')}`;
+  });
+  sec.querySelectorAll('.motionnote').forEach(el => { el.textContent = 'ท่าแอนิเมชัน: ' + v('motion-note').replace(/^["']|["']$/g, ''); });
+});
+
+// โผล่ตอนเลื่อนถึง (+ รถวิ่งเข้าฉากของ ผสม 3)
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+}), { threshold: .15 });
+document.querySelectorAll('.rv').forEach(el => io.observe(el));
+// รถเริ่มอยู่นอกจอ → ดูที่กรอบภาพแทน แล้วสั่งรถวิ่ง
+const driveIO = new IntersectionObserver(es => es.forEach(e => {
+  if (e.isIntersecting) { e.target.querySelector('.drive').classList.add('in'); driveIO.unobserve(e.target); }
+}), { threshold: .3 });
+document.querySelectorAll('[data-drive]').forEach(el => driveIO.observe(el));
+
+// ไฟระย้า: วางหลอดตามเส้นโค้ง 3 ช่วง (ตรงกับ path ใน svg)
+document.querySelectorAll('.string').forEach(s => {
+  const N = 24;
+  for (let i = 0; i < N; i++) {
+    const x = (i + .5) / N, f = (x * 3) % 1;
+    const b = document.createElement('span');
+    b.className = 'bulb';
+    b.style.setProperty('--i', i);
+    b.style.left = (x * 100) + '%';
+    b.style.top = (12 + 50 * Math.sin(Math.PI * f) - 2) + 'px';
+    s.appendChild(b);
+  }
+});
+
+// แสงไฟเบลอ (โบเก้) — สุ่มแบบตายตัว เปิดกี่ครั้งก็ได้ภาพเดิม
+let seed = 7;
+const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+document.querySelectorAll('[data-bokeh]').forEach(box => {
+  for (let i = 0; i < +box.dataset.bokeh; i++) {
+    const el = document.createElement('i');
+    const size = 30 + rnd() * 140;
+    if (rnd() > .65) el.className = 'warm';
+    Object.assign(el.style, { width: size + 'px', height: size + 'px', left: (rnd() * 100) + '%', top: (rnd() * 100) + '%' });
+    el.style.setProperty('--t', (14 + rnd() * 16) + 's');
+    el.style.setProperty('--dx', ((rnd() - .5) * 80) + 'px');
+    el.style.setProperty('--dy', ((rnd() - .5) * 80) + 'px');
+    box.appendChild(el);
+  }
+});
+
+// ฉากค้างจอ
+const topbar = document.querySelector('.topbar');
+const setTop = () => document.documentElement.style.setProperty('--top', topbar.offsetHeight + 'px');
+setTop();
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+function progress(pin) {
+  const stage = pin.querySelector('.pin-stage');
+  return clamp((topbar.offsetHeight - pin.getBoundingClientRect().top) / (pin.offsetHeight - stage.offsetHeight));
+}
+const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+const mix = (a, b, t) => { const A = hex(a), B = hex(b); return `rgb(${A.map((x, i) => Math.round(x + (B[i] - x) * t)).join(',')})`; };
+const SKY = [['#8ec5ff', '#ffe2b0'], ['#6b3fa0', '#ff9e6b'], ['#0d0a26', '#1b1640']];
+
+const demos = {
+  m1(p, pin) {
+    const s = p * 2, i = Math.min(1, Math.floor(s)), t = s - i;
+    const sky = pin.querySelector('[data-sky]');
+    sky.style.background = `linear-gradient(180deg, ${mix(SKY[i][0], SKY[i + 1][0], t)}, ${mix(SKY[i][1], SKY[i + 1][1], t)})`;
+    const sun = sky.querySelector('.sun');
+    sun.style.top = (8 + p * 90) + '%';
+    sun.style.opacity = 1 - smooth(.4, .6, p);
+    sky.querySelector('.stars').style.opacity = smooth(.55, .85, p);
+    const bulbs = sky.querySelectorAll('.bulb');
+    bulbs.forEach((b, k) => b.classList.toggle('on', p > .3 + (k / bulbs.length) * .3));
+    const glow = smooth(.5, .9, p);
+    sky.querySelector('.truck').style.filter = `brightness(0) drop-shadow(0 -2px 0 rgba(255,211,107,${glow})) drop-shadow(0 0 16px rgba(255,211,107,${glow * .5}))`;
+    const mins = Math.round(p * 42) * 10;
+    sky.querySelector('.clock').textContent = `${16 + Math.floor(mins / 60)}:${String(mins % 60).padStart(2, '0')} น.`;
+    const steps = pin.querySelectorAll('.step'), a = Math.min(steps.length - 1, Math.floor(p * steps.length));
+    steps.forEach((el, k) => el.classList.toggle('active', k === a));
+    pin.querySelector('.bar i').style.width = (p * 100) + '%';
+  },
+  m2(p, pin) {
+    const lines = pin.querySelectorAll('.lines p');
+    lines.forEach((el, k) => el.classList.toggle('on', p > (k + .3) / (lines.length + .5)));
+    pin.querySelector('.bokeh').style.opacity = .15 + .85 * smooth(.05, .8, p);
+    pin.querySelector('.gold-line').style.width = (smooth(.7, .95, p) * 240) + 'px';
+  }
+};
+const pins = [...document.querySelectorAll('.pin')];
+function update(all) {
+  pins.forEach(pin => {
+    const r = pin.getBoundingClientRect();
+    if (all || (r.bottom > 0 && r.top < innerHeight)) demos[pin.dataset.demo](progress(pin), pin);
+  });
+}
+let ticking = false;
+addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(() => { ticking = false; update(); }); } }, { passive: true });
+addEventListener('resize', () => { setTop(); update(true); });
+update(true);
+</script>
+</body>
+</html>

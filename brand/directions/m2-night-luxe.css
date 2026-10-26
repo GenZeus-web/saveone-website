@@ -1,0 +1,32 @@
+/* ผสม 2 — หรูยามค่ำ (กลางคืนของ B + ความทางการของ D)
+   พื้นครามกลางคืน ทองอ่อนแทนนีออน ฟอนต์หัวมีหัว (เป็นทางการ) · แสงนุ่ม ไม่กระพริบ */
+[data-dir="m2"] {
+  --bg: #12102a;
+  --surface: #1b1838;
+  --surface-2: #24204a;
+  --ink: #f6f1e7;         /* ครีม */
+  --muted: #a9a2c0;
+  --line: #2f2a55;
+  --brand: #84e62d;       /* ใช้แค่ในโลโก้ */
+  --gold: #e3bd78;        /* ทองแสงไฟ */
+  --accent: #e3bd78;
+  --accent-2: #ff9e6b;
+  --on-brand: #12102a;
+  --wm-ink: #f6f1e7;
+  --wm-go: #84e62d;
+
+  --font-head: "Noto Serif Thai", serif;       /* หัวข้อ: ตัวมีหัว ดูทางการ */
+  --font-body: "IBM Plex Sans Thai", sans-serif;
+  --font-accent: "Playfair Display", "Noto Serif Thai", serif;  /* ตัวเลข/อังกฤษ */
+  --head-weight: 600;
+
+  --radius: 4px;          /* มุมคม = ดูหรู */
+  --radius-lg: 6px;
+  --space: 8px;
+  --border-w: 1px;
+  --shadow: 0 24px 48px rgba(0,0,0,.35);
+
+  --ease: cubic-bezier(.22,.61,.36,1);
+  --dur: 1100ms;
+  --motion-note: "ช้า นุ่ม · เส้นทองค่อยๆ ลาก · แสงไฟเบลอลอยช้าๆ";
+}

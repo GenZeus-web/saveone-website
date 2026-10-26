@@ -1,0 +1,32 @@
+/* ทิศทาง D — เรียบ มืออาชีพ (Clean Pro)
+   อารมณ์: น่าเชื่อถือ สงบ สำหรับคู่ค้า/ผู้ใหญ่ · ขาวเยอะ เขียวใช้แค่จุดเน้น ภาพกลางคืนเป็นพระเอก */
+[data-dir="clean"] {
+  --bg: #fafaf7;
+  --surface: #ffffff;
+  --surface-2: #101214;   /* แผงภาพกลางคืน */
+  --ink: #15171a;
+  --muted: #5e646b;
+  --line: #e4e4de;
+  --brand: #84e62d;
+  --brand-text: #3d7a0f;  /* เขียวเข้ม ใช้เป็นตัวหนังสือบนพื้นขาว (เขียวสดอ่านไม่ออกบนขาว) */
+  --accent: #15171a;
+  --accent-2: #84e62d;
+  --on-brand: #15171a;
+  --wm-ink: #15171a;
+  --wm-go: #3d7a0f;
+
+  --font-head: "IBM Plex Sans Thai", sans-serif;
+  --font-body: "IBM Plex Sans Thai", sans-serif;
+  --font-accent: "IBM Plex Sans", "IBM Plex Sans Thai", sans-serif;
+  --head-weight: 600;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --space: 8px;
+  --border-w: 1px;
+  --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+
+  --ease: cubic-bezier(.25,.1,.25,1);
+  --dur: 700ms;
+  --motion-note: "ค่อยๆ จาง · ภาพค้างจอเล่าทีละช่วงแบบ Apple";
+}
