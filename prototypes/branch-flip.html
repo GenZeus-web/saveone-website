@@ -15,7 +15,7 @@
 :root{
   --ink:#f6f1e7; --muted:#b9b2c9; --panel:rgba(23,19,58,.72); --panel-solid:rgba(23,19,58,.94); --line:rgba(246,241,231,.18);
   --go:#84e62d; --bg:#17133a;
-  --food:#ff8a3d; --boot:#b48cf0; --event:#2cc9b5; --park:#5aaeea; --spot:#f6f1e7; --warn:#ffd36b;
+  --food:#ff8a3d; --boot:#b48cf0; --event:#2cc9b5; --park:#5aaeea; --spot:#f6f1e7; --wc:#f48fc1; --warn:#ffd36b;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -60,12 +60,13 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 .pin{--c:var(--spot);--d:48px;position:absolute;left:0;top:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:3px;
   font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer}
 .pin i{display:block;width:var(--d);height:var(--d);border-radius:50%}
-.pin span{font-size:12px;font-weight:600;white-space:nowrap;padding:1px 9px;border-radius:999px;background:var(--panel-solid);border:1.5px solid var(--c);
+/* ป้ายชื่อทึบสีตามชนิด (เดิมพื้นกรมท่าเหมือนกันหมด กลืนกับผังกลางคืน) */
+.pin span{font-size:12px;font-weight:700;white-space:nowrap;padding:1px 9px;border-radius:999px;background:var(--c);color:#15122b;border:1.5px solid var(--c);
   box-shadow:0 3px 10px rgba(0,0,0,.35);transition:background .15s,color .15s}
 .pin span:empty,.pin.bare span{display:none}
-.pin:hover span,.pin.on span{background:var(--c);color:var(--bg)}
+.pin:hover span,.pin.on span{background:var(--panel-solid);color:var(--ink)}
 .pin:focus-visible{outline:none} .pin:focus-visible i{outline:2px solid var(--c);outline-offset:3px}
-.pin.food{--c:var(--food)} .pin.boot{--c:var(--boot)} .pin.event{--c:var(--event)} .pin.park{--c:var(--park)} .pin.moto{--c:var(--park)}
+.pin.food{--c:var(--food)} .pin.boot{--c:var(--boot)} .pin.event{--c:var(--event)} .pin.park{--c:var(--park)} .pin.moto{--c:var(--park)} .pin.wc{--c:var(--wc)}
 .pin.minor{opacity:0;pointer-events:none;transition:opacity .25s}
 .pin.minor span{font-size:11px}
 .pins.near .pin.minor{opacity:1;pointer-events:auto}
@@ -78,7 +79,7 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 .card.on{transform:none}
 .card .x{position:sticky;top:0;float:right;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;cursor:pointer}
 .tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--c,var(--spot));color:var(--bg)}
-.tag.food{--c:var(--food)} .tag.boot{--c:var(--boot)} .tag.event{--c:var(--event)} .tag.park{--c:var(--park)}
+.tag.food{--c:var(--food)} .tag.boot{--c:var(--boot)} .tag.event{--c:var(--event)} .tag.park{--c:var(--park)} .tag.wc{--c:var(--wc)}
 .card h2{font-size:21px;line-height:1.35;margin:8px 0 2px}
 .where{font-size:13px;color:var(--muted)}
 .sec{margin-top:14px}
@@ -125,7 +126,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
   .card{top:auto;left:0;right:0;bottom:0;width:auto;max-height:62%;border-radius:20px 20px 0 0;transform:translateY(105%)}
   body.carded .nav{opacity:0;pointer-events:none}
 }
-@media (max-width:520px){ .label{min-width:0} .label h2{font-size:20px} .seg button{padding:6px 8px;font-size:12px} .seg span{display:none} .tools{align-items:flex-start} }
+@media (max-width:520px){ .label{min-width:0;padding:6px 14px} .label h2{font-size:18px} .label p{display:none} .seg button{padding:6px 8px;font-size:12px} .seg span{display:none} .tools{align-items:flex-start} }
 </style>
 </head>
 <body>
@@ -189,7 +190,7 @@ const SHOW_LOGOS = true;   // โลโก้ร้านบนหลังค�
 //            az = มุมหมุนกล้องของสาขานี้ในมุมบ้าน (ไม่ใส่ = ใช้มุมบ้านปกติ)
 //            pins (ผังตาราง): [ข้อความ, ชนิด, [คอลัมน์ซ้าย, แถวบน, คอลัมน์ขวา, แถวล่าง]]
 const BRANCHES = [
-  { tag: 'สาขา SG', name: 'ประตูกรุงเทพ', sub: 'ผังจริงจากแผนที่ · แยก คปอ.', sg: true, az: 1 },   // az: เจ้าของสั่ง 28 ต.ค. 69 หมุนให้ฝั่งสำนักงาน (ทิศใต้) อยู่ใกล้
+  { tag: 'สาขา SG', name: 'ประตูกรุงเทพ', sub: 'ผังจริงจากแผนที่ · แยก คปอ.', sg: true, az: 1, tallTurn: true },   // az: เจ้าของสั่ง 28 ต.ค. 69 หมุนให้ฝั่งสำนักงาน (ทิศใต้) อยู่ใกล้
   { tag: 'สาขา SB', name: 'บางนา', sub: 'ผังสมมติ · ตลาดเย็น 16:00–23:00', map: [
     'RRRRRRRRRRRRRR',
     'BB.TTTTTTTT.GG',
@@ -415,7 +416,7 @@ const KB = (() => {
 })();
 const kp = (x, y) => [(x - KB.cx) * KB.s, (y - KB.cy) * KB.s];   // ผัง → แผ่น (X, Z)
 const KM = K.U * KB.s;                                           // 1 เมตร = กี่หน่วยบนแผ่น
-const KCOL = { food: '#ff8a3d', boot: '#b48cf0', event: '#2cc9b5', park: '#5aaeea', spot: '#f6f1e7', moto: '#5aaeea', wc: '#f6f1e7' };   // wc = ห้องน้ำ (สีเดียวกับจุดบริการ)   // moto = ลานจอดมอเตอร์ไซค์ (สีเดียวกับลานจอด)
+const KCOL = { food: '#ff8a3d', boot: '#b48cf0', event: '#2cc9b5', park: '#5aaeea', spot: '#f6f1e7', moto: '#5aaeea', wc: '#f48fc1' };   // wc = ห้องน้ำ (ชมพู · แยกจากจุดบริการสีครีม)   // moto = ลานจอดมอเตอร์ไซค์ (สีเดียวกับลานจอด)
 
 const koratGround = () => groundMat(g => {
   const P = (x, y) => { const [X, Z] = kp(x, y); return [(X + COLS / 2) * PX, (Z + ROWS / 2) * PX]; };
@@ -428,7 +429,7 @@ const koratGround = () => groundMat(g => {
   poly(K.road, TOPC.R); poly(K.corner, TOPC.R);
   K.lanes.forEach(([x0, y0, x1, y1, w]) => line(x0, y0, x1, y1, w * px, TOPC.R));
   poly(K.dirt, '#6b5a48');
-  const ZT = { food: '#7a5a52', boot: '#5c5078', event: '#4f6070' };
+  const ZT = { food: '#94583a', boot: '#5e4894', event: '#4f6070' };
   K.zones.forEach(z => ZT[z.kind] && poly(z.b, ZT[z.kind]));
   grain(g, 90000, 77);
   // ขอบทางเท้า (ขอบที่ดินสว่างกว่า) + เส้นขอบถนนใหญ่ + เส้นประกลางถนน
@@ -726,7 +727,7 @@ const sgGround = () => groundMat(g => {
   const px = SGB.s * PX;   // พิกเซล canvas ต่อพิกเซลภาพดาวเทียม
   g.fillStyle = TOPC.G; g.fillRect(0, 0, COLS * PX, ROWS * PX);
   SG.site.forEach(b => poly(b, TOPC['.']));
-  const ZT = { food: '#7a5a52', boot: '#5c5078', park: TOPC.P, vpark: TOPC.P, moto: TOPC.P, seat: '#6e5f5c', seatT: '#6e5f5c', plaza: '#605a76' };
+  const ZT = { food: '#94583a', boot: '#5e4894', park: TOPC.P, vpark: TOPC.P, moto: TOPC.P, seat: '#6e5f5c', seatT: '#6e5f5c', plaza: '#605a76' };
   SG.zones.forEach(([, , k, b]) => poly(b, ZT[k]));
   grain(g, 90000, 61);
   // ถนน: ผิวถนน · ขอบถนนใหญ่ + เส้นประกลาง (แบบโคราช)
@@ -740,7 +741,7 @@ const sgGround = () => groundMat(g => {
   SG.site.slice(0, 1).forEach(b => { path(b); g.strokeStyle = '#8d86a3'; g.lineWidth = 2.5; g.stroke(); });
   // ขอบโซน (สีตามชนิด) · ให้เห็นว่าตรงไหนขายอะไรตั้งแต่ยังไม่กด
   const ZC = { food: KCOL.food, boot: KCOL.boot, park: KCOL.park, vpark: KCOL.park, moto: KCOL.park, seat: KCOL.event, seatT: KCOL.event };
-  SG.zones.forEach(([, , k, b]) => { if (!ZC[k]) return; path(b); g.strokeStyle = ZC[k] + '99'; g.lineWidth = 2; g.stroke(); });
+  SG.zones.forEach(([, , k, b]) => { if (!ZC[k]) return; path(b); g.strokeStyle = ZC[k]; g.lineWidth = 4; g.stroke(); });
   // เส้นช่องจอด 2.5 × 5 ม.
   const u = SU, c = 'rgba(230,225,210,.5)';
   sgSlots().park.forEach(([x, y, f]) => { line(x - 1.25 * u, y - 2.5 * u, x - 1.25 * u, y + 2.5 * u, 1, c); line(x - 1.25 * u, y + (f ? -2.5 : 2.5) * u, x + 1.25 * u, y + (f ? -2.5 : 2.5) * u, 1, c); });
@@ -763,6 +764,7 @@ function buildSG() {
     const az = THREE.MathUtils.degToRad(viewAzOf(BRANCHES.findIndex(b => b.sg))), fwd = 10 * SM;   // เลื่อนไปขอบหลังคาฝั่งกล้อง ไม่ให้หมุดบัง
     const g = new THREE.Group(); g.position.set(o.x + Math.sin(az) * fwd, 0, o.z + Math.cos(az) * fwd);
     g.rotation.y = az;   // ด้านหน้า (+Z) หันเข้ากล้องของสาขานี้ ไม่ตามแนวตึก
+    FACE_CAM.push(a => { g.position.set(o.x + Math.sin(a) * fwd, 0, o.z + Math.cos(a) * fwd); g.rotation.y = a; });   // มือถือหมุนกล้อง → ป้ายหันตาม
     const back = new THREE.Mesh(GEO.box, mat('#17133a', { roughness: .8 })); back.scale.set(W + 2 * pad, H + 2 * pad, .3 * SM);
     back.position.set(0, y0 + H / 2 + pad, 0); back.castShadow = back.receiveShadow = true; g.add(back);
     svg.paths.forEach(p => {
@@ -791,6 +793,7 @@ function buildSG() {
     // ป้ายตั้งบนหลังคา หันเข้ากล้องแบบป้ายสำนักงาน (แปะนอนบนหลังคาแล้วเล็ก/จ้าจนอ่านไม่ออก)
     const S = 14 * SM, y0 = (WC.h + 1) * SM, sg = new THREE.Group(); sg.position.set(o.x, 0, o.z);
     sg.rotation.y = THREE.MathUtils.degToRad(viewAzOf(BRANCHES.findIndex(b => b.sg)));
+    FACE_CAM.push(a => { sg.rotation.y = a; });
     const face = new THREE.Mesh(new THREE.PlaneGeometry(S, S), new THREE.MeshBasicMaterial({ map: tx, transparent: true, color: '#cfcabf' }));
     face.position.set(0, y0 + S / 2, .12 * SM); sg.add(face);
     const back = new THREE.Mesh(GEO.box, mat('#d9d5cc', { roughness: .8 })); back.scale.set(S * .96, S * .96, .2 * SM);
@@ -819,6 +822,7 @@ function buildSG() {
       const o = at(x0 + (i + .5) * (x1 - x0) / rows.length, y);
       const me = new THREE.Mesh(GEO.decal, new THREE.MeshStandardMaterial({ map: tx, transparent: true, roughness: .7, polygonOffset: true, polygonOffsetFactor: -2 }));
       me.scale.set(3.6 * SM, 1, 1.8 * SM); me.position.set(o.x, .012, o.z); me.rotation.y = READ; me.receiveShadow = true;
+      FACE_CAM.push(a => { me.rotation.y = Math.round(a / (Math.PI / 2)) * (Math.PI / 2); });   // ตัวอักษรบนพื้น หันให้อ่านได้ทีละ 90°
       BK.add(o, me);
     });
   });
@@ -1148,7 +1152,7 @@ const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 //    fit = เฟรมเฉพาะพื้นที่ตลาด ไม่ใช่ทั้งแผ่น · rotate = ลากหมุนเองได้ · ซูมเปิด/ปิดแยกที่ปุ่ม 🔍
 //    home = มุมที่เจ้าของจัดเอง (28 ต.ค. 69 · โคราช บนจอ 1920×945) ใช้เป็นมุมเปิดจริง · ปุ่มเลือกมุมอื่นซ่อนไว้ เปิดด้วย ?cam ต่อท้ายลิงก์
 const VIEWS = {
-  home:  { el: 29, az: -179, fit: true, rotate: false, exact: { d: 9.43, t: [.46, 0, -.13], aspect: 1920 / 945 } },
+  home:  { el: 29, elTall: 48, az: -179, fit: true, rotate: false, exact: { d: 9.43, t: [.46, 0, -.13], aspect: 1920 / 945 } },
   front: { el: 50, az: 0,   fit: true,  rotate: false },
   diagL: { el: 42, az: -40, fit: true,  rotate: false },
   diagR: { el: 42, az: 40,  fit: true,  rotate: false },
@@ -1159,8 +1163,15 @@ const VIEWS = {
 try { const m = JSON.parse(localStorage.getItem('flip-mine')); if (m && isFinite(m.el) && isFinite(m.az)) VIEWS.mine = { el: m.el, az: m.az, fit: true, rotate: false }; } catch {}
 let view = 'home', viewBi = 0, zoomOn = false;
 // มุมหมุนที่ใช้จริง: มุมบ้าน + สาขาที่ตั้ง az ไว้ → ใช้ของสาขา · มุมอื่น (?cam) ใช้ตามมุมนั้น
-const viewAzOf = bi => (view === 'home' && BRANCHES[bi].az != null ? BRANCHES[bi].az : VIEWS[view].az);
+// จอตั้ง (มือถือ): ผังที่ยาวแนวนอนหมุนกล้อง 90° ให้ด้านยาววางตามแนวตั้งจอ · ทดลองค่าอื่นได้ ?turn=-90
+const TALL_TURN = +(new URLSearchParams(location.search).get('turn') ?? 90);
+const tallTurn = bi => (view === 'home' && camera.aspect < .8 && BRANCHES[bi].tallTurn ? TALL_TURN : 0);
+const viewAzOf = bi => (view === 'home' && BRANCHES[bi].az != null ? BRANCHES[bi].az : VIEWS[view].az) + tallTurn(bi);
+const FACE_CAM = [];   // ป้ายที่หันเข้ากล้องของสาขา SG (สร้างตอน buildSG)
+const faceCam = () => { const a = THREE.MathUtils.degToRad(viewAzOf(BRANCHES.findIndex(b => b.sg))); FACE_CAM.forEach(f => f(a)); };
 const viewAz = () => viewAzOf(viewBi);
+// จอตั้ง (มือถือ): มุมบ้านก้มลงมากขึ้น ผังเลยสูงขึ้นบนจอ ไม่เหลือที่ว่างล่างเยอะ (มุมหันเดิม)
+const viewEl = () => (view === 'home' && camera.aspect < .8 ? VIEWS.home.elTall : VIEWS[view].el);
 const dirOf = (elDeg, azDeg) => { const el = THREE.MathUtils.degToRad(elDeg), az = THREE.MathUtils.degToRad(azDeg); return new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)); };
 
 // ── กล้อง: มุมบ้าน · บินไปโซน ──
@@ -1182,7 +1193,8 @@ const koratPts = [
 // หาระยะ+จุดเล็งที่ทำให้ผังเต็มช่องว่างระหว่างแถบบนกับป้ายสาขาล่าง (ฉายจุดจริงด้วยกล้องจำลอง ไม่เดา)
 function fitView(pts) {
   const box = new THREE.Box3().setFromPoints(pts);
-  const H = innerHeight, yTop = 1 - 2 * ($('top').getBoundingClientRect().bottom + 10) / H, yBot = -1 + 2 * (H - $('nav').getBoundingClientRect().top + 10) / H;
+  const pinRoom = innerWidth > 720 ? 30 : 46;   // เว้นที่บนให้หมุดของโซนที่ชิดขอบบน (ไม่งั้นหมุดถูกซ่อน · จอเตี้ยเจอบ่อย)
+  const H = innerHeight, yTop = 1 - 2 * ($('top').getBoundingClientRect().bottom + 10 + pinRoom) / H, yBot = -1 + 2 * (H - $('nav').getBoundingClientRect().top + 10) / H;
   const cam = camera.clone(), t = box.getCenter(new THREE.Vector3()).setY(0), v = new THREE.Vector3();
   const span = d => {
     cam.position.copy(t).addScaledVector(VIEW_DIR, d); cam.lookAt(t); cam.updateMatrixWorld();
@@ -1231,7 +1243,7 @@ function camAngle() {
 }
 function applyView(name, fly = true) {
   if (VIEWS[name].rotate && fly) Object.assign(VIEWS[name], camAngle());   // อิสระ: ตั้งต้นจากมุมที่ดูอยู่ ไม่กระโดด
-  view = name; const V = VIEWS[name], el = THREE.MathUtils.degToRad(V.el), az = THREE.MathUtils.degToRad(viewAz());
+  view = name; const V = VIEWS[name], el = THREE.MathUtils.degToRad(viewEl()), az = THREE.MathUtils.degToRad(viewAz());
   $('angle').hidden = !V.rotate;
   VIEW_DIR.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
   const zoom = V.rotate || zoomOn;
@@ -1284,7 +1296,7 @@ function flyTo(p, t, dur = 900) {
 function focusView(p) {
   const v = THREE.MathUtils.degToRad(camera.fov) / 2, wide = innerWidth > 720, V = VIEWS[view];
   // หันกล้องตามแนวโซน: โซนเอียง a → กล้องหมุนตาม แถวรถ/ล็อกตรงกับจอ (จุดบริการ a = 0 ใช้มุมหลัก)
-  const dir = V.rotate ? VIEW_DIR : dirOf(V.el, viewAz() - THREE.MathUtils.radToDeg(p.a || 0));
+  const dir = V.rotate ? VIEW_DIR : dirOf(viewEl(), viewAz() - THREE.MathUtils.radToDeg(p.a || 0));
   let d = Math.max(p.radius / Math.tan(v), p.radius / (Math.tan(v) * camera.aspect * (wide ? .62 : 1))) * 1.15;
   d = THREE.MathUtils.clamp(d, home.full * .16, Math.min(home.full * .8, home.d));
   const t = p.center.clone();
@@ -1329,7 +1341,7 @@ function makePinKit() {
       // หน้าเหรียญ+ไอคอนไม่รับแสงฉาก → สว่างเท่ากันทุกทิศ (หันรับแดดแล้วไม่จ้าจนไอคอนจาง)
       body: top(std(col, { roughness: .25, metalness: .1, emissive: col, emissiveIntensity: .3 })), face: top(new THREE.MeshBasicMaterial({ color: '#e9e7f1' })),
       icon: top(new THREE.MeshBasicMaterial({ map: tex, transparent: true })),
-      beam: top(glow(col, 2.5)), glow: glow(col, 3), pool: Object.assign(glow(col, .8), { transparent: true, opacity: .7 }),
+      beam: top(glow(col, 1.6)), glow: glow(col, 1.8), pool: Object.assign(glow(col, .5), { transparent: true, opacity: .45 }),   // เบาลง: เดิมวงแสงจ้าจนกลบผัง
     };
   }
   return { head, ground, kinds, beam: new THREE.CylinderGeometry(.012, .012, 1, 8).translate(0, .5, 0) };
@@ -1359,14 +1371,14 @@ const pv = new THREE.Vector3(), pu = new THREE.Vector3();
 function placePins() {
   const W = innerWidth, H = innerHeight, near = camera.position.distanceTo(controls.target) < home.d * .6;   // น้ำพุ โผล่เมื่อซูมเข้าจากมุมบ้าน
   pinLayer.classList.toggle('near', near);
-  const off = pinLayer.classList.contains('hide'), wide = W > 720, D = wide ? 48 : 34, BASE = D * 1.15, MAXLIFT = wide ? 220 : 110;
+  const off = pinLayer.classList.contains('hide'), wide = W > 720, D = wide ? 48 : 34, BASE = D * 1.15, MAXLIFT = wide ? 220 : 48;   // มือถือ: ไม่ยกหมุดสูง (เส้นยาวรก) · ที่ไม่พอ ซ่อนชื่อ/หมุดแทน
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   // วัดตำแหน่งบนจอ แล้วเรียงลำดับวาง: หมุดโซนที่มีชื่อก่อน → หมุด P ไม่มีชื่อ → หมุดย่อย · ในกลุ่มเดียวกัน ใกล้กล้อง (ล่างจอ) ก่อน
   const list = pinEls.map(q => {
     pv.copy(q.p.pos).project(camera); pu.copy(q.p.pos).setY(q.p.pos.y + 1).project(camera);
     if (!q.w) { q.el.classList.remove('bare'); q.w = Math.max(D, q.el.offsetWidth); q.h = q.el.offsetHeight; q.named = !!q.el.textContent; }
     return { q, x: (pv.x + 1) / 2 * W, y: (1 - pv.y) / 2 * H, up: Math.max(((1 - pu.y) / 2 * H - (1 - pv.y) / 2 * H) * -1, .001), front: pv.z < 1,
-      rank: (q.p.minor ? 2 : q.named ? 0 : 1) };
+      rank: (q.p.minor ? 3 : !q.named ? 2 : q.p.kind === 'food' || q.p.kind === 'boot' ? 0 : 1) };   // โซนขายได้ที่ก่อน (ที่จอดเยอะ อย่าแย่งที่)
   }).sort((a, b) => (a.rank - b.rank) || (b.y - a.y));
   // แถบบน (โลโก้) + ป้ายสาขาล่าง ถือว่าเป็นที่ที่มีของอยู่แล้ว หมุดห้ามทับ
   const placed = [$('top'), $('nav')].map(e => { const b = e.getBoundingClientRect(); return { x0: b.left, x1: b.right, y0: b.top, y1: b.bottom }; });
@@ -1398,7 +1410,7 @@ function placePins() {
     q.m.root.position.copy(q.p.pos);
     q.m.head.position.y = hW; q.m.head.scale.setScalar(s * (q.el.classList.contains('on') ? 1.15 : 1));
     q.m.head.rotation.y = Math.atan2(camera.position.x - q.p.pos.x, camera.position.z - q.p.pos.z);
-    q.m.ground.scale.setScalar(s);
+    q.m.ground.scale.setScalar(s * (wide ? 1 : .6));   // วงแสงบนพื้น มือถือเล็กลง ไม่บังผัง
     q.m.beam.scale.set(s, Math.max(hW - PIN_TIP * s, .001), s);
   }
 }
@@ -1488,7 +1500,7 @@ function go(dir) {
   busy = true; $('prev').disabled = $('next').disabled = true;
   if (VIEWS[view].rotate) { Object.assign(VIEWS[view], camAngle()); applyView(view, false); }   // อิสระ: พลิกแล้วคงมุมที่หมุนไว้
   viewBi = next;
-  if (!VIEWS[view].rotate) VIEW_DIR.copy(dirOf(VIEWS[view].el, viewAz()));   // สาขาที่มีมุมของตัวเอง → กล้องหมุนไปมุมนั้น
+  if (!VIEWS[view].rotate) VIEW_DIR.copy(dirOf(viewEl(), viewAz()));   // สาขาที่มีมุมของตัวเอง → กล้องหมุนไปมุมนั้น
   aimSun();
   computeHome();   // มุมบ้านของสาขาถัดไป (โคราชเฟรมแคบกว่าผังตาราง)
   closeCard(false); flyTo(home.p, home.t, 1100);   // ช้าพอให้หมุนอ้อมไปมุมของสาขาถัดไปได้นุ่ม
@@ -1521,6 +1533,9 @@ function resize() {
   const w = innerWidth, h = innerHeight, aspect = w / h;
   renderer.setSize(w, h); composer.setSize(w, h); bloom.setSize(w, h);
   camera.aspect = aspect; camera.updateProjectionMatrix();
+  if (!VIEWS[view].rotate) VIEW_DIR.copy(dirOf(viewEl(), viewAz()));   // หมุนจอ ตั้ง↔นอน → มุมก้มเปลี่ยนตาม
+  bloom.strength = w < 720 ? .42 : .7;
+  faceCam();   // จอเล็ก ของเล็กลงแต่แสงฟุ้งเท่าเดิม → ดูจ้า ลดลง
   computeHome();
   pinEls.forEach(q => (q.w = 0));   // ขนาดหมุดเปลี่ยนตามจอ → วัดป้ายใหม่
   const v2 = sel ? focusView(sel) : home;
@@ -1546,7 +1561,7 @@ function keepOnBoard() {
   if (panPull.lengthSq()) { t.add(panPull); camera.position.add(panPull); }
 }
 renderer.setAnimationLoop(now => { runTweens(now); controls.update(); keepOnBoard(); placePins(); showAngle(); composer.render(); });
-window.__flip = { go, setMode: m => (mode = m), platform, tiles, camera, controls, pins: () => pinEls };   // ใช้ทดสอบจากคอนโซล
+window.__flip = { go, setMode: m => (mode = m), platform, tiles, camera, controls, pins: () => pinEls, home, zoomLim };   // ใช้ทดสอบจากคอนโซล
 </script>
 </body>
 </html>
