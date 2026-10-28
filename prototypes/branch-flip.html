@@ -171,7 +171,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <script src="sg-layout.js?v=5"></script>
 <script src="office-sign.js?v=2"></script>
 <script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=20261028d"></script>
+<script src="content/cms.js?v=20261028g"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -1058,11 +1058,11 @@ const range = z => { const v = z.tiers.map(t => t[season][wk]), a = Math.min(...
 const m2txt = v => `≈ ${v.toLocaleString('th-TH')} ตร.ม. · ${(v / 1600).toFixed(1)} ไร่`;
 const KINDNAME = { ...K.about.kinds, spot: 'จุดบริการ', wc: 'ห้องน้ำ' };
 const head = (kind, name, where) => `<span class="tag ${kind}">${esc(KINDNAME[kind] || '')}</span><h2>${esc(name)}</h2>${where ? `<p class="where">📍 ${rt(where)}</p>` : ''}<!--ph-->`;
-// ── รูปจริงในการ์ด: ใส่ชื่อไฟล์ตาม "สาขา/id หมุด" (ไฟล์อยู่ prototypes/photos/ ชื่อตัวพิมพ์เล็ก) · ยังไม่มี = ช่องว่างเส้นประ ──
-//    เช่น 'sg/สำนักงาน': ['photos/sg/office-1.jpg', 'photos/sg/office-2.jpg'] · หลายรูป = เลื่อนซ้าย-ขวา
+// ── รูปจริงในการ์ด: ใส่ใน content/<สาขา>/data.json → photos: { "id หมุด": ["content/<สาขา>/img/x.jpg", …] } (ชื่อไฟล์ตัวพิมพ์เล็ก) · ยังไม่มี = ช่องว่างเส้นประ ──
+//    หลายรูป = เลื่อนซ้าย-ขวา · PHOTOS ด้านล่างไว้ทดลองในโค้ด (ทับของในไฟล์)
 const PHOTOS = {};
 const photoKey = p => `${p.sg ? 'sg' : p.fake ? 'sb' : 'korat'}/${p.id || p.name}`;
-const photoSlot = p => { const a = PHOTOS[photoKey(p)];
+const photoSlot = p => { const [b, id] = photoKey(p).split('/'), a = PHOTOS[photoKey(p)] || (SITE && SITE[b] && SITE[b].photos && SITE[b].photos[id]);   // รูปจาก content/<สาขา>/data.json → photos
   return a && a.length ? `<div class="ph">${a.map((u, i) => `<img src="${esc(u)}" alt="${esc(p.name || p.label)} รูปที่ ${i + 1}" loading="lazy">`).join('')}</div>`
                        : `<div class="ph empty"><div>📷 รูปจริง<small>เพิ่มทีหลัง</small></div></div>`; };
 const todo = (e, k, w = 0) => [e, k, 'รอข้อมูล', w, 1];   // ช่องข้อมูลที่ยังไม่มี → กรอบเส้นประ
@@ -1082,7 +1082,7 @@ const sf = (e, k, p, w = 0) => `<div class="fact${w ? ' w' : ''}${S(p) ? '' : ' 
 const FACT_EMOJI = { size: '📐', online: '📱', walk: '🏢', clock: '🕓', bolt: '⚡', box: '📦', car: '🚗' };
 const lineHref = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
 function sgLot(kind) {   // การ์ดโซนขาย: ราคาวันนี้ + รูปตัวอย่างล็อก + ข้อมูลล็อก + วิธีจอง
-  const V = SITE.vendor, Z = V.zones[kind], P = `vendor.zones.${kind}`;
+  const V = SITE.sg.vendor, Z = V.zones[kind], P = `sg.vendor.zones.${kind}`;
   const season = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
   const i = Z.rows.findIndex(r => (!r.season || r.season === season) && r.dow === dow), r = Z.rows[i];
   const today = r ? `<div class="today ${kind}"><small>ราคาวันนี้ · ${dow === 'weekday' ? 'จันทร์–พฤหัส' : 'ศุกร์–อาทิตย์'}${r.season ? ' · ' + esc(V.seasons[r.season].label) : ''} · จองออนไลน์</small>`
@@ -1090,26 +1090,26 @@ function sgLot(kind) {   // การ์ดโซนขาย: ราคาว�
   return today
     + `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><img class="lotimg" src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"></div>`
     + `<div class="sec facts">${Z.facts.map((f, j) => sf(FACT_EMOJI[f[0]] || '•', f[1], `${P}.facts.${j}.2`, j === 0)).join('')}</div>`
-    + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
-    + `<div class="actions"><a class="btn pri" href="${esc(S('links.booking'))}" target="_blank" rel="noopener">จองล็อก ↗</a><a class="btn" href="${esc(lineHref(S('contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE ${esc(S('contact.lineVendor'))}</a></div>`;
+    + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `sg.vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `sg.vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
+    + `<div class="actions"><a class="btn pri" href="${esc(S('sg.links.booking'))}" target="_blank" rel="noopener">จองล็อก ↗</a><a class="btn" href="${esc(lineHref(S('sg.contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE ${esc(S('sg.contact.lineVendor'))}</a></div>`;
 }
 function sgCard(p) {
   const I = SG.info, where = 'ประตูกรุงเทพ · แยก คปอ.', T = (q, tag, cls) => SITE ? CMS.T(SITE, q, tag, cls) : '';
-  if (p.id === 'gate') return head('spot', 'ประตูกรุงเทพ', S('sgMap.gate.where')) + T('sgMap.gate.note', 'p', 'muted')
-    + `<div class="sec facts">${sf('🕓', 'เวลาตลาดเปิด', 'sgMap.gate.hours', 1)}${sf('🚆', 'เดินจาก BTS แยก คปอ.', 'sgMap.gate.bts', 1)}</div>`;
-  if (p.id === 'ห้องน้ำลูกค้า') return head('wc', 'ห้องน้ำลูกค้า', S('sgMap.wc.where'))
-    + `<div class="sec facts">${sf('🕓', 'เวลาเปิด', 'sgMap.wc.hours')}${sf('💰', 'ค่าบริการ', 'sgMap.wc.fee')}</div>`;
-  if (p.id === 'สำนักงาน') return head('spot', 'สำนักงานตลาด', S('sgMap.office.where')) + T('sgMap.office.note', 'p', 'muted')
-    + `<div class="sec facts">${sf('📞', 'โทร', 'contact.phone')}${sf('🕓', 'เวลาโทร', 'contact.phoneHours')}${sf('💬', 'LINE ผู้ค้า', 'contact.lineVendor')}${sf('🏢', 'เวลาทำการสำนักงาน', 'sgMap.office.hours')}${sf('🧭', 'จุดสังเกต', 'sgMap.office.landmark', 1)}</div>`
-    + `<div class="actions">${S('contact.phone') ? telBtn(S('contact.phone'), '', 1) : ''}<a class="btn" href="${esc(lineHref(S('contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE</a></div>`;
+  if (p.id === 'gate') return head('spot', 'ประตูกรุงเทพ', S('sg.map.gate.where')) + T('sg.map.gate.note', 'p', 'muted')
+    + `<div class="sec facts">${sf('🕓', 'เวลาตลาดเปิด', 'sg.map.gate.hours', 1)}${sf('🚆', 'เดินจาก BTS แยก คปอ.', 'sg.map.gate.bts', 1)}</div>`;
+  if (p.id === 'ห้องน้ำลูกค้า') return head('wc', 'ห้องน้ำลูกค้า', S('sg.map.wc.where'))
+    + `<div class="sec facts">${sf('🕓', 'เวลาเปิด', 'sg.map.wc.hours')}${sf('💰', 'ค่าบริการ', 'sg.map.wc.fee')}</div>`;
+  if (p.id === 'สำนักงาน') return head('spot', 'สำนักงานตลาด', S('sg.map.office.where')) + T('sg.map.office.note', 'p', 'muted')
+    + `<div class="sec facts">${sf('📞', 'โทร', 'sg.contact.phone')}${sf('🕓', 'เวลาโทร', 'sg.contact.phoneHours')}${sf('💬', 'LINE ผู้ค้า', 'sg.contact.lineVendor')}${sf('🏢', 'เวลาทำการสำนักงาน', 'sg.map.office.hours')}${sf('🧭', 'จุดสังเกต', 'sg.map.office.landmark', 1)}</div>`
+    + `<div class="actions">${S('sg.contact.phone') ? telBtn(S('sg.contact.phone'), '', 1) : ''}<a class="btn" href="${esc(lineHref(S('sg.contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE</a></div>`;
   const z = SGZ[p.id];
   if (z.kind === 'park' || z.kind === 'vpark' || z.kind === 'moto') {
     const r = I[z.kind === 'vpark' ? 'vpark' : 'park'];
-    return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sgMap.parkEntrance')}</div>`
+    return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sg.map.parkEntrance')}</div>`
       + `<p class="muted">${esc(r.note)} · ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด</p><p class="warn">${esc(I.limit)}</p>`;
   }
   return head(z.kind, z.name, where) + `<div class="sec"><p class="sec-h">✅ ขายได้</p><div class="chips"><span class="chip ok">${esc(I[z.kind])}</span></div></div>`
-    + (SITE && SITE.vendor.zones[z.kind] ? sgLot(z.kind) : facts(LOT_TODO));
+    + (SITE && SITE.sg.vendor.zones[z.kind] ? sgLot(z.kind) : facts(LOT_TODO));
 }
 function cardHtml(p) {
   if (p.sg) return sgCard(p);
@@ -1327,7 +1327,16 @@ addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
   if ('pinGroup' in e.data) pinGroup = e.data.pinGroup;
   if (e.data.content) SITE = e.data.content;   // หน้าแรก/admin ส่งเนื้อหาชุดล่าสุดมา (รวมที่แก้ค้างไว้)
+  if (e.data.goBranch) goBranch(e.data.goBranch);   // ปุ่ม "ดูสาขา…" ในหน้าแรก
 });
+// รหัสสาขา (ตรงกับโฟลเดอร์ content/<รหัส>/) · บอกหน้าแรกทุกครั้งที่พลิกเสร็จ → เนื้อหาข้างล่างเปลี่ยนตาม
+const brKey = i => BRANCHES[i].sg ? 'sg' : BRANCHES[i].korat ? 'korat' : 'sb';
+const tellBranch = () => { if (parent !== window) parent.postMessage({ branch: brKey(cur) }, location.origin); };
+function goBranch(k) {
+  const i = BRANCHES.findIndex((_, j) => brKey(j) === k);
+  if (i < 0 || i === cur || busy || $('loading')) return;
+  go((i - cur + BRANCHES.length) % BRANCHES.length === 1 ? 1 : -1);   // 3 สาขา = ห่างกันไม่เกิน 1 ช่องเสมอ
+}
 let cur = 0, mode = 'wave', busy = false;   // เจ้าของเลือก "พลิกไล่ทีละช่อง" (28 ต.ค. 69) · อีก 2 ท่าเก็บไว้ในโค้ด เรียกได้ทาง __flip.setMode
 // ── หมุด 3D แบบ D (เจ้าของเลือก · โมเดล Blender ของเรา brand/3d/pins) ──
 //    เหรียญหันหน้าเข้ากล้องเสมอ · ขนาดคงที่บนจอ · ซ้อนกันเมื่อไร ยกเหรียญขึ้นหนี (เส้นแสงยืดตาม ยังชี้จุดเดิมบนพื้น)
@@ -1521,7 +1530,7 @@ function go(dir) {
   const swapLabel = () => { showLabel(next); $('label').classList.remove('out'); };
   const end = () => {
     cur = next; busy = false; $('prev').disabled = $('next').disabled = false;
-    renderPins(cur); pinLayer.classList.remove('hide');
+    renderPins(cur); pinLayer.classList.remove('hide'); tellBranch();
   };
   if (reduced) { tiles.forEach(t => setTile(t, next)); swapLabel(); end(); return; }
   FLIPS[mode](next, VIEW_DIR.z < 0 ? -dir : dir, swapLabel, end);   // มองจากหน้าตลาด ซ้าย-ขวาบนจอกลับด้าน → คลื่นยังวิ่งจากฝั่งลูกศรที่กด
@@ -1559,12 +1568,12 @@ addEventListener('resize', resize);
 await Promise.all([loadModels(), document.fonts.ready, CMS.load().then(c => { SITE = SITE || c; }, e => console.warn(e.message))]);
 if (CMS.EDIT) {   // admin: แก้ในการ์ด → ส่งให้หน้าแม่เก็บ/บันทึก
   document.body.classList.add('edit');
-  CMS.bind(card, { get vendor() { return SITE.vendor; }, get contact() { return SITE.contact; }, get links() { return SITE.links; }, get sgMap() { return SITE.sgMap; } },
+  CMS.bind(card, { get sg() { return SITE.sg; } },   // ทาง data-p ในการ์ด = sg.… (content/sg/data.json)
     (p, v) => parent !== window && parent.postMessage({ patch: { p, v } }, location.origin), () => {});
 }
 if (new URLSearchParams(location.search).has('cam')) document.querySelector('.tools').hidden = false;   // ปุ่มหามุมกล้อง (สำหรับจัดมุมใหม่)
 tiles.forEach(t => setTile(t, cur)); showLabel(cur); applyView(view, false); resize(); renderPins(cur);
-$('loading').remove();
+$('loading').remove(); tellBranch();
 // เลื่อนได้ไม่เกินขอบแผ่น: ถ้าจุดเล็งหลุดขอบ ดึงทั้งจุดเล็งและกล้องกลับเท่ากัน (มุมไม่เพี้ยน)
 const panPull = new THREE.Vector3();
 function keepOnBoard() {

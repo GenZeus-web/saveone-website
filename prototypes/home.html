@@ -101,6 +101,22 @@ details[open] summary::after{content:"−"}
 details>div{padding:0 2px 14px;font-size:14px;color:#ddd8ea}
 .minus{color:var(--bad);font-weight:700;white-space:nowrap;text-align:right}
 .scope{display:inline-block;margin-top:8px;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+/* สาขา: ชื่อสาขาต่อหัวข้อ · ปุ่มไปสาขาอื่น · รูปจริง */
+.brn{color:var(--go);font-weight:700}
+.brgo{display:inline-flex;gap:8px;align-items:center;margin:10px 8px 0 0;padding:10px 16px;border-radius:999px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-weight:600;font-size:14px;cursor:pointer}
+.brgo:hover{border-color:var(--go)}.brgo .i{color:var(--go)}
+.pics{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:10px;margin-top:16px;overflow-x:auto;scroll-snap-type:x mandatory}
+.pics figure{margin:0;scroll-snap-align:start}
+.pics img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:16px;display:block;background:var(--bg2)}
+.pics figcaption{font-size:12px;color:var(--muted);margin-top:4px}
+.kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px}
+.kind{border-radius:18px;overflow:hidden;background:var(--bg2);border:1px solid var(--line)}
+.kind img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.kind>div{padding:12px 14px}.kind b{display:flex;gap:8px;align-items:center;font-size:16px}.kind b .i{color:var(--go)}
+.kind small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.q.off{opacity:.55;pointer-events:none}
+.soon{margin-top:34px;padding:28px 20px;border-radius:20px;border:1px dashed var(--line);text-align:center;color:var(--muted)}
+.soon b{display:block;color:var(--ink);font-size:20px;margin-bottom:4px}
 footer{margin-top:40px;padding:28px 16px;color:var(--muted);font-size:13px;text-align:center;border-top:1px solid var(--line)}
 @media (max-width:520px){ th,td{padding:7px 6px} .sec h2{font-size:21px} }
 
@@ -143,7 +159,7 @@ body.edit{padding-bottom:90px}
 <main class="grp" id="g-ven"></main>
 <footer id="foot"></footer>
 
-<script src="content/cms.js?v=20261028d"></script>
+<script src="content/cms.js?v=20261028g"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -180,15 +196,22 @@ const ICON = {
 };
 const ic = k => `<i class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k] || ''}</svg></i>`;
 
-let C;   // เนื้อหาทั้งหน้า (site.json)
+let C;   // เนื้อหาทั้งหน้า: content/site.json + content/<สาขา>/data.json (C.sg, C.korat)
+let BR = 'sg';   // สาขาที่ผังด้านบนโชว์อยู่ (ผังบอกมาทาง postMessage) · เนื้อหาข้างล่างเปลี่ยนตาม
 const digits = s => String(s || '').replace(/[^\d+]/g, '');
 const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
-// ปุ่มลิงก์: tel/line/link = ชี้ไปค่าใน contact/links (แก้ที่เดียว) · href = ลิงก์ในหน้า
-const qHref = q => q.tel ? 'tel:' + digits(get(C, 'contact.' + q.tel)) : q.line ? lineUrl(get(C, 'contact.' + q.line)) : q.link ? get(C, 'links.' + q.link) : q.href || '#';
+// ปุ่มลิงก์: tel/line/link = ชี้ไปค่าใน contact/links ของสาขานั้น (ไม่มี → ของส่วนกลาง) · href = ลิงก์ในหน้า · ว่าง = ปุ่มจาง "รอลิงก์"
+const brVal = (kind, key) => get(C, `${BR}.${kind}.${key}`) || get(C, `${kind}.${key}`) || '';
+const qHref = q => q.tel ? (brVal('contact', q.tel) && 'tel:' + digits(brVal('contact', q.tel))) : q.line ? (brVal('contact', q.line) && lineUrl(brVal('contact', q.line))) : q.link ? brVal('links', q.link) : q.href || '#';
 const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const dots = p => `<ul class="dots">${get(C, p).map((_, i) => `<li>${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</li>`).join('')}</ul>${add(p)}`;
-const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q);
-  return `<a class="q${q.main ? ' main' : ''}" href="${esc(h)}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
+const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q), off = !h && !EDIT;
+  return `<a class="q${q.main ? ' main' : ''}${off ? ' off' : ''}" href="${esc(h || '#')}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}${off ? ' aria-disabled="true"' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}${off ? '<small>· รอลิงก์</small>' : ''}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
+const pics = p => { const a = get(C, p); return a && a.length ? `<div class="pics">${a.map(([src, alt]) => `<figure><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy"><figcaption>${esc(alt)}</figcaption></figure>`).join('')}</div>` : ''; };
+const brName = () => C[BR] ? ` <span class="brn">· ${esc(C[BR].name)}</span>` : '';
+// ปุ่มไปสาขาอื่น → สั่งผังด้านบนพลิก แล้วเลื่อนขึ้นไปดู
+const otherBranches = () => C.branchKeys.filter(k => k !== BR).map(k => `<button type="button" class="brgo" data-go="${k}">${ic('pin')}ดูสาขา${esc(C[k].name)} →</button>`).join('');
+const soon = () => `<div class="wrap"><div class="soon"><b>สาขาบางนา · เร็วๆ นี้</b>ยังไม่มีรายละเอียดของสาขานี้<br>${otherBranches()}</div></div>`;
 
 // ── ม่าน ──
 function renderGate() {
@@ -198,21 +221,25 @@ function renderGate() {
 
 // ── ลูกค้า ──
 function renderCus() {
-  const br = C.customer.branches.map((b, i) => `<div class="card" style="position:relative"><h3>${ic('pin')}${T(C, `customer.branches.${i}.name`)}</h3>${T(C, `customer.branches.${i}.where`, 'p', 'sub')}
-    <div class="facts" style="margin-top:10px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `customer.branches.${i}.facts.${j}.1`)}</small>${T(C, `customer.branches.${i}.facts.${j}.2`, 'b')}</div>`).join('')}</div>${del(`customer.branches.${i}`)}</div>`).join('');
+  const b = C[BR], P = BR;
+  if (!b) { $('g-cus').innerHTML = soon(); return; }
   $('g-cus').innerHTML = `<div class="wrap">
-    <section class="sec">${T(C, 'customer.title', 'h2')}${T(C, 'customer.sub', 'p', 'sub')}${quick('customer.quick')}</section>
-    <section class="sec">${T(C, 'customer.branchesTitle', 'h2')}<div class="two">${br}</div>${add('customer.branches', '+ เพิ่มสาขา')}${T(C, 'customer.note', 'p', 'note')}</section></div>`;
+    <section class="sec"><h2>${T(C, 'customer.title')}${brName()}</h2>${T(C, `${P}.customer.sub`, 'p', 'sub')}${quick(`${P}.customer.quick`)}${pics(`${P}.customer.photos`)}</section>
+    <section class="sec"><div class="card"><h3>${ic('pin')}${T(C, `${P}.name`)}</h3>${T(C, `${P}.where`, 'p', 'sub')}
+      <div class="facts" style="margin-top:10px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${j}.1`)}</small>${T(C, `${P}.facts.${j}.2`, 'b')}</div>`).join('')}</div></div>
+      ${T(C, `${P}.customer.note`, 'p', 'note')}<div>${otherBranches()}</div></section></div>`;
 }
 
 // ── ผู้ค้า ──
 let zoneNow = 'food';
 function renderVen() {
-  const V = C.vendor, P = 'vendor';
+  if (!C[BR]) { $('g-ven').innerHTML = soon(); return; }
+  if (!C[BR].vendor.zones) return renderVenSimple();
+  const P = `${BR}.vendor`, V = get(C, P);
   const rights = V.rights.map((r, i) => `<div class="card"><h3>${ic(r.ic)}${T(C, `${P}.rights.${i}.title`)}</h3>${dots(`${P}.rights.${i}.items`)}</div>`).join('');
   const faq = V.faq.map((_, i) => `<details${EDIT ? ' open' : ''}><summary>${T(C, `${P}.faq.${i}.0`)}${del(`${P}.faq.${i}`)}</summary><div>${T(C, `${P}.faq.${i}.1`)}</div></details>`).join('');
   $('g-ven').innerHTML = `<div class="wrap">
-    <section class="sec">${T(C, `${P}.title`, 'h2')}${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}</section>
+    <section class="sec"><h2>${T(C, 'vendor.title')}${brName()}</h2>${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}<div>${otherBranches()}</div></section>
     <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}
       <div class="seg" id="zone">${['food', 'boot'].map(z => `<button data-z="${z}">${ic(V.zones[z].ic)}${esc(V.zones[z].name)}</button>`).join('')}</div>
       <div class="card" id="zoneCard"></div></section>
@@ -237,9 +264,30 @@ function renderVen() {
   $('zone').querySelectorAll('button').forEach(b => b.onclick = () => zone(b.dataset.z));
   zone(zoneNow);
 }
+// สาขาที่ยังไม่มีตารางราคา/ระเบียบเต็ม (โคราช): ขายอะไรได้ · ช่วงราคา · วิธีจอง · เบอร์ · เช่าลานจัดงาน
+function renderVenSimple() {
+  const P = `${BR}.vendor`, V = get(C, P), E = V.event;
+  const kinds = (V.kinds || []).map((k, i) => `<div class="kind">${k.img ? `<img src="${esc(k.img)}" alt="${esc(k.title)}" loading="lazy">` : ''}<div><b>${ic(k.ic)}${T(C, `${P}.kinds.${i}.title`)}</b>${T(C, `${P}.kinds.${i}.sub`, 'small')}</div></div>`).join('');
+  const phones = get(C, `${BR}.contact.phones`) || [];
+  $('g-ven').innerHTML = `<div class="wrap">
+    <section class="sec"><h2>${T(C, 'vendor.title')}${brName()}</h2>${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}<div>${otherBranches()}</div></section>
+    <section class="sec"><h2>ขายอะไรได้บ้าง</h2><div class="kinds">${kinds}</div></section>
+    <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}<div class="card"><div class="facts">
+      ${V.seasons.map((_, i) => `<div class="f"><small>${ic('cal')}${T(C, `${P}.seasons.${i}.0`)}</small>${T(C, `${P}.seasons.${i}.1`, 'b')}</div>`).join('')}
+      <div class="f"><small>${ic('bolt')}ไฟฟ้า</small>${T(C, `${P}.elec`, 'b')}</div></div>
+      ${T(C, `${P}.fee`, 'p', 'note')}${T(C, `${P}.priceNote`, 'p', 'note')}</div></section>
+    <section class="sec">${T(C, `${P}.steps.title`, 'h2')}
+      <ol class="steps">${V.steps.items.map((_, i) => `<li>${T(C, `${P}.steps.items.${i}.0`, 'b')}${T(C, `${P}.steps.items.${i}.1`)}${del(`${P}.steps.items.${i}`)}</li>`).join('')}</ol>${add(`${P}.steps.items`, '+ เพิ่มขั้น')}
+      <div class="quick">${phones.map((p, i) => `<a class="q" href="tel:${digits(p[0])}">${ic('phone')}<div>${T(C, `${BR}.contact.phones.${i}.0`, 'b')}${T(C, `${BR}.contact.phones.${i}.1`, 'small')}</div></a>`).join('')}</div></section>
+    ${E ? `<section class="sec">${T(C, `${P}.event.title`, 'h2')}${T(C, `${P}.event.sub`, 'p', 'sub')}${pics(`${P}.event.photos`)}
+      <div class="card"><div class="tbl"><table><thead><tr><th>พื้นที่</th><th>ค่าเช่า (บาท)</th></tr></thead><tbody>${E.rows.map((_, i) => `<tr><td>${T(C, `${P}.event.rows.${i}.0`)}</td><td class="big">${T(C, `${P}.event.rows.${i}.1`)}</td></tr>`).join('')}</tbody></table></div>
+      <p class="sub" style="margin-top:8px">ลาน: ${T(C, `${P}.event.areas`)}</p>${T(C, `${P}.event.note`, 'p', 'note')}
+      <div class="quick"><a class="q" href="tel:${digits(E.tel)}">${ic('phone')}<div><b>สอบถามเช่าลาน</b>${T(C, `${P}.event.tel`, 'small')}</div></a></div></div></section>` : ''}
+  </div>`;
+}
 function zone(z) {
   zoneNow = z;
-  const V = C.vendor, Z = V.zones[z], P = `vendor.zones.${z}`, now = CMS.seasonNow(V.seasons);
+  const VP = `${BR}.vendor`, V = get(C, VP), Z = V.zones[z], P = `${VP}.zones.${z}`, now = CMS.seasonNow(V.seasons);
   $('zone').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.z === z));
   const seasonal = Z.rows.some(r => r.season);
   const row = (r, i) => { const on = r.season && r.season === now;
@@ -249,23 +297,32 @@ function zone(z) {
     + T(C, `${P}.note`, 'p', 'note')
     + `<div class="lot"><img src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"><div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
   $('penZone').textContent = '· ' + Z.name;
-  const PP = `vendor.penalties.${z}`;
+  const PP = `${VP}.penalties.${z}`;
   $('pen').innerHTML = get(C, PP).map((g, i) =>
     `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
       `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
 }
 function renderFoot() {
-  $('foot').innerHTML = `${T(C, 'contact.company')} · ${T(C, 'contact.address')} · โทร ${T(C, 'contact.phone')}<br>${T(C, 'contact.footnote')}`;
+  $('foot').innerHTML = `${T(C, 'contact.company')} · ${T(C, 'contact.address')} · โทร ${T(C, 'sg.contact.phone')}<br>${T(C, 'contact.footnote')}`;
 }
 // แผงลิงก์/เบอร์ (เฉพาะโหมดแก้ · ค่าที่ปุ่มบนหน้าใช้ แต่ไม่ได้โชว์เป็นตัวหนังสือ)
 function renderPanel() {
   if (!EDIT) return;
   const inp = (p, label) => `<label>${esc(label)}<input data-p="${esc(p)}" value="${esc(get(C, p))}"></label>`;
   $('edpanel').innerHTML = `<section class="sec"><h2>ลิงก์และเบอร์ติดต่อ</h2><p class="sub">ปุ่มบนหน้าเว็บใช้ค่าพวกนี้ · แก้ตรงนี้ที่เดียว ทุกปุ่มเปลี่ยนตาม</p>
-    <div class="card edgrid">${inp('links.booking', 'ลิงก์จองล็อก')}${inp('links.cctv', 'ลิงก์ดูกล้อง (ประตูกรุงเทพ)')}${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF)')}
-    ${inp('contact.lineVendor', 'LINE ผู้ค้า')}${inp('contact.lineCustomer', 'LINE ลูกค้า')}${inp('contact.phone', 'เบอร์โทร')}${inp('contact.phoneHours', 'เวลาโทร')}</div></section>`;
+    <div class="card edgrid">${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF · ทุกสาขา)')}</div>
+    ${C.branchKeys.map(k => `<div class="card"><h3>${ic('pin')}${esc(C[k].name)}</h3><div class="edgrid">${inp(`${k}.links.booking`, 'ลิงก์จองล็อก')}${inp(`${k}.links.cctv`, 'ลิงก์ดูกล้อง')}
+      ${inp(`${k}.contact.lineVendor`, 'LINE ผู้ค้า')}${inp(`${k}.contact.lineCustomer`, 'LINE ลูกค้า')}${inp(`${k}.contact.phone`, 'เบอร์โทร')}${inp(`${k}.contact.phoneHours`, 'เวลาโทร')}</div></div>`).join('')}</section>`;
 }
-function renderAll() { renderGate(); renderCus(); renderVen(); renderFoot(); renderPanel(); wireGate(); }
+function renderBranch() { renderCus(); renderVen(); wireGo(); document.querySelectorAll('.grp [data-close]').forEach(a => a.addEventListener('click', () => gate.classList.add('off'))); }
+function renderAll() { renderGate(); renderCus(); renderVen(); renderFoot(); renderPanel(); wireGate(); wireGo(); }
+// ปุ่ม "ดูสาขา…" → ผังพลิกไปสาขานั้น (ผังบอกกลับมาว่าเปลี่ยนแล้ว → วาดเนื้อหาใหม่)
+function wireGo() {
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+    try { frame.contentWindow.postMessage({ goBranch: b.dataset.go }, location.origin); } catch {}
+    $('map').scrollIntoView({ behavior: 'smooth' });
+  });
+}
 
 // ── ม่านเลือกกลุ่ม · ส่งกลุ่ม (+ เนื้อหา) ไปผัง 3D ──
 const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
@@ -273,7 +330,11 @@ let group = null;
 const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
 frame.addEventListener('load', tellMap);
 // ผังบอกว่าเปิด/ปิดการ์ด → มือถือขยายผังเต็มจอ
-addEventListener('message', e => { if (e.origin === location.origin && e.data && 'cardOpen' in e.data) document.documentElement.classList.toggle('mapfull', !!e.data.cardOpen && innerWidth <= 720); });
+addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data) return;
+  if ('cardOpen' in e.data) document.documentElement.classList.toggle('mapfull', !!e.data.cardOpen && innerWidth <= 720);
+  if (e.data.branch && e.data.branch !== BR && C) { BR = e.data.branch; renderBranch(); }   // ผังพลิกสาขา → เนื้อหาข้างล่างเปลี่ยนตาม
+});
 function pick(g) {
   group = g; tellMap();
   gate.classList.add('off'); chip.hidden = false; chip.textContent = (g ? C.gate[g].title : 'ดูผังทั้งหมด') + ' · เปลี่ยน';
@@ -290,22 +351,29 @@ function wireGate() {
 chip.onclick = () => { gate.classList.remove('off'); chip.hidden = true; scrollTo({ top: 0 }); };
 
 // ── โหมดแก้: แถบล่าง (บันทึก/ฉบับร่าง) ──
-// ตอนนี้ (ทดลองในเครื่อง) บันทึก = เขียนทับไฟล์ content/site.json ด้วย Chrome · ขึ้นเว็บจริงค่อยเปลี่ยนเป็นส่งไปเซิร์ฟเวอร์ที่ต้องล็อกอิน
-const DRAFT = 'site-draft';
-let fileHandle = null;
+// ตอนนี้ (ทดลองในเครื่อง) บันทึก = เลือกโฟลเดอร์ prototypes/content ครั้งแรก แล้วเขียนทับ site.json + <สาขา>/data.json ด้วย Chrome
+// ขึ้นเว็บจริงค่อยเปลี่ยนเป็นส่งไปเซิร์ฟเวอร์ที่ต้องล็อกอิน
+const DRAFT = 'site-draft-v2';   // v2: เนื้อหาแยกไฟล์รายสาขาแล้ว (ฉบับร่างแบบเก่าใช้ไม่ได้)
+let dirHandle = null;
 function setSt(t, dirty) { const s = $('edSt'); if (s) { s.textContent = t; s.classList.toggle('dirty', dirty); } }
 function keepDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(C)); } catch {} setSt('ยังไม่บันทึก', true); }
 function changed() { keepDraft(); tellMap(); }
 async function save() {
   C.meta.updated = new Date().toISOString().slice(0, 10);
-  const text = JSON.stringify(C, null, 2) + '\n';
+  const files = CMS.files(C).map(([p, d]) => [p, JSON.stringify(d, null, 2) + '\n']);
   try {
-    if (window.showSaveFilePicker) {   // ครั้งแรกให้เลือกไฟล์ prototypes/content/site.json · ครั้งต่อไปเขียนทับไฟล์เดิม
-      fileHandle = fileHandle || await showSaveFilePicker({ suggestedName: 'site.json', types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }] });
-      const w = await fileHandle.createWritable(); await w.write(text); await w.close();
-    } else {
-      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([text], { type: 'application/json' })), download: 'site.json' });
-      a.click(); URL.revokeObjectURL(a.href);
+    if (window.showDirectoryPicker) {   // ครั้งแรกให้เลือกโฟลเดอร์ prototypes/content · ครั้งต่อไปเขียนทับที่เดิม
+      dirHandle = dirHandle || await showDirectoryPicker({ id: 'site-content', mode: 'readwrite' });
+      for (const [p, text] of files) {
+        const parts = p.split('/'); let d = dirHandle;
+        for (const s of parts.slice(0, -1)) d = await d.getDirectoryHandle(s, { create: true });
+        const w = await (await d.getFileHandle(parts.at(-1), { create: true })).createWritable(); await w.write(text); await w.close();
+      }
+    } else {   // เบราว์เซอร์อื่น: ดาวน์โหลดทีละไฟล์ (sg-data.json = content/sg/data.json)
+      for (const [p, text] of files) {
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([text], { type: 'application/json' })), download: p.replace('/', '-') });
+        a.click(); URL.revokeObjectURL(a.href);
+      }
     }
     try { localStorage.removeItem(DRAFT); } catch {}
     setSt('บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), false);
@@ -330,7 +398,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261028f' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261028g' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);

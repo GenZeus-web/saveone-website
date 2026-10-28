@@ -56,10 +56,23 @@
     return '';
   }
   const dowNow = (d = new Date()) => [1, 2, 3, 4].includes(d.getDay()) ? 'weekday' : 'weekend';   // ศ–อา = weekend
-  async function load(url = 'content/site.json') {
+  // ไฟล์เนื้อหา: content/site.json (ส่วนกลาง) + content/<สาขา>/data.json (ของแต่ละสาขา · รูปอยู่ <สาขา>/img/)
+  // โหลดแล้วรวมเป็นก้อนเดียว: C.sg, C.korat … · ทาง data-p ขึ้นต้นด้วยรหัสสาขา เช่น "korat.vendor.sub"
+  const getJson = async url => {
     const r = await fetch(url, { cache: 'no-store' });
     if (!r.ok) throw new Error('โหลด ' + url + ' ไม่ได้ (' + r.status + ')');
     return r.json();
+  };
+  async function load(base = 'content/') {
+    const C = await getJson(base + 'site.json');
+    await Promise.all((C.branchKeys || []).map(async k => { C[k] = await getJson(`${base}${k}/data.json`); }));
+    return C;
   }
-  window.CMS = { EDIT, esc, phr, get, set, T, del, add, bind, sync, seasonNow, dowNow, load };
+  // แยกกลับเป็นไฟล์ตอนบันทึก: [[ทางไฟล์ใน content/, ข้อมูล], …]
+  function files(C) {
+    const site = { ...C }, out = [];
+    for (const k of C.branchKeys || []) { out.push([`${k}/data.json`, C[k]]); delete site[k]; }
+    return [['site.json', site], ...out];
+  }
+  window.CMS = { EDIT, esc, phr, get, set, T, del, add, bind, sync, seasonNow, dowNow, load, files };
 })();

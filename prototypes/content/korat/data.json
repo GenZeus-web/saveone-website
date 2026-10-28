@@ -1,0 +1,231 @@
+{
+  "name": "โคราช",
+  "tag": "ตลาดเซฟวัน",
+  "where": "1485/1 ถ.มิตรภาพ ต.ในเมือง อ.เมือง จ.นครราชสีมา 30000",
+  "source": "เว็บเดิมของตลาดโคราช thefunzaavoice.wixsite.com/saveoneclean2 (© 2018) + ผังโซนโคราช · ราคา/เวลาต้องยืนยันกับสำนักงานก่อนเปิดเว็บจริง",
+  "facts": [
+    [
+      "clock",
+      "สำนักงาน",
+      "15:00–22:00"
+    ],
+    [
+      "chat",
+      "LINE",
+      "@saveonemarket"
+    ]
+  ],
+  "links": {
+    "booking": "",
+    "cctv": "https://thefunzaavoice.wixsite.com/saveoneclean2/livecam",
+    "facebook": "https://www.facebook.com/saveonekorat",
+    "map": "https://www.google.com/maps/place/%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B9%80%E0%B8%8B%E0%B8%9F%E0%B8%A7%E0%B8%B1%E0%B8%99/@14.957095,102.0450516,17.92z/data=!4m5!3m4!1s0x0:0xec5f662e93e55bff!8m2!3d14.9572712!4d102.0455898"
+  },
+  "contact": {
+    "phone": "044-222-588",
+    "phoneHours": "15:00–22:00",
+    "lineVendor": "@saveonemarket",
+    "lineCustomer": "@saveonemarket",
+    "phones": [
+      [
+        "044-222-588",
+        "ทุกโซน"
+      ],
+      [
+        "044-299-169",
+        "อาหาร"
+      ],
+      [
+        "044-300-555",
+        "เปิดท้าย"
+      ]
+    ]
+  },
+  "customer": {
+    "sub": "ตลาดเซฟวัน ถ.มิตรภาพ · ที่จอดรถกว่า 3,000 คัน · หาร้านไม่เจอ ถามเราใน LINE ได้เลย",
+    "quick": [
+      {
+        "ic": "search",
+        "title": "ตามหาร้าน",
+        "sub": "หาร้าน/สินค้าได้ทุกสาขา · เปิดใน LINE",
+        "link": "findShop",
+        "main": true
+      },
+      {
+        "ic": "parking",
+        "title": "ที่จอดรถ",
+        "sub": "ฟรี 2 ชม.แรก · ชม.ต่อไป 20 บาท · 10:00–23:00",
+        "href": "#map"
+      },
+      {
+        "ic": "cam",
+        "title": "ดูกล้องสด",
+        "sub": "เปิดท้าย · สตรีทฟู้ด · หน้าตลาด ถ.มิตรภาพ",
+        "link": "cctv"
+      },
+      {
+        "ic": "pin",
+        "title": "นำทาง",
+        "sub": "เปิด Google Maps",
+        "link": "map"
+      },
+      {
+        "ic": "chat",
+        "title": "ติดต่อตลาด",
+        "sub": "LINE @saveonemarket",
+        "line": "lineCustomer"
+      }
+    ],
+    "note": "ค่าจอดจากเว็บเดิมของตลาด ต้องยืนยันอีกครั้ง · รายละเอียดแต่ละลาน แตะหมุดบนผัง",
+    "photos": [
+      [
+        "content/korat/img/aerial-dusk-1.jpg",
+        "ตลาดเซฟวันโคราช มุมสูงยามเย็น"
+      ],
+      [
+        "content/korat/img/aerial-dusk-2.jpg",
+        "แผงร้านค้ายามค่ำ มุมสูง"
+      ],
+      [
+        "content/korat/img/entrance.jpg",
+        "ทางเข้าตลาดเซฟวัน ถ.มิตรภาพ"
+      ]
+    ]
+  },
+  "vendor": {
+    "sub": "จองล็อกรายวันผ่านแอป SAVEONE หรือที่เคาน์เตอร์สำนักงาน",
+    "scope": "ระเบียบโคราชแยกจากประตูกรุงเทพ · ราคาแต่ละโซน แตะหมุดบนผังด้านบน",
+    "quick": [
+      {
+        "ic": "chat",
+        "title": "LINE ตลาดโคราช",
+        "sub": "@saveonemarket",
+        "line": "lineVendor",
+        "main": true
+      },
+      {
+        "ic": "phone",
+        "title": "044-222-588",
+        "sub": "ทุกโซน · สำนักงาน 15:00–22:00",
+        "tel": "phone"
+      },
+      {
+        "ic": "cam",
+        "title": "ดูกล้องสด",
+        "sub": "ดูโซนก่อนมาขาย",
+        "link": "cctv"
+      }
+    ],
+    "kinds": [
+      {
+        "ic": "food",
+        "title": "ขายอาหาร",
+        "sub": "รายวัน / รายเดือน · ทอด ปิ้ง ย่าง ของหวาน",
+        "img": "content/korat/img/food-stalls.jpg"
+      },
+      {
+        "ic": "car",
+        "title": "ขายสินค้า",
+        "sub": "เปิดท้าย / ศาลา · เสื้อผ้า กระเป๋า รองเท้า นาฬิกา เบ็ดเตล็ด",
+        "img": "content/korat/img/goods-stalls.jpg"
+      },
+      {
+        "ic": "heart",
+        "title": "บริการ",
+        "sub": "ธุรกรรม · ความงาม · ตัดผม ทำเล็บ สปา คลินิก",
+        "img": "content/korat/img/services.jpg"
+      }
+    ],
+    "priceTitle": "ราคาล็อก",
+    "seasons": [
+      [
+        "ช่วงปกติ",
+        "13 เม.ย. – 31 ต.ค."
+      ],
+      [
+        "ไฮซีซั่น",
+        "1 พ.ย. – 12 เม.ย."
+      ]
+    ],
+    "fee": "รวมค่าส่วนกลาง 10 บาท (ห้องน้ำ รถรับส่ง เก็บขยะ ไฟส่องสว่าง รปภ.)",
+    "elec": "200 วัตต์แรก 30 ฿ · +10 ฿ ทุก 100 วัตต์",
+    "priceNote": "ราคาต่างกันตามโซน แตะหมุดสตรีทฟู้ด / ศูนย์อาหาร / เปิดท้าย บนผังเพื่อดูราคาวันนี้",
+    "steps": {
+      "title": "มาขายครั้งแรก",
+      "items": [
+        [
+          "โหลดแอป SAVEONE แล้วสมัคร",
+          "ใช้เบอร์โทรจริง รับรหัส OTP"
+        ],
+        [
+          "ผูกบัญชีก่อนจ่ายเงิน",
+          "ไม่ผูก = จองไม่ได้"
+        ],
+        [
+          "จองในแอป 12:00–15:00",
+          "ขายวันถัดไป · หรือจองที่เคาน์เตอร์ 15:00–18:00 พร้อมบัตรประชาชน"
+        ],
+        [
+          "มาตั้งร้าน",
+          "เปิดท้ายสุ่มล็อกใหม่ทุกวัน ดูเลขล็อกในแอป"
+        ]
+      ]
+    },
+    "event": {
+      "title": "เช่าลานจัดงาน",
+      "sub": "ลานกลางแจ้งรวมกว่า 5,000 ตร.ม. · งานสตรีทฟู้ด ตลาดนัด คอนเสิร์ต โชว์",
+      "areas": "ลานไทมุง · ลานหน้าทาวเวอร์ · ลานน้ำพุม้า",
+      "rows": [
+        [
+          "1,250 ตร.ม.",
+          "40,000"
+        ],
+        [
+          "2,500 ตร.ม.",
+          "60,000"
+        ],
+        [
+          "5,000 ตร.ม.",
+          "100,000"
+        ]
+      ],
+      "note": "ลานไทมุง วันติดตั้งคิดครึ่งราคา · ราคาจากเว็บเดิม ต้องยืนยันกับสำนักงาน",
+      "tel": "044-300-555",
+      "photos": [
+        [
+          "content/korat/img/event-concert.jpg",
+          "คอนเสิร์ตบนลานกิจกรรม มุมสูง"
+        ],
+        [
+          "content/korat/img/event-tower.jpg",
+          "ลานหน้าทาวเวอร์ยามค่ำ"
+        ]
+      ]
+    }
+  },
+  "photos": {
+    "food-sf1": [
+      "content/korat/img/food-stalls.jpg"
+    ],
+    "food-sf2": [
+      "content/korat/img/food-stalls.jpg"
+    ],
+    "boot-a": [
+      "content/korat/img/goods-stalls.jpg"
+    ],
+    "boot-b": [
+      "content/korat/img/goods-stalls.jpg"
+    ],
+    "event": [
+      "content/korat/img/event-concert.jpg",
+      "content/korat/img/event-tower.jpg"
+    ],
+    "fountain": [
+      "content/korat/img/fountain.jpg"
+    ],
+    "park-4": [
+      "content/korat/img/parking-aerial.jpg",
+      "content/korat/img/parking-night.jpg"
+    ]
+  }
+}
