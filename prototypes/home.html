@@ -143,7 +143,7 @@ body.edit{padding-bottom:90px}
 <main class="grp" id="g-ven"></main>
 <footer id="foot"></footer>
 
-<script src="content/cms.js?v=20261028c"></script>
+<script src="content/cms.js?v=20261028d"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -330,7 +330,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261028c' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261028d' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);

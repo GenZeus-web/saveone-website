@@ -171,7 +171,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <script src="sg-layout.js?v=5"></script>
 <script src="office-sign.js?v=2"></script>
 <script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=20261028c"></script>
+<script src="content/cms.js?v=20261028d"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -196,7 +196,7 @@ const SHOW_LOGOS = true;   // โลโก้ร้านบนหลังค�
 //            az = มุมหมุนกล้องของสาขานี้ในมุมบ้าน (ไม่ใส่ = ใช้มุมบ้านปกติ)
 //            pins (ผังตาราง): [ข้อความ, ชนิด, [คอลัมน์ซ้าย, แถวบน, คอลัมน์ขวา, แถวล่าง]]
 const BRANCHES = [
-  { tag: 'สาขา SG', name: 'ประตูกรุงเทพ', sub: 'ผังจริงจากแผนที่ · แยก คปอ.', sg: true, az: 1, tallTurn: true },   // az: เจ้าของสั่ง 28 ต.ค. 69 หมุนให้ฝั่งสำนักงาน (ทิศใต้) อยู่ใกล้
+  { tag: 'สาขา SG', name: 'ประตูกรุงเทพ', sub: '', sg: true, az: 1, tallTurn: true },   // az: เจ้าของสั่ง 28 ต.ค. 69 หมุนให้ฝั่งสำนักงาน (ทิศใต้) อยู่ใกล้
   { tag: 'สาขา SB', name: 'บางนา', sub: 'ผังสมมติ · ตลาดเย็น 16:00–23:00', map: [
     'RRRRRRRRRRRRRR',
     'BB.TTTTTTTT.GG',
@@ -211,7 +211,7 @@ const BRANCHES = [
     ['🍢 เต็นท์อาหาร', 'food', [3, 1, 10, 1]], ['🍽️ ลานโต๊ะกิน', 'event', [5, 3, 8, 4]], ['🅿️ ลานจอด', 'park', [0, 4, 1, 6]],
     ['🅿️ ลานจอด', 'park', [12, 4, 13, 6]], ['📍 สำนักงาน', 'spot', [0, 1, 1, 2]], ['🚪 ทางเข้า', 'spot', [6, 7, 7, 7]],
   ]},
-  { tag: 'ตลาดเซฟวัน', name: 'โคราช', sub: 'ผังจริงจากแผนที่ตลาด', korat: true },
+  { tag: 'ตลาดเซฟวัน', name: 'โคราช', sub: '', korat: true },
 ];
 const COLS = 14, ROWS = 9;
 BRANCHES.forEach(b => b.map && console.assert(b.map.length === ROWS && b.map.every(r => r.length === COLS), 'ผังผิดขนาด', b.name));
