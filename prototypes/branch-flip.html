@@ -24,7 +24,7 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 
 .top{position:fixed;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;pointer-events:none;z-index:3}
 .top>*{pointer-events:auto}
-.wm{height:32px;display:block}
+.wm{height:36px;width:auto;display:block}
 .seg{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;backdrop-filter:blur(8px)}
 .seg button{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
@@ -138,7 +138,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <body>
 <p class="loading" id="loading">กำลังโหลด…</p>
 <div class="top" id="top">
-  <img class="wm" src="../brand/ref-logos/logo-wordmark.svg" alt="ตลาดเซฟวัน GO">
+  <img class="wm" src="img/logo-3d-night.webp" alt="ตลาดเซฟวัน GO">   <!-- โลโก้ 3D ลุค B (brand/3d/logo3d-web.py) -->
   <div class="tools" hidden>
     <div class="seg" id="segView" role="group" aria-label="มุมกล้อง">
       <span>มุมกล้อง</span>
@@ -171,7 +171,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <script src="sg-layout.js?v=5"></script>
 <script src="office-sign.js?v=2"></script>
 <script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=20261028g"></script>
+<script src="content/cms.js?v=20261028i"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -1081,35 +1081,49 @@ const S = p => SITE ? CMS.get(SITE, p) : '';
 const sf = (e, k, p, w = 0) => `<div class="fact${w ? ' w' : ''}${S(p) ? '' : ' todo'}"><small>${esc(e)} ${esc(k)}</small><b>${SITE ? CMS.T(SITE, p) : 'รอข้อมูล'}</b></div>`;
 const FACT_EMOJI = { size: '📐', online: '📱', walk: '🏢', clock: '🕓', bolt: '⚡', box: '📦', car: '🚗' };
 const lineHref = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
-function sgLot(kind) {   // การ์ดโซนขาย: ราคาวันนี้ + รูปตัวอย่างล็อก + ข้อมูลล็อก + วิธีจอง
-  const V = SITE.sg.vendor, Z = V.zones[kind], P = `sg.vendor.zones.${kind}`;
+const TT = (q, tag, cls) => SITE ? CMS.T(SITE, q, tag, cls) : '';
+// กติกาขายได้/ห้ามขาย: ส่วนกลาง (site.json → vendor.rules) ทุกสาขาเหมือนกัน · rk = food / boot / court (ศูนย์อาหาร)
+function rulesHtml(rk) {
+  const R = SITE && SITE.vendor.rules && SITE.vendor.rules[rk]; if (!R) return '';
+  const li = (k, cls) => `<div class="chips">${R[k].map((v, j) => v || CMS.EDIT ? `<span class="chip ${cls}">${CMS.T(SITE, `vendor.rules.${rk}.${k}.${j}`)}</span>` : '').join('')}</div>`;
+  return `<div class="sec"><p class="sec-h">✅ ขายได้ <small>${esc(R.sub)}</small></p>${li('ok', 'ok')}`
+    + (R.no.some(Boolean) || CMS.EDIT ? `<p class="sec-h" style="margin-top:10px">🚫 ห้ามขาย</p>${li('no', 'no')}` : '') + '</div>';
+}
+// การ์ดโซนขาย · ทุกสาขาโครงเดียวกัน (content/<สาขา>/data.json → vendor.zones): ราคาวันนี้ + รูปล็อก + ข้อมูลล็อก + วิธีจอง + ปุ่ม
+function lotCard(b, kind) {
+  const V = SITE[b].vendor, Z = V.zones[kind], P = `${b}.vendor.zones.${kind}`;
   const season = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
   const i = Z.rows.findIndex(r => (!r.season || r.season === season) && r.dow === dow), r = Z.rows[i];
-  const today = r ? `<div class="today ${kind}"><small>ราคาวันนี้ · ${dow === 'weekday' ? 'จันทร์–พฤหัส' : 'ศุกร์–อาทิตย์'}${r.season ? ' · ' + esc(V.seasons[r.season].label) : ''} · จองออนไลน์</small>`
-    + `<b>${CMS.T(SITE, `${P}.rows.${i}.online`)}</b> <span class="u">บาท/ล็อก/วัน · จองหน้างาน ${CMS.T(SITE, `${P}.rows.${i}.walkin`)}</span></div>` : '';
+  const today = r ? `<div class="today ${kind === 'court' ? 'food' : kind}"><small>ราคาวันนี้ · ${dow === 'weekday' ? 'จันทร์–พฤหัส' : 'ศุกร์–อาทิตย์'}${r.season ? ' · ' + esc(V.seasons[r.season].label) : ''} · จองออนไลน์</small>`
+    + `<b>${CMS.T(SITE, `${P}.rows.${i}.online`)}</b> <span class="u">บาท/ล็อก/วัน · จองหน้างาน ${CMS.T(SITE, `${P}.rows.${i}.walkin`)}</span>${Z.note ? `<small class="sub">${CMS.T(SITE, `${P}.note`)}</small>` : ''}</div>` : '';
+  const book = S(`${b}.links.booking`), line = S(`${b}.contact.lineVendor`), ph = Z.photos.filter(([src]) => src);
   return today
-    + `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><img class="lotimg" src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"></div>`
+    + (ph.length ? `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><div class="ph">${ph.map(([src, alt]) => `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`).join('')}</div></div>` : '')   // หลายรูป = เลื่อนซ้าย-ขวา
     + `<div class="sec facts">${Z.facts.map((f, j) => sf(FACT_EMOJI[f[0]] || '•', f[1], `${P}.facts.${j}.2`, j === 0)).join('')}</div>`
-    + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `sg.vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `sg.vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
-    + `<div class="actions"><a class="btn pri" href="${esc(S('sg.links.booking'))}" target="_blank" rel="noopener">จองล็อก ↗</a><a class="btn" href="${esc(lineHref(S('sg.contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE ${esc(S('sg.contact.lineVendor'))}</a></div>`;
+    + `<div class="sec"><p class="sec-h">${esc(V.steps.title || 'มาขายครั้งแรก')}</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `${b}.vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `${b}.vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
+    + `<div class="actions">${book ? `<a class="btn pri" href="${esc(book)}" target="_blank" rel="noopener">จองล็อก ↗</a>` : ''}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">💬 LINE ${esc(line)}</a>` : ''}</div>`;
+}
+// การ์ดสำนักงาน · ทุกสาขาช่องเดียวกัน (map.office + contact)
+function officeCard(b) {
+  const phones = S(`${b}.contact.phones`) || [], line = S(`${b}.contact.lineVendor`);
+  return head('spot', 'สำนักงานตลาด', S(`${b}.map.office.where`)) + TT(`${b}.map.office.note`, 'p', 'muted')
+    + `<div class="sec facts">${sf('📞', 'โทร', `${b}.contact.phone`)}${sf('🕓', 'เวลาโทร', `${b}.contact.phoneHours`)}${sf('💬', 'LINE ผู้ค้า', `${b}.contact.lineVendor`)}${sf('🏢', 'เวลาทำการสำนักงาน', `${b}.map.office.hours`)}${sf('🧭', 'จุดสังเกต', `${b}.map.office.landmark`, 1)}</div>`
+    + `<div class="actions">${phones.map(([t, l], i) => telBtn(t, l, i === 0)).join('')}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">💬 LINE</a>` : ''}</div>`;
 }
 function sgCard(p) {
-  const I = SG.info, where = 'ประตูกรุงเทพ · แยก คปอ.', T = (q, tag, cls) => SITE ? CMS.T(SITE, q, tag, cls) : '';
-  if (p.id === 'gate') return head('spot', 'ประตูกรุงเทพ', S('sg.map.gate.where')) + T('sg.map.gate.note', 'p', 'muted')
+  const I = SG.info, where = 'ประตูกรุงเทพ · แยก คปอ.';
+  if (p.id === 'gate') return head('spot', 'ประตูกรุงเทพ', S('sg.map.gate.where')) + TT('sg.map.gate.note', 'p', 'muted')
     + `<div class="sec facts">${sf('🕓', 'เวลาตลาดเปิด', 'sg.map.gate.hours', 1)}${sf('🚆', 'เดินจาก BTS แยก คปอ.', 'sg.map.gate.bts', 1)}</div>`;
   if (p.id === 'ห้องน้ำลูกค้า') return head('wc', 'ห้องน้ำลูกค้า', S('sg.map.wc.where'))
     + `<div class="sec facts">${sf('🕓', 'เวลาเปิด', 'sg.map.wc.hours')}${sf('💰', 'ค่าบริการ', 'sg.map.wc.fee')}</div>`;
-  if (p.id === 'สำนักงาน') return head('spot', 'สำนักงานตลาด', S('sg.map.office.where')) + T('sg.map.office.note', 'p', 'muted')
-    + `<div class="sec facts">${sf('📞', 'โทร', 'sg.contact.phone')}${sf('🕓', 'เวลาโทร', 'sg.contact.phoneHours')}${sf('💬', 'LINE ผู้ค้า', 'sg.contact.lineVendor')}${sf('🏢', 'เวลาทำการสำนักงาน', 'sg.map.office.hours')}${sf('🧭', 'จุดสังเกต', 'sg.map.office.landmark', 1)}</div>`
-    + `<div class="actions">${S('sg.contact.phone') ? telBtn(S('sg.contact.phone'), '', 1) : ''}<a class="btn" href="${esc(lineHref(S('sg.contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE</a></div>`;
+  if (p.id === 'สำนักงาน') return officeCard('sg');
   const z = SGZ[p.id];
   if (z.kind === 'park' || z.kind === 'vpark' || z.kind === 'moto') {
     const r = I[z.kind === 'vpark' ? 'vpark' : 'park'];
     return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sg.map.parkEntrance')}</div>`
       + `<p class="muted">${esc(r.note)} · ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด</p><p class="warn">${esc(I.limit)}</p>`;
   }
-  return head(z.kind, z.name, where) + `<div class="sec"><p class="sec-h">✅ ขายได้</p><div class="chips"><span class="chip ok">${esc(I[z.kind])}</span></div></div>`
-    + (SITE && SITE.sg.vendor.zones[z.kind] ? sgLot(z.kind) : facts(LOT_TODO));
+  return head(z.kind, z.name, where) + (SITE ? rulesHtml(z.kind) + lotCard('sg', z.kind) : facts(LOT_TODO));
 }
 function cardHtml(p) {
   if (p.sg) return sgCard(p);
@@ -1117,9 +1131,7 @@ function cardHtml(p) {
     + facts(p.kind === 'food' || p.kind === 'boot' ? LOT_TODO
       : p.kind === 'park' ? [todo('🚗', 'ใครจอดได้'), todo('🕓', 'เวลา')] : [todo('🕓', 'เวลา'), todo('📞', 'ติดต่อ')]);
   if (p.kind === 'spot') {
-    if (p.id === 'office') return head('spot', 'สำนักงานตลาด', 'จองที่เคาน์เตอร์ได้ที่นี่')
-      + facts(K.about.office.map(([k, v]) => ['', k, v, k === 'ที่อยู่'])) + `<div class="actions">${K.about.calls.map(([t, l], i) => telBtn(t, l, i === 0)).join('')}</div>`
-      + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${K.about.steps.map(([t, d]) => `<li><div><b>${rt(t)}</b><span>${rt(d)}</span></div></li>`).join('')}</ol></div>`;
+    if (p.id === 'office') return SITE ? officeCard('korat') : head('spot', 'สำนักงานตลาด', '');
     return head('spot', 'น้ำพุม้า', 'ลานหน้าอาคาร ข้าง WishCo') + `<p class="muted">ม้าโลหะยืนสองขา 2 ตัว กลางอ่างน้ำพุ</p>`;
   }
   const z = K.info[p.id], kind = z.kind;
@@ -1130,11 +1142,10 @@ function cardHtml(p) {
   if (kind === 'event') return head(kind, z.name, z.where) + can(z)
     + `<div class="today event"><small>ราคา</small><b>${esc(z.price)}</b> <span class="u">${z.priceNote ? '· ' + esc(z.priceNote) : ''}</span></div>`
     + facts([...(z.facts || []), ['🗺️', 'พื้นที่', m2txt(z.m2), 1]]) + calls(z.tel) + warn(z);
-  const area = kind === 'boot' ? ['🗺️', 'ล็อกตามผัง', `≈ ${z.count} ล็อก`] : ['🗺️', 'พื้นที่โซน', m2txt(z.m2)];
-  return head(kind, z.name, z.where) + can(z)
-    + `<div class="today ${kind}"><small>ราคาวันนี้ · ${dayTxt} · จองผ่านแอป</small><b>${range(z)}</b> <span class="u">บาท/ล็อก/วัน</span>`
-    + `${K.about.feeNote ? `<small class="sub">${rt(K.about.feeNote)}</small>` : ''}</div>`
-    + facts([...(z.facts || []), ['⚡', 'ไฟฟ้า', K.about.elec], area]) + flow(z.steps) + calls(z.tel) + warn(z);
+  // โซนขาย: โครงเดียวกับประตูกรุงเทพ (content/korat/data.json) · ศูนย์อาหาร = โซน court · ชื่อ/ที่ตั้ง/พื้นที่/หมายเหตุ ยังมาจากผัง korat-layout.js
+  const rk = p.id === 'food-in' ? 'court' : kind, area = kind === 'boot' ? ['🗺️', 'ล็อกตามผัง', `≈ ${z.count} ล็อก`] : ['🗺️', 'พื้นที่โซน', m2txt(z.m2)];
+  if (!SITE) return head(kind, z.name, z.where) + can(z) + facts([area]);
+  return head(kind, z.name, z.where) + rulesHtml(rk) + lotCard('korat', rk) + facts([area]) + warn(z);
 }
 
 // ── ตัวจับเวลาแอนิเมชันง่ายๆ ──
@@ -1568,7 +1579,7 @@ addEventListener('resize', resize);
 await Promise.all([loadModels(), document.fonts.ready, CMS.load().then(c => { SITE = SITE || c; }, e => console.warn(e.message))]);
 if (CMS.EDIT) {   // admin: แก้ในการ์ด → ส่งให้หน้าแม่เก็บ/บันทึก
   document.body.classList.add('edit');
-  CMS.bind(card, { get sg() { return SITE.sg; } },   // ทาง data-p ในการ์ด = sg.… (content/sg/data.json)
+  CMS.bind(card, new Proxy({}, { get: (_, k) => SITE[k] }),   // ทาง data-p ในการ์ด = <สาขา>.… หรือ vendor.rules.… (ส่วนกลาง)
     (p, v) => parent !== window && parent.postMessage({ patch: { p, v } }, location.origin), () => {});
 }
 if (new URLSearchParams(location.search).has('cam')) document.querySelector('.tools').hidden = false;   // ปุ่มหามุมกล้อง (สำหรับจัดมุมใหม่)

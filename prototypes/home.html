@@ -27,6 +27,7 @@ button{font-family:inherit}
 .gate.off{opacity:0;pointer-events:none}
 .gate-in{max-width:720px;width:100%;text-align:center}
 .gate .hi{color:var(--go);font-weight:600}
+.gate .logo3d{display:block;height:clamp(52px,9vw,84px);width:auto;margin:0 auto 6px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}   /* โลโก้ 3D ลุค B */
 .gate h1{font-size:clamp(28px,5vw,44px);line-height:1.2;margin:4px 0 20px}
 .who{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left}
 .who>div{position:relative;color:var(--ink);cursor:pointer;padding:20px;border-radius:22px;border:2px solid var(--line);background:rgba(29,25,64,.92);transition:border-color .2s,transform .2s}
@@ -115,6 +116,10 @@ details>div{padding:0 2px 14px;font-size:14px;color:#ddd8ea}
 .kind>div{padding:12px 14px}.kind b{display:flex;gap:8px;align-items:center;font-size:16px}.kind b .i{color:var(--go)}
 .kind small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
 .q.off{opacity:.55;pointer-events:none}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{position:relative;font-size:13px;padding:2px 10px;border-radius:999px;background:rgba(132,230,45,.14);border:1px solid rgba(132,230,45,.35)}
+.chip.no{background:rgba(255,122,122,.12);border-color:rgba(255,122,122,.4)}
+.chips .ed-add{margin-top:0;padding:2px 10px}
 .soon{margin-top:34px;padding:28px 20px;border-radius:20px;border:1px dashed var(--line);text-align:center;color:var(--muted)}
 .soon b{display:block;color:var(--ink);font-size:20px;margin-bottom:4px}
 footer{margin-top:40px;padding:28px 16px;color:var(--muted);font-size:13px;text-align:center;border-top:1px solid var(--line)}
@@ -159,7 +164,7 @@ body.edit{padding-bottom:90px}
 <main class="grp" id="g-ven"></main>
 <footer id="foot"></footer>
 
-<script src="content/cms.js?v=20261028g"></script>
+<script src="content/cms.js?v=20261028i"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -207,7 +212,9 @@ const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const dots = p => `<ul class="dots">${get(C, p).map((_, i) => `<li>${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</li>`).join('')}</ul>${add(p)}`;
 const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q), off = !h && !EDIT;
   return `<a class="q${q.main ? ' main' : ''}${off ? ' off' : ''}" href="${esc(h || '#')}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}${off ? ' aria-disabled="true"' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}${off ? '<small>· รอลิงก์</small>' : ''}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
-const pics = p => { const a = get(C, p); return a && a.length ? `<div class="pics">${a.map(([src, alt]) => `<figure><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy"><figcaption>${esc(alt)}</figcaption></figure>`).join('')}</div>` : ''; };
+// รูปจริง [[ไฟล์, คำบรรยาย], …] · ไฟล์อยู่ content/<สาขา>/img/ · หน้าจริงข้ามรูปที่ยังว่าง · โหมดแก้: พิมพ์ชื่อไฟล์/คำบรรยาย + เพิ่ม/ลบ
+const pics = p => { const a = get(C, p) || [], on = a.map((x, i) => [x, i]).filter(([[src]]) => EDIT || src);
+  return on.length || EDIT ? `<div class="pics">${on.map(([[src, alt], i]) => `<figure style="position:relative">${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">` : ''}<figcaption>${EDIT ? `ไฟล์: ${T(C, `${p}.${i}.0`)}<br>` : ''}${T(C, `${p}.${i}.1`)}</figcaption>${del(`${p}.${i}`)}</figure>`).join('')}</div>${add(p, '+ เพิ่มรูป')}` : ''; };
 const brName = () => C[BR] ? ` <span class="brn">· ${esc(C[BR].name)}</span>` : '';
 // ปุ่มไปสาขาอื่น → สั่งผังด้านบนพลิก แล้วเลื่อนขึ้นไปดู
 const otherBranches = () => C.branchKeys.filter(k => k !== BR).map(k => `<button type="button" class="brgo" data-go="${k}">${ic('pin')}ดูสาขา${esc(C[k].name)} →</button>`).join('');
@@ -216,7 +223,7 @@ const soon = () => `<div class="wrap"><div class="soon"><b>สาขาบาง
 // ── ม่าน ──
 function renderGate() {
   const who = g => `<div data-g="${g}" tabindex="0" role="button"><b>${ic(g === 'cus' ? 'bag' : 'store')}${T(C, `gate.${g}.title`)}</b><ul>${C.gate[g].items.map((_, i) => `<li>${T(C, `gate.${g}.items.${i}`)}</li>`).join('')}</ul><span class="go">เลือก →</span></div>`;
-  $('gateIn').innerHTML = `${T(C, 'gate.kicker', 'p', 'hi')}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button>`;
+  $('gateIn').innerHTML = `<img class="logo3d" src="img/logo-3d-night.webp" alt="${esc(C.gate.kicker)}">${EDIT ? T(C, 'gate.kicker', 'p', 'hi') : ''}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button>`;
 }
 
 // ── ลูกค้า ──
@@ -231,59 +238,61 @@ function renderCus() {
 }
 
 // ── ผู้ค้า ──
+// ทุกสาขาโครงเดียวกัน (content/<สาขา>/data.json) วาดด้วยโค้ดชุดนี้ชุดเดียว
+// หน้าจริง: ส่วนที่ยังว่างทั้งส่วน (เช่น สาขาไม่มีศูนย์อาหาร) ไม่โชว์ · ช่องว่างในส่วนที่มีข้อมูล = "รอข้อมูล" · โหมดแก้: โชว์ทุกส่วนให้กรอก
+const ZONES = ['food', 'boot', 'court'];
+const filled = v => Array.isArray(v) ? v.some(filled) : v && typeof v === 'object' ? Object.values(v).some(filled) : typeof v === 'string' && v.trim() !== '';
+const penHas = g => g.some(x => filled(x.title) || filled(x.rows));   // ไม่นับรหัสไอคอน
+const zoneHas = Z => Z.rows.some(r => (r.online || '').trim() || (r.walkin || '').trim());
+const show = ok => EDIT || ok;
+const chipList = (p, cls) => `<div class="chips">${get(C, p).map((_, i) => `<span class="chip ${cls}">${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</span>`).join('')}${add(p, '+')}</div>`;
 let zoneNow = 'food';
 function renderVen() {
   if (!C[BR]) { $('g-ven').innerHTML = soon(); return; }
-  if (!C[BR].vendor.zones) return renderVenSimple();
-  const P = `${BR}.vendor`, V = get(C, P);
+  const P = `${BR}.vendor`, V = get(C, P), R = C.vendor.rules, E = V.event;
+  const zs = ZONES.filter(z => show(zoneHas(V.zones[z])));
+  if (!zs.includes(zoneNow)) zoneNow = zs[0] || 'food';
+  // ขายอะไรได้บ้าง: กติกาส่วนกลาง (ทุกสาขาเหมือนกัน) + รูปของสาขา
+  const kinds = zs.map(z => { const Z = V.zones[z];
+    const cover = Z.photos.find(([src]) => src);   // รูปแรกของโซน = ภาพปก
+    return `<div class="kind">${cover ? `<img src="${esc(cover[0])}" alt="${esc(cover[1])}" loading="lazy">` : ''}<div><b>${ic(R[z].ic)}${T(C, `vendor.rules.${z}.name`)}</b>${T(C, `vendor.rules.${z}.sub`, 'small')}
+      <small style="margin-top:8px">ขายได้</small>${chipList(`vendor.rules.${z}.ok`, 'ok')}${show(filled(R[z].no)) ? `<small style="margin-top:6px">ห้ามขาย</small>${chipList(`vendor.rules.${z}.no`, 'no')}` : ''}</div></div>`; }).join('');
   const rights = V.rights.map((r, i) => `<div class="card"><h3>${ic(r.ic)}${T(C, `${P}.rights.${i}.title`)}</h3>${dots(`${P}.rights.${i}.items`)}</div>`).join('');
   const faq = V.faq.map((_, i) => `<details${EDIT ? ' open' : ''}><summary>${T(C, `${P}.faq.${i}.0`)}${del(`${P}.faq.${i}`)}</summary><div>${T(C, `${P}.faq.${i}.1`)}</div></details>`).join('');
+  const phones = get(C, `${BR}.contact.phones`);
+  const dayOn = filled(V.day.rows.map(r => r.slice(1))), lateOn = filled(V.late.items), leaveOn = filled(V.leave.items);
   $('g-ven').innerHTML = `<div class="wrap">
     <section class="sec"><h2>${T(C, 'vendor.title')}${brName()}</h2>${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}<div>${otherBranches()}</div></section>
+    ${zs.length ? `<section class="sec">${T(C, 'vendor.kindsTitle', 'h2')}<div class="kinds">${kinds}</div></section>
     <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}
-      <div class="seg" id="zone">${['food', 'boot'].map(z => `<button data-z="${z}">${ic(V.zones[z].ic)}${esc(V.zones[z].name)}</button>`).join('')}</div>
-      <div class="card" id="zoneCard"></div></section>
-    <section class="sec">${T(C, `${P}.steps.title`, 'h2')}
+      <div class="seg" id="zone">${zs.map(z => `<button data-z="${z}">${ic(V.zones[z].ic)}${esc(V.zones[z].name)}</button>`).join('')}</div>
+      <div class="card" id="zoneCard"></div></section>` : ''}
+    ${show(filled(V.steps.items)) ? `<section class="sec">${T(C, `${P}.steps.title`, 'h2')}
       <ol class="steps">${V.steps.items.map((_, i) => `<li>${T(C, `${P}.steps.items.${i}.0`, 'b')}${T(C, `${P}.steps.items.${i}.1`)}${del(`${P}.steps.items.${i}`)}</li>`).join('')}</ol>${add(`${P}.steps.items`, '+ เพิ่มขั้น')}
-      ${T(C, `${P}.steps.note`, 'p', 'note')}</section>
-    <section class="sec">${T(C, `${P}.day.title`, 'h2')}
-      <div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
+      ${T(C, `${P}.steps.note`, 'p', 'note')}
+      <div class="quick">${phones.map((_, i) => `<a class="q" href="tel:${digits(phones[i][0])}">${ic('phone')}<div>${T(C, `${BR}.contact.phones.${i}.0`, 'b')}${T(C, `${BR}.contact.phones.${i}.1`, 'small')}</div>${del(`${BR}.contact.phones.${i}`)}</a>`).join('')}</div>${add(`${BR}.contact.phones`, '+ เพิ่มเบอร์')}</section>` : ''}
+    ${show(dayOn || lateOn || leaveOn) ? `<section class="sec">${T(C, `${P}.day.title`, 'h2')}
+      ${show(dayOn) ? `<div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
         <tbody>${V.day.rows.map((r, i) => `<tr>${r.map((_, j) => `<td>${T(C, `${P}.day.rows.${i}.${j}`)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
-        ${T(C, `${P}.day.note`, 'p', 'note')}</div>
+        ${T(C, `${P}.day.note`, 'p', 'note')}</div>` : ''}
       <div class="two">
-        <div class="card"><h3>${ic('clock')}${T(C, `${P}.late.title`)}</h3>${dots(`${P}.late.items`)}</div>
-        <div class="card"><h3>${ic('leave')}${T(C, `${P}.leave.title`)}</h3>${dots(`${P}.leave.items`)}</div>
-      </div></section>
-    <section class="sec">${T(C, `${P}.points.title`, 'h2')}
-      <div class="card"><div class="pts">${V.points.chips.map((_, i) => `<span class="pt">${T(C, `${P}.points.chips.${i}`)}${del(`${P}.points.chips.${i}`)}</span>`).join('')}</div>${add(`${P}.points.chips`)}
-        ${T(C, `${P}.points.text`, 'p')}${T(C, `${P}.points.note`, 'p', 'note')}</div>
-      <div class="card"><h3>${T(C, `${P}.points.penTitle`)} <span class="sub" id="penZone"></span></h3><div id="pen"></div></div></section>
-    <section class="sec">${T(C, `${P}.rightsTitle`, 'h2')}<div class="two">${rights}</div></section>
-    <section class="sec">${T(C, `${P}.faqTitle`, 'h2')}<div class="card">${faq}${add(`${P}.faq`, '+ เพิ่มคำถาม')}</div></section>
-  </div>`;
-  $('zone').querySelectorAll('button').forEach(b => b.onclick = () => zone(b.dataset.z));
-  zone(zoneNow);
-}
-// สาขาที่ยังไม่มีตารางราคา/ระเบียบเต็ม (โคราช): ขายอะไรได้ · ช่วงราคา · วิธีจอง · เบอร์ · เช่าลานจัดงาน
-function renderVenSimple() {
-  const P = `${BR}.vendor`, V = get(C, P), E = V.event;
-  const kinds = (V.kinds || []).map((k, i) => `<div class="kind">${k.img ? `<img src="${esc(k.img)}" alt="${esc(k.title)}" loading="lazy">` : ''}<div><b>${ic(k.ic)}${T(C, `${P}.kinds.${i}.title`)}</b>${T(C, `${P}.kinds.${i}.sub`, 'small')}</div></div>`).join('');
-  const phones = get(C, `${BR}.contact.phones`) || [];
-  $('g-ven').innerHTML = `<div class="wrap">
-    <section class="sec"><h2>${T(C, 'vendor.title')}${brName()}</h2>${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}<div>${otherBranches()}</div></section>
-    <section class="sec"><h2>ขายอะไรได้บ้าง</h2><div class="kinds">${kinds}</div></section>
-    <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}<div class="card"><div class="facts">
-      ${V.seasons.map((_, i) => `<div class="f"><small>${ic('cal')}${T(C, `${P}.seasons.${i}.0`)}</small>${T(C, `${P}.seasons.${i}.1`, 'b')}</div>`).join('')}
-      <div class="f"><small>${ic('bolt')}ไฟฟ้า</small>${T(C, `${P}.elec`, 'b')}</div></div>
-      ${T(C, `${P}.fee`, 'p', 'note')}${T(C, `${P}.priceNote`, 'p', 'note')}</div></section>
-    <section class="sec">${T(C, `${P}.steps.title`, 'h2')}
-      <ol class="steps">${V.steps.items.map((_, i) => `<li>${T(C, `${P}.steps.items.${i}.0`, 'b')}${T(C, `${P}.steps.items.${i}.1`)}${del(`${P}.steps.items.${i}`)}</li>`).join('')}</ol>${add(`${P}.steps.items`, '+ เพิ่มขั้น')}
-      <div class="quick">${phones.map((p, i) => `<a class="q" href="tel:${digits(p[0])}">${ic('phone')}<div>${T(C, `${BR}.contact.phones.${i}.0`, 'b')}${T(C, `${BR}.contact.phones.${i}.1`, 'small')}</div></a>`).join('')}</div></section>
-    ${E ? `<section class="sec">${T(C, `${P}.event.title`, 'h2')}${T(C, `${P}.event.sub`, 'p', 'sub')}${pics(`${P}.event.photos`)}
-      <div class="card"><div class="tbl"><table><thead><tr><th>พื้นที่</th><th>ค่าเช่า (บาท)</th></tr></thead><tbody>${E.rows.map((_, i) => `<tr><td>${T(C, `${P}.event.rows.${i}.0`)}</td><td class="big">${T(C, `${P}.event.rows.${i}.1`)}</td></tr>`).join('')}</tbody></table></div>
+        ${show(lateOn) ? `<div class="card"><h3>${ic('clock')}${T(C, `${P}.late.title`)}</h3>${dots(`${P}.late.items`)}</div>` : ''}
+        ${show(leaveOn) ? `<div class="card"><h3>${ic('leave')}${T(C, `${P}.leave.title`)}</h3>${dots(`${P}.leave.items`)}</div>` : ''}
+      </div></section>` : ''}
+    ${show(filled(V.points.chips) || filled(V.points.text) || zs.some(z => penHas(V.penalties[z]))) ? `<section class="sec">${T(C, `${P}.points.title`, 'h2')}
+      ${show(filled(V.points.chips) || filled(V.points.text)) ? `<div class="card"><div class="pts">${V.points.chips.map((_, i) => `<span class="pt">${T(C, `${P}.points.chips.${i}`)}${del(`${P}.points.chips.${i}`)}</span>`).join('')}</div>${add(`${P}.points.chips`)}
+        ${T(C, `${P}.points.text`, 'p')}${T(C, `${P}.points.note`, 'p', 'note')}</div>` : ''}
+      <div class="card" id="penCard"><h3>${T(C, `${P}.points.penTitle`)} <span class="sub" id="penZone"></span></h3><div id="pen"></div></div></section>` : ''}
+    ${show(V.rights.some(r => filled(r.title) || filled(r.items))) ? `<section class="sec">${T(C, `${P}.rightsTitle`, 'h2')}<div class="two">${rights}</div>${add(`${P}.rights`, '+ เพิ่มสิทธิ์')}</section>` : ''}
+    ${show(filled(E.rows) || filled(E.sub)) ? `<section class="sec">${T(C, `${P}.event.title`, 'h2')}${T(C, `${P}.event.sub`, 'p', 'sub')}${pics(`${P}.event.photos`)}
+      <div class="card"><div class="tbl"><table><thead><tr><th>พื้นที่</th><th>ค่าเช่า (บาท)</th></tr></thead><tbody>${E.rows.map((_, i) => `<tr><td style="position:relative">${T(C, `${P}.event.rows.${i}.0`)}${del(`${P}.event.rows.${i}`)}</td><td class="big">${T(C, `${P}.event.rows.${i}.1`)}</td></tr>`).join('')}</tbody></table></div>${add(`${P}.event.rows`, '+ เพิ่มแถว')}
       <p class="sub" style="margin-top:8px">ลาน: ${T(C, `${P}.event.areas`)}</p>${T(C, `${P}.event.note`, 'p', 'note')}
       <div class="quick"><a class="q" href="tel:${digits(E.tel)}">${ic('phone')}<div><b>สอบถามเช่าลาน</b>${T(C, `${P}.event.tel`, 'small')}</div></a></div></div></section>` : ''}
+    ${show(filled(V.faq)) ? `<section class="sec">${T(C, `${P}.faqTitle`, 'h2')}<div class="card">${faq}${add(`${P}.faq`, '+ เพิ่มคำถาม')}</div></section>` : ''}
   </div>`;
+  if (!zs.length) return;
+  $('zone').querySelectorAll('button').forEach(b => b.onclick = () => zone(b.dataset.z));
+  zone(zoneNow);
 }
 function zone(z) {
   zoneNow = z;
@@ -295,9 +304,12 @@ function zone(z) {
   $('zoneCard').innerHTML =
     `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จองหน้างาน</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
     + T(C, `${P}.note`, 'p', 'note')
-    + `<div class="lot"><img src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"><div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
-  $('penZone').textContent = '· ' + Z.name;
+    + `<div class="lot">${Z.photos.some(([src]) => src) || EDIT ? `<div>${pics(`${P}.photos`)}</div>` : ''}<div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
   const PP = `${VP}.penalties.${z}`;
+  if (!$('pen')) return;
+  const penOn = show(penHas(get(C, PP)));
+  $('penCard').hidden = !penOn;
+  $('penZone').textContent = '· ' + Z.name;
   $('pen').innerHTML = get(C, PP).map((g, i) =>
     `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
       `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
@@ -398,7 +410,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261028h' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261028k' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);

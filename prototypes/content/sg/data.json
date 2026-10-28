@@ -2,6 +2,7 @@
   "name": "ประตูกรุงเทพ",
   "tag": "สาขา SG",
   "where": "แยก คปอ. · หัวมุม ถ.พหลโยธิน–ลำลูกกา · ใกล้ BTS แยก คปอ.",
+  "source": "",
   "facts": [
     [
       "food",
@@ -16,13 +17,21 @@
   ],
   "links": {
     "booking": "https://services.saveone.co.th/SaveoneGo/Login.aspx?openExternalBrowser=1",
-    "cctv": "https://windwynnn.wixsite.com/saveonegostreetfood/saveonegocctv"
+    "cctv": "https://windwynnn.wixsite.com/saveonegostreetfood/saveonegocctv",
+    "map": "",
+    "facebook": ""
   },
   "contact": {
     "phone": "092-895-0699",
     "phoneHours": "14:00–22:00",
     "lineVendor": "@saveone.go",
-    "lineCustomer": "@saveone.go.cs"
+    "lineCustomer": "@saveone.go.cs",
+    "phones": [
+      [
+        "092-895-0699",
+        "โทร 14:00–22:00"
+      ]
+    ]
   },
   "customer": {
     "sub": "ตลาดเย็น เปิดทุกวัน · หาร้านไม่เจอ ถามเราใน LINE ได้เลย",
@@ -47,13 +56,25 @@
         "link": "cctv"
       },
       {
+        "ic": "pin",
+        "title": "นำทาง",
+        "sub": "เปิด Google Maps",
+        "link": "map"
+      },
+      {
         "ic": "chat",
-        "title": "แจ้งปัญหา",
+        "title": "แจ้งปัญหา / ติดต่อตลาด",
         "sub": "LINE @saveone.go.cs",
         "line": "lineCustomer"
       }
     ],
-    "note": "ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด · รายละเอียดแต่ละลาน แตะหมุดบนผัง"
+    "note": "ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด · รายละเอียดแต่ละลาน แตะหมุดบนผัง",
+    "photos": [
+      [
+        "",
+        ""
+      ]
+    ]
   },
   "vendor": {
     "sub": "จองล็อกรายวัน ไม่มีค่าเซ้ง ไม่มีล็อกประจำ · ระบบสุ่มล็อกให้ทุกวัน",
@@ -119,8 +140,12 @@
           }
         ],
         "note": "บาท/ล็อก/วัน · ราคาเดียวทั้งปี · จองหน้างาน = ถ้ามีล็อกเหลือ",
-        "img": "content/sg/img/lot-food.jpg",
-        "imgAlt": "ขนาดล็อกสตรีทฟู้ด 1–3 ล็อก พร้อมโต๊ะพับ",
+        "photos": [
+          [
+            "content/sg/img/lot-food.jpg",
+            "ขนาดล็อกสตรีทฟู้ด 1–3 ล็อก พร้อมโต๊ะพับ"
+          ]
+        ],
         "facts": [
           [
             "size",
@@ -188,8 +213,12 @@
           }
         ],
         "note": "บาท/ล็อก/วัน · ราคาตามฤดู · จองหน้างาน = ออนไลน์ + 50 (ถ้ามีล็อกเหลือ)",
-        "img": "content/sg/img/lot-boot.jpg",
-        "imgAlt": "ขนาดล็อกเปิดท้าย 1–4 ล็อก พร้อมรถ 1 คัน",
+        "photos": [
+          [
+            "content/sg/img/lot-boot.jpg",
+            "ขนาดล็อกเปิดท้าย 1–4 ล็อก พร้อมรถ 1 คัน"
+          ]
+        ],
         "facts": [
           [
             "size",
@@ -220,6 +249,31 @@
             "car",
             "รถ",
             "ต้องมีรถจอดในล็อก · จอดขวางต้องจอง 3–4 ล็อก"
+          ]
+        ]
+      },
+      "court": {
+        "name": "ศูนย์อาหาร",
+        "ic": "bag",
+        "rows": [
+          {
+            "season": "",
+            "dow": "weekday",
+            "days": "",
+            "online": "",
+            "walkin": ""
+          }
+        ],
+        "note": "",
+        "photos": [
+          [
+            "",
+            ""
+          ]
+        ],
+        "facts": [
+          [
+            ""
           ]
         ]
       }
@@ -611,6 +665,17 @@
             ]
           ]
         }
+      ],
+      "court": [
+        {
+          "ic": "shirt",
+          "title": "",
+          "rows": [
+            [
+              ""
+            ]
+          ]
+        }
       ]
     },
     "rightsTitle": "สิทธิ์ของผู้ค้า",
@@ -636,6 +701,25 @@
         ]
       }
     ],
+    "event": {
+      "title": "เช่าลานจัดงาน",
+      "sub": "",
+      "areas": "",
+      "rows": [
+        [
+          "",
+          ""
+        ]
+      ],
+      "note": "",
+      "tel": "",
+      "photos": [
+        [
+          "",
+          ""
+        ]
+      ]
+    },
     "faqTitle": "คำถามที่พบบ่อย",
     "faq": [
       [
