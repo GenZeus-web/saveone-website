@@ -4,3 +4,6 @@ node_modules/
 
 # ภาพอ้างอิงสำหรับวาดผัง (ภาพดาวเทียมเป็นของ Google · ไม่ขึ้นเว็บ ไม่เข้า git)
 prototypes/tools/ref/
+
+# รูปดึงจาก Wix เก็บไว้อ้างอิง (30 MB) — ไม่ขึ้น git
+docs/content-source/wix-img/

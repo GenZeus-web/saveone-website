@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตลาดเซฟวัน โก</title>
+<!-- หน้าแรกแบบ D (เจ้าของเลือก 28 ต.ค. 69): ม่านมืดเลือกกลุ่มทับผัง 3D → เลือกแล้วจางหาย → เลื่อนลงเจอเนื้อหาของกลุ่มนั้น
+     เนื้อหาทั้งหมดอยู่ content/site.json (แก้ได้ที่ admin/ = หน้านี้ ?edit) · หน้านี้มีแค่หน้าตา + วิธีวาด
+     ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#15122b;--bg2:#1d1940;--ink:#f6f1e7;--muted:#a9a4bd;--line:rgba(246,241,231,.14);--go:#84e62d;--bad:#ff7a7a;--warn:#ffcf6b;--ed:#5fb3ff}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",sans-serif;line-height:1.55}
+a{color:inherit}
+button{font-family:inherit}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+.i{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;flex:none}
+.i svg{width:100%;height:100%;display:block}
+
+/* ── ผัง 3D + ม่านเลือกกลุ่ม ── */
+.map{position:relative;height:min(82vh,760px);background:#100d24;overflow:hidden}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.gate{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:rgba(13,11,29,.74);backdrop-filter:blur(3px);transition:opacity .5s}
+.gate.off{opacity:0;pointer-events:none}
+.gate-in{max-width:720px;width:100%;text-align:center}
+.gate .hi{color:var(--go);font-weight:600}
+.gate h1{font-size:clamp(28px,5vw,44px);line-height:1.2;margin:4px 0 20px}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:14px;text-align:left}
+.who>div{position:relative;color:var(--ink);cursor:pointer;padding:20px;border-radius:22px;border:2px solid var(--line);background:rgba(29,25,64,.92);transition:border-color .2s,transform .2s}
+.who>div:hover,.who>div:focus-visible{border-color:var(--go);transform:translateY(-3px);outline:0}
+.who b{display:flex;gap:10px;align-items:center;font-size:22px}
+.who b .i{width:28px;height:28px;color:var(--go)}
+.who ul{margin:10px 0 0;padding-left:18px;color:var(--muted);font-size:14px}
+.who .go{display:block;margin-top:12px;color:var(--go);font-weight:600;font-size:14px}
+.skip{margin-top:16px;font-size:14px;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer}
+.chipg{position:absolute;z-index:4;top:16px;left:50%;transform:translateX(-50%);font-weight:600;font-size:14px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(29,25,64,.92);color:var(--ink);cursor:pointer;white-space:nowrap}
+@media (max-width:640px){ .map{height:62vh} .who{grid-template-columns:1fr;gap:10px} .who ul{display:none} .who b{font-size:19px} .gate h1{margin-bottom:14px} }
+
+/* ── เนื้อหา ── */
+.grp{display:none}.grp.on{display:block}
+.sec{padding:34px 0 6px}
+.sec h2{font-size:24px;line-height:1.3}
+.sub{color:var(--muted);font-size:14px;margin-top:2px}
+/* ลิงก์ด่วน: ไอคอนซ้าย ตัวหนังสือขวา · การ์ดหลักสีเขียว = ทำอย่างแรก */
+.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;margin-top:16px}
+.q{position:relative;display:flex;gap:12px;align-items:center;text-decoration:none;padding:14px 16px;border-radius:18px;background:var(--bg2);border:1px solid var(--line);transition:transform .2s,border-color .2s}
+.q:hover{transform:translateY(-2px);border-color:var(--go)}
+.q>.i{width:42px;height:42px;padding:9px;border-radius:12px;background:rgba(132,230,45,.12);color:var(--go)}
+.q b{display:block;font-size:16px;line-height:1.3}.q small{display:block;color:var(--muted);font-size:13px;line-height:1.4}
+.q.main{background:var(--go);border-color:var(--go);color:#15122b}
+.q.main>.i{background:rgba(21,18,43,.12);color:#15122b}
+.q.main small{color:#33461c}
+.q .arr{margin-left:auto;opacity:.5}
+.card{margin-top:14px;padding:18px;border-radius:20px;background:var(--bg2);border:1px solid var(--line)}
+.card h3{display:flex;gap:8px;align-items:center;font-size:18px;margin-bottom:8px}
+.card h3 .i{color:var(--go)}
+.seg{display:inline-flex;padding:4px;border-radius:999px;background:rgba(246,241,231,.07);border:1px solid var(--line);margin-top:14px}
+.seg button{display:flex;gap:6px;align-items:center;font-weight:700;font-size:15px;padding:8px 18px;border-radius:999px;border:0;background:none;color:var(--ink);cursor:pointer}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px}
+.f{position:relative;padding:10px 12px;border-radius:14px;background:rgba(246,241,231,.05)}
+.f small{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12px}
+.f b{font-size:15px}
+.lot{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-top:14px;align-items:start}
+.lot img{width:100%;border-radius:16px;display:block}
+@media (max-width:760px){.lot{grid-template-columns:1fr}}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:12px}
+td.big{font-size:17px;font-weight:700}
+tr.now td{background:rgba(132,230,45,.08)}
+.now-tag{display:inline-block;margin-left:6px;font-size:11px;font-weight:700;padding:1px 8px;border-radius:999px;background:var(--go);color:var(--bg)}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+.steps{list-style:none;padding:0;counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:14px}
+.steps li{position:relative;counter-increment:s;padding:14px;border-radius:16px;background:rgba(246,241,231,.05);font-size:14px}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--go);color:var(--bg);font-weight:700;margin-bottom:6px}
+.steps b{display:block;font-size:15px}.steps li>span{display:block;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+ul.dots{padding-left:18px;font-size:14px;display:grid;gap:4px}
+ul.dots li{position:relative}
+.pts{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+.pt{position:relative;padding:6px 12px;border-radius:999px;font-weight:700;font-size:14px;background:rgba(132,230,45,.14);border:1px solid rgba(132,230,45,.4)}
+.pt:last-of-type{background:rgba(246,241,231,.06);border-color:var(--line)}
+details{border-top:1px solid var(--line)}
+details:first-of-type{border-top:0}
+summary{position:relative;cursor:pointer;padding:12px 2px;font-weight:600;list-style:none;display:flex;align-items:center;gap:8px}
+summary::-webkit-details-marker{display:none}
+summary .i{color:var(--go)}
+summary .n{margin-left:auto;color:var(--muted);font-weight:400;font-size:13px}
+summary::after{content:"+";color:var(--muted);font-weight:400;width:14px;text-align:center}
+details[open] summary::after{content:"−"}
+details>div{padding:0 2px 14px;font-size:14px;color:#ddd8ea}
+.minus{color:var(--bad);font-weight:700;white-space:nowrap;text-align:right}
+.scope{display:inline-block;margin-top:8px;font-size:12px;padding:3px 10px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+footer{margin-top:40px;padding:28px 16px;color:var(--muted);font-size:13px;text-align:center;border-top:1px solid var(--line)}
+@media (max-width:520px){ th,td{padding:7px 6px} .sec h2{font-size:21px} }
+
+/* ── โหมดแก้ (admin) ── */
+body.edit [data-p]{outline:1px dashed rgba(95,179,255,.55);outline-offset:2px;border-radius:4px;min-width:2em;cursor:text}
+body.edit span[data-p],body.edit b[data-p],body.edit small[data-p]{display:inline-block}
+body.edit [data-p]:focus{outline:2px solid var(--ed);background:rgba(95,179,255,.1)}
+body.edit [data-p].empty{min-width:5em;background:rgba(255,207,107,.08)}
+body.edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:var(--warn);opacity:.7;font-weight:400}
+.ed-del{position:absolute;top:-8px;right:-8px;z-index:2;width:22px;height:22px;border-radius:50%;border:0;background:var(--bad);color:#fff;font-weight:700;cursor:pointer;line-height:1}
+.ed-add{margin-top:8px;padding:6px 12px;border-radius:999px;border:1px dashed var(--ed);background:none;color:var(--ed);font-weight:600;cursor:pointer}
+.edbar{position:fixed;z-index:50;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);padding:10px 12px;border-radius:18px;background:#0d0b1d;border:1px solid var(--ed);box-shadow:0 10px 40px rgba(0,0,0,.5);font-size:14px}
+.edbar b{color:var(--ed)}
+.edbar button{padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--bg2);color:var(--ink);font-weight:600;cursor:pointer}
+.edbar button.pri{background:var(--ed);border-color:var(--ed);color:#0d0b1d}
+.edbar .st{color:var(--muted)}.edbar .st.dirty{color:var(--warn)}
+.edpanel{display:none}
+body.edit .edpanel{display:block}
+.edpanel label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.edpanel input{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:#100d24;color:var(--ink);font:inherit;font-size:14px;outline:0}
+.edpanel input:focus{border-color:var(--ed)}
+.edgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+body.edit{padding-bottom:90px}
+</style>
+</head>
+<body>
+
+<div class="map" id="map">
+  <iframe id="mapFrame" title="ผังตลาด 3D"></iframe>
+  <div class="gate" id="gate"><div class="gate-in" id="gateIn"></div></div>
+  <button class="chipg" id="chip" hidden></button>
+</div>
+
+<div class="wrap edpanel" id="edpanel"></div>
+<main class="grp" id="g-cus"></main>
+<main class="grp" id="g-ven"></main>
+<footer id="foot"></footer>
+
+<script src="content/cms.js"></script>
+<script>
+const { EDIT, esc, get, T, del, add } = CMS;
+const $ = id => document.getElementById(id);
+// ── ไอคอนวาดเอง (เส้น 24×24 ตามสีตัวหนังสือ) · ไม่ใช้อีโมจิ ──
+const ICON = {
+  bag: '<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  store: '<path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9a3 3 0 0 0 6 0a3 3 0 0 0 6 0a3 3 0 0 0 6 0"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
+  parking: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M10 17V7h3.5a3 3 0 0 1 0 6H10"/>',
+  cam: '<rect x="3" y="7" width="13" height="10" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/>',
+  chat: '<path d="M4 5h16v11H10l-6 4z"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  pin: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  food: '<path d="M4 20L20 4"/><circle cx="9" cy="15" r="2.4"/><circle cx="12.5" cy="11.5" r="2.4"/><circle cx="16" cy="8" r="2.4"/>',
+  car: '<path d="M3 16v-4l2.5-5h13l2.5 5v4z"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  leave: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  rain: '<path d="M7 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.3 3.3 0 0 1 17 14z"/><path d="M8 17.5l-1 3M12 17.5l-1 3M16 17.5l-1 3"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  size: '<path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/>',
+  bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+  online: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+  walk: '<path d="M4 21V5l8-2v18"/><path d="M12 9h8v12"/><path d="M3 21h18"/>',
+  box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  shirt: '<path d="M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>',
+  tag: '<path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  drop: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  smoke: '<path d="M8 21c-2-3 2-5 0-8s2-5 0-8M15 21c-2-3 2-5 0-8s2-5 0-8"/>',
+  heart: '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 6-8 11-8 11z"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  area: '<path d="M4 4h16v16H4z" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="2"/>',
+  arrow: '<path d="M7 17L17 7M9 7h8v8"/>',
+};
+const ic = k => `<i class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k] || ''}</svg></i>`;
+
+let C;   // เนื้อหาทั้งหน้า (site.json)
+const digits = s => String(s || '').replace(/[^\d+]/g, '');
+const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
+// ปุ่มลิงก์: tel/line/link = ชี้ไปค่าใน contact/links (แก้ที่เดียว) · href = ลิงก์ในหน้า
+const qHref = q => q.tel ? 'tel:' + digits(get(C, 'contact.' + q.tel)) : q.line ? lineUrl(get(C, 'contact.' + q.line)) : q.link ? get(C, 'links.' + q.link) : q.href || '#';
+const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
+const dots = p => `<ul class="dots">${get(C, p).map((_, i) => `<li>${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</li>`).join('')}</ul>${add(p)}`;
+const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q);
+  return `<a class="q${q.main ? ' main' : ''}" href="${esc(h)}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
+
+// ── ม่าน ──
+function renderGate() {
+  const who = g => `<div data-g="${g}" tabindex="0" role="button"><b>${ic(g === 'cus' ? 'bag' : 'store')}${T(C, `gate.${g}.title`)}</b><ul>${C.gate[g].items.map((_, i) => `<li>${T(C, `gate.${g}.items.${i}`)}</li>`).join('')}</ul><span class="go">เลือก →</span></div>`;
+  $('gateIn').innerHTML = `${T(C, 'gate.kicker', 'p', 'hi')}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button>`;
+}
+
+// ── ลูกค้า ──
+function renderCus() {
+  const br = C.customer.branches.map((b, i) => `<div class="card" style="position:relative"><h3>${ic('pin')}${T(C, `customer.branches.${i}.name`)}</h3>${T(C, `customer.branches.${i}.where`, 'p', 'sub')}
+    <div class="facts" style="margin-top:10px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `customer.branches.${i}.facts.${j}.1`)}</small>${T(C, `customer.branches.${i}.facts.${j}.2`, 'b')}</div>`).join('')}</div>${del(`customer.branches.${i}`)}</div>`).join('');
+  $('g-cus').innerHTML = `<div class="wrap">
+    <section class="sec">${T(C, 'customer.title', 'h2')}${T(C, 'customer.sub', 'p', 'sub')}${quick('customer.quick')}</section>
+    <section class="sec">${T(C, 'customer.branchesTitle', 'h2')}<div class="two">${br}</div>${add('customer.branches', '+ เพิ่มสาขา')}${T(C, 'customer.note', 'p', 'note')}</section></div>`;
+}
+
+// ── ผู้ค้า ──
+let zoneNow = 'food';
+function renderVen() {
+  const V = C.vendor, P = 'vendor';
+  const rights = V.rights.map((r, i) => `<div class="card"><h3>${ic(r.ic)}${T(C, `${P}.rights.${i}.title`)}</h3>${dots(`${P}.rights.${i}.items`)}</div>`).join('');
+  const faq = V.faq.map((_, i) => `<details${EDIT ? ' open' : ''}><summary>${T(C, `${P}.faq.${i}.0`)}${del(`${P}.faq.${i}`)}</summary><div>${T(C, `${P}.faq.${i}.1`)}</div></details>`).join('');
+  $('g-ven').innerHTML = `<div class="wrap">
+    <section class="sec">${T(C, `${P}.title`, 'h2')}${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}</section>
+    <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}
+      <div class="seg" id="zone">${['food', 'boot'].map(z => `<button data-z="${z}">${ic(V.zones[z].ic)}${esc(V.zones[z].name)}</button>`).join('')}</div>
+      <div class="card" id="zoneCard"></div></section>
+    <section class="sec">${T(C, `${P}.steps.title`, 'h2')}
+      <ol class="steps">${V.steps.items.map((_, i) => `<li>${T(C, `${P}.steps.items.${i}.0`, 'b')}${T(C, `${P}.steps.items.${i}.1`)}${del(`${P}.steps.items.${i}`)}</li>`).join('')}</ol>${add(`${P}.steps.items`, '+ เพิ่มขั้น')}
+      ${T(C, `${P}.steps.note`, 'p', 'note')}</section>
+    <section class="sec">${T(C, `${P}.day.title`, 'h2')}
+      <div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
+        <tbody>${V.day.rows.map((r, i) => `<tr>${r.map((_, j) => `<td>${T(C, `${P}.day.rows.${i}.${j}`)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        ${T(C, `${P}.day.note`, 'p', 'note')}</div>
+      <div class="two">
+        <div class="card"><h3>${ic('clock')}${T(C, `${P}.late.title`)}</h3>${dots(`${P}.late.items`)}</div>
+        <div class="card"><h3>${ic('leave')}${T(C, `${P}.leave.title`)}</h3>${dots(`${P}.leave.items`)}</div>
+      </div></section>
+    <section class="sec">${T(C, `${P}.points.title`, 'h2')}
+      <div class="card"><div class="pts">${V.points.chips.map((_, i) => `<span class="pt">${T(C, `${P}.points.chips.${i}`)}${del(`${P}.points.chips.${i}`)}</span>`).join('')}</div>${add(`${P}.points.chips`)}
+        ${T(C, `${P}.points.text`, 'p')}${T(C, `${P}.points.note`, 'p', 'note')}</div>
+      <div class="card"><h3>${T(C, `${P}.points.penTitle`)} <span class="sub" id="penZone"></span></h3><div id="pen"></div></div></section>
+    <section class="sec">${T(C, `${P}.rightsTitle`, 'h2')}<div class="two">${rights}</div></section>
+    <section class="sec">${T(C, `${P}.faqTitle`, 'h2')}<div class="card">${faq}${add(`${P}.faq`, '+ เพิ่มคำถาม')}</div></section>
+  </div>`;
+  $('zone').querySelectorAll('button').forEach(b => b.onclick = () => zone(b.dataset.z));
+  zone(zoneNow);
+}
+function zone(z) {
+  zoneNow = z;
+  const V = C.vendor, Z = V.zones[z], P = `vendor.zones.${z}`, now = CMS.seasonNow(V.seasons);
+  $('zone').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.z === z));
+  const seasonal = Z.rows.some(r => r.season);
+  const row = (r, i) => { const on = r.season && r.season === now;
+    return `<tr${on ? ' class="now"' : ''}><td>${r.season ? esc(get(V.seasons, r.season + '.label') || '') + ' · ' : ''}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}</td></tr>`; };
+  $('zoneCard').innerHTML =
+    `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จองหน้างาน</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
+    + T(C, `${P}.note`, 'p', 'note')
+    + `<div class="lot"><img src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"><div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
+  $('penZone').textContent = '· ' + Z.name;
+  const PP = `vendor.penalties.${z}`;
+  $('pen').innerHTML = get(C, PP).map((g, i) =>
+    `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
+      `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
+}
+function renderFoot() {
+  $('foot').innerHTML = `${T(C, 'contact.company')} · ${T(C, 'contact.address')} · โทร ${T(C, 'contact.phone')}<br>${T(C, 'contact.footnote')}`;
+}
+// แผงลิงก์/เบอร์ (เฉพาะโหมดแก้ · ค่าที่ปุ่มบนหน้าใช้ แต่ไม่ได้โชว์เป็นตัวหนังสือ)
+function renderPanel() {
+  if (!EDIT) return;
+  const inp = (p, label) => `<label>${esc(label)}<input data-p="${esc(p)}" value="${esc(get(C, p))}"></label>`;
+  $('edpanel').innerHTML = `<section class="sec"><h2>ลิงก์และเบอร์ติดต่อ</h2><p class="sub">ปุ่มบนหน้าเว็บใช้ค่าพวกนี้ · แก้ตรงนี้ที่เดียว ทุกปุ่มเปลี่ยนตาม</p>
+    <div class="card edgrid">${inp('links.booking', 'ลิงก์จองล็อก')}${inp('links.cctv', 'ลิงก์ดูกล้อง')}${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF)')}
+    ${inp('contact.lineVendor', 'LINE ผู้ค้า')}${inp('contact.lineCustomer', 'LINE ลูกค้า')}${inp('contact.phone', 'เบอร์โทร')}${inp('contact.phoneHours', 'เวลาโทร')}</div></section>`;
+}
+function renderAll() { renderGate(); renderCus(); renderVen(); renderFoot(); renderPanel(); wireGate(); }
+
+// ── ม่านเลือกกลุ่ม · ส่งกลุ่ม (+ เนื้อหา) ไปผัง 3D ──
+const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
+let group = null;
+const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
+frame.addEventListener('load', tellMap);
+function pick(g) {
+  group = g; tellMap();
+  gate.classList.add('off'); chip.hidden = false; chip.textContent = (g ? C.gate[g].title : 'ดูผังทั้งหมด') + ' · เปลี่ยน';
+  document.querySelectorAll('.grp').forEach(m => m.classList.toggle('on', m.id === 'g-' + g));
+}
+function wireGate() {
+  gate.querySelectorAll('[data-g]').forEach(b => {
+    b.onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(b.dataset.g); };
+    b.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === b) { e.preventDefault(); pick(b.dataset.g); } };
+  });
+  $('skip').onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(null); };
+  document.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => gate.classList.add('off')));
+}
+chip.onclick = () => { gate.classList.remove('off'); chip.hidden = true; scrollTo({ top: 0 }); };
+
+// ── โหมดแก้: แถบล่าง (บันทึก/ฉบับร่าง) ──
+// ตอนนี้ (ทดลองในเครื่อง) บันทึก = เขียนทับไฟล์ content/site.json ด้วย Chrome · ขึ้นเว็บจริงค่อยเปลี่ยนเป็นส่งไปเซิร์ฟเวอร์ที่ต้องล็อกอิน
+const DRAFT = 'site-draft';
+let fileHandle = null;
+function setSt(t, dirty) { const s = $('edSt'); if (s) { s.textContent = t; s.classList.toggle('dirty', dirty); } }
+function keepDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(C)); } catch {} setSt('ยังไม่บันทึก', true); }
+function changed() { keepDraft(); tellMap(); }
+async function save() {
+  C.meta.updated = new Date().toISOString().slice(0, 10);
+  const text = JSON.stringify(C, null, 2) + '\n';
+  try {
+    if (window.showSaveFilePicker) {   // ครั้งแรกให้เลือกไฟล์ prototypes/content/site.json · ครั้งต่อไปเขียนทับไฟล์เดิม
+      fileHandle = fileHandle || await showSaveFilePicker({ suggestedName: 'site.json', types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }] });
+      const w = await fileHandle.createWritable(); await w.write(text); await w.close();
+    } else {
+      const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([text], { type: 'application/json' })), download: 'site.json' });
+      a.click(); URL.revokeObjectURL(a.href);
+    }
+    try { localStorage.removeItem(DRAFT); } catch {}
+    setSt('บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), false);
+  } catch (e) { if (e.name !== 'AbortError') setSt('บันทึกไม่ได้: ' + e.message, true); }
+}
+function editBar(hasDraft) {
+  const bar = document.createElement('div'); bar.className = 'edbar';
+  bar.innerHTML = `<b>โหมดแก้เนื้อหา</b><span class="st" id="edSt">แตะตัวหนังสือที่มีเส้นประเพื่อแก้</span>`
+    + (hasDraft ? `<button id="edDraftOff">ทิ้งที่แก้ค้างไว้</button>` : '')
+    + `<button id="edView">ดูหน้าจริง ↗</button><button class="pri" id="edSave">บันทึก</button>`;
+  document.body.appendChild(bar);
+  $('edSave').onclick = save;
+  $('edView').onclick = () => open(location.pathname.replace(/admin\/?$/, 'home.html'), '_blank');
+  if (hasDraft) {
+    $('edDraftOff').onclick = () => { try { localStorage.removeItem(DRAFT); } catch {} location.reload(); };
+    setSt('มีที่แก้ค้างไว้ (ยังไม่บันทึก)', true);
+  }
+}
+
+(async () => {
+  C = await CMS.load();
+  let hasDraft = false;
+  if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
+  document.body.classList.toggle('edit', EDIT);
+  frame.src = 'branch-flip.html' + (EDIT ? '?edit' : '');
+  renderAll();
+  if (!EDIT) return;
+  editBar(hasDraft);
+  CMS.bind(document.body, C, changed, () => { changed(); renderAll(); pick(group); });
+  // แก้ในการ์ดบนผัง → ผังส่งกลับมา
+  addEventListener('message', e => {
+    if (e.origin !== location.origin || !e.data || !e.data.patch) return;
+    const { p, v } = e.data.patch; CMS.set(C, p, v); CMS.sync(document.body, p, v); keepDraft();
+  });
+  pick('ven');
+})();
+</script>
+</body>
+</html>

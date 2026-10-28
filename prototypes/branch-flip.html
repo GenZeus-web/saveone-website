@@ -1,0 +1,1552 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>เปลี่ยนสาขา 3D</title>
+<!-- ตัวอย่าง: เปิดมาเห็นพื้นที่ตลาด 3 มิติ กดลูกศรแล้วผังพลิกไล่ทีละช่องเป็นอีกสาขา · มุมกล้องให้เจ้าของเลือก (ปุ่มขวาบน)
+     หมุดบนผัง กดแล้วกล้องบินไปที่โซน + การ์ดรายละเอียด (แบบผังโซนโคราชเดิม)
+     ประตูกรุงเทพ / บางนา = ผังสมมติ · โคราช = ผังจริง + รายละเอียดจากโปรเจกต์ผังโซน (tools/export-korat.mjs)
+     โมเดล = รูปทรงในโค้ด + โมเดล Blender ของเรา · โลโก้ร้านบนหลังคาโคราช = เจ้าของสั่งใส่ (ปิดได้ที่ SHOW_LOGOS) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#f6f1e7; --muted:#b9b2c9; --panel:rgba(23,19,58,.72); --panel-solid:rgba(23,19,58,.94); --line:rgba(246,241,231,.18);
+  --go:#84e62d; --bg:#17133a;
+  --food:#ff8a3d; --boot:#b48cf0; --event:#2cc9b5; --park:#5aaeea; --spot:#f6f1e7; --warn:#ffd36b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",sans-serif;overflow:hidden}
+canvas{position:fixed;inset:0;display:block;touch-action:none}
+
+.top{position:fixed;top:16px;left:16px;right:16px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;pointer-events:none;z-index:3}
+.top>*{pointer-events:auto}
+.wm{height:32px;display:block}
+.seg{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;backdrop-filter:blur(8px)}
+.seg button{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
+.seg span{font-size:12px;color:var(--muted);padding:6px 4px 6px 10px;align-self:center}
+.tools{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.tools[hidden]{display:none}
+.seg button:disabled{opacity:.4;cursor:default}
+#zoomBtn{margin-left:4px;border:1px solid var(--line)}
+
+.nav{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);display:flex;align-items:center;gap:14px;width:max-content;max-width:calc(100% - 32px);z-index:3;transition:opacity .25s}
+.arrow{flex:none;width:52px;height:52px;border-radius:50%;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:22px;cursor:pointer;backdrop-filter:blur(8px);transition:transform .15s}
+.arrow:hover{transform:scale(1.06)}
+.arrow:disabled{opacity:.5;cursor:default;transform:none}
+.label{min-width:220px;text-align:center;padding:10px 20px;border-radius:18px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(8px);transition:opacity .25s,transform .25s}
+.label.out{opacity:0;transform:translateY(6px)}
+.label small{display:block;font-size:12px;color:var(--go);letter-spacing:.08em}
+.label h2{font-size:24px;font-weight:600;line-height:1.3}
+.label p{font-size:13px;color:var(--muted)}
+.dots{display:flex;gap:6px;justify-content:center;margin-top:6px}
+.dots i{width:6px;height:6px;border-radius:50%;background:var(--line)}
+.dots i.on{background:var(--go)}
+.note{position:fixed;left:16px;bottom:8px;font-size:11px;color:var(--muted);opacity:.8;z-index:3}
+.angle{position:fixed;left:16px;top:64px;z-index:3;display:flex;align-items:center;gap:10px;padding:6px 6px 6px 14px;border-radius:999px;background:var(--panel);border:1px solid var(--line);backdrop-filter:blur(8px);font-size:13px}
+.angle[hidden]{display:none}
+.angle button{font:inherit;font-size:13px;font-weight:600;border:0;border-radius:999px;padding:6px 12px;background:var(--go);color:var(--bg);cursor:pointer}
+@media (max-width:520px){ .angle{top:auto;bottom:118px} }
+.loading{position:fixed;inset:0;display:grid;place-items:center;font-size:14px;color:var(--muted)}
+
+/* หมุด: เหรียญ 3D วาดใน WebGL · ปุ่ม HTML โปร่งใสทับเหรียญไว้กด + ป้ายชื่อใต้เหรียญ (ตั้งตำแหน่งทุกเฟรม) */
+.pins{position:fixed;inset:0;pointer-events:none;z-index:2;transition:opacity .25s}
+.pins.hide{opacity:0}
+.pins.hide .pin{pointer-events:none}
+.pin{--c:var(--spot);--d:48px;position:absolute;left:0;top:0;pointer-events:auto;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer}
+.pin i{display:block;width:var(--d);height:var(--d);border-radius:50%}
+.pin span{font-size:12px;font-weight:600;white-space:nowrap;padding:1px 9px;border-radius:999px;background:var(--panel-solid);border:1.5px solid var(--c);
+  box-shadow:0 3px 10px rgba(0,0,0,.35);transition:background .15s,color .15s}
+.pin span:empty,.pin.bare span{display:none}
+.pin:hover span,.pin.on span{background:var(--c);color:var(--bg)}
+.pin:focus-visible{outline:none} .pin:focus-visible i{outline:2px solid var(--c);outline-offset:3px}
+.pin.food{--c:var(--food)} .pin.boot{--c:var(--boot)} .pin.event{--c:var(--event)} .pin.park{--c:var(--park)} .pin.moto{--c:var(--park)}
+.pin.minor{opacity:0;pointer-events:none;transition:opacity .25s}
+.pin.minor span{font-size:11px}
+.pins.near .pin.minor{opacity:1;pointer-events:auto}
+@media (max-width:720px){ .pin{--d:34px} .pin span{font-size:11px;padding:0 7px} }
+
+/* การ์ดรายละเอียด: ขวาบนจอกว้าง · แผ่นล่างบนมือถือ */
+.card{position:fixed;top:72px;right:16px;width:370px;max-height:calc(100% - 96px);overflow:auto;z-index:4;
+  background:var(--panel-solid);border:1px solid var(--line);border-radius:20px;padding:20px;backdrop-filter:blur(10px);
+  transform:translateX(calc(100% + 24px));transition:transform .35s cubic-bezier(.2,.8,.2,1);box-shadow:0 20px 50px rgba(0,0,0,.4)}
+.card.on{transform:none}
+.card .x{position:sticky;top:0;float:right;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;cursor:pointer}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--c,var(--spot));color:var(--bg)}
+.tag.food{--c:var(--food)} .tag.boot{--c:var(--boot)} .tag.event{--c:var(--event)} .tag.park{--c:var(--park)}
+.card h2{font-size:21px;line-height:1.35;margin:8px 0 2px}
+.where{font-size:13px;color:var(--muted)}
+.sec{margin-top:14px}
+.sec-h{font-size:13px;font-weight:600;margin-bottom:6px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-size:12px;padding:3px 9px;border-radius:999px;background:rgba(132,230,45,.14);border:1px solid rgba(132,230,45,.35)}
+.chip.no{background:rgba(227,107,107,.14);border-color:rgba(227,107,107,.45)}
+.today{margin-top:14px;padding:12px 14px;border-radius:14px;background:rgba(246,241,231,.07);border-left:4px solid var(--c,var(--spot))}
+.today.food{--c:var(--food)} .today.boot{--c:var(--boot)} .today.event{--c:var(--event)} .today.park{--c:var(--park)}
+.today small{display:block;font-size:12px;color:var(--muted)}
+.today b{font-size:30px;line-height:1.2}
+.today .u{font-size:13px;color:var(--muted)}
+.today .sub{margin-top:4px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fact{padding:8px 10px;border-radius:12px;background:rgba(246,241,231,.05)}
+.fact.w{grid-column:span 2}
+.fact small{display:block;font-size:11px;color:var(--muted)}
+.fact b{font-size:13px;font-weight:600}
+small small,b small,span small{font-weight:400;color:var(--muted)}
+.flow{list-style:none;counter-reset:s;display:grid;gap:8px}
+.flow li{counter-increment:s;display:flex;gap:10px;font-size:13px}
+.flow li::before{content:counter(s);flex:none;width:22px;height:22px;border-radius:50%;background:var(--go);color:var(--bg);font-weight:700;font-size:12px;display:grid;place-items:center}
+.flow span{display:block;color:var(--muted);font-size:12px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.btn{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}
+.btn.pri{background:var(--go);border-color:var(--go);color:var(--bg)}
+.warn{margin-top:12px;font-size:12px;color:var(--warn)}
+/* ช่องรูปจริง (ใส่ทีหลัง) · ช่องข้อมูลที่ยังไม่มี = กรอบเส้นประ */
+.ph{margin-top:12px;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px}
+.ph img{flex:none;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;scroll-snap-align:start}
+.ph.empty{aspect-ratio:16/9;border:1.5px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;background:rgba(246,241,231,.03)}
+.ph.empty small{display:block;font-size:11px;margin-top:2px}
+.fact.todo{background:none;border:1px dashed var(--line)}
+.fact.todo b{color:var(--muted);font-weight:400}
+.lotimg{width:100%;border-radius:14px;display:block}
+/* โหมดแก้ (เปิดจาก admin): ช่องที่แก้ได้มีเส้นประ */
+.edit [data-p]{outline:1px dashed rgba(95,179,255,.6);outline-offset:2px;border-radius:4px;min-width:2em;display:inline-block;cursor:text}
+.edit [data-p]:focus{outline:2px solid #5fb3ff;background:rgba(95,179,255,.12)}
+.edit [data-p].empty{min-width:5em}
+.edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:#ffcf6b;opacity:.7;font-weight:400}
+.muted{color:var(--muted);font-size:13px;margin-top:10px}
+
+@media (max-width:720px){
+  .card{top:auto;left:0;right:0;bottom:0;width:auto;max-height:62%;border-radius:20px 20px 0 0;transform:translateY(105%)}
+  body.carded .nav{opacity:0;pointer-events:none}
+}
+@media (max-width:520px){ .label{min-width:0} .label h2{font-size:20px} .seg button{padding:6px 8px;font-size:12px} .seg span{display:none} .tools{align-items:flex-start} }
+</style>
+</head>
+<body>
+<p class="loading" id="loading">กำลังโหลด…</p>
+<div class="top" id="top">
+  <img class="wm" src="../brand/ref-logos/logo-wordmark.svg" alt="ตลาดเซฟวัน GO">
+  <div class="tools" hidden>
+    <div class="seg" id="segView" role="group" aria-label="มุมกล้อง">
+      <span>มุมกล้อง</span>
+      <button data-view="home" aria-pressed="true">มุมหลัก</button>
+      <button data-view="front" aria-pressed="false">ตรง</button>
+      <button data-view="diagL" aria-pressed="false">เฉียงซ้าย</button>
+      <button data-view="diagR" aria-pressed="false">เฉียงขวา</button>
+      <button data-view="low" aria-pressed="false">เฉียงต่ำ</button>
+      <button data-view="free" aria-pressed="false">อิสระ</button>
+      <button id="zoomBtn" aria-pressed="false" title="ให้ซูมเองได้ (ล้อเมาส์/ถ่างนิ้ว)">🔍 ซูม</button>
+    </div>
+  </div>
+</div>
+
+<div class="pins" id="pins"></div>
+<aside class="card" id="card" aria-hidden="true" aria-live="polite">
+  <button class="x" id="cardX" aria-label="ปิดรายละเอียด">✕</button>
+  <div id="cardBody"></div>
+</aside>
+
+<div class="nav" id="nav">
+  <button class="arrow" id="prev" aria-label="สาขาก่อนหน้า">←</button>
+  <div class="label" id="label"><small id="code"></small><h2 id="name"></h2><p id="sub"></p><div class="dots" id="dots"></div></div>
+  <button class="arrow" id="next" aria-label="สาขาถัดไป">→</button>
+</div>
+<p class="note" id="hint">แตะหมุดดูรายละเอียด</p>
+<div class="angle" id="angle" hidden><span id="angleTxt"></span><button id="angleSave">📌 ใช้มุมนี้เป็นมุมเปิด</button></div>
+
+<script src="korat-layout.js?v=2"></script>
+<script src="sg-layout.js?v=5"></script>
+<script src="office-sign.js?v=2"></script>
+<script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
+<script src="content/cms.js?v=1"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { SVGLoader } from 'three/addons/loaders/SVGLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const SG_WC = new URLSearchParams(location.search).get('wc') || 'pin';   // ห้องน้ำประตูกรุงเทพ: pin | roof | both · ค่าเริ่ม = หมุดอย่างเดียว (ทั้งคู่แล้วซ้อนกัน)
+const SHOW_LOGOS = true;   // โลโก้ร้านบนหลังคาโคราช · ร้านไหนขอเอาออก → ปิดที่นี่ หรือลบชื่อใน korat-layout.js
+
+// ── สาขา ── ผังตาราง 14×9 ช่อง: R ถนน · . ลาน · T เต็นท์ · P ที่จอด · B ตึก · G หญ้า/ต้นไม้ · S ลานโต๊ะกิน · E ซุ้มทางเข้า
+//            korat: true = สร้างจากพิกัดจริงใน korat-layout.js · sg: true = จาก sg-layout.js (กรอบที่เจ้าของวาด)
+//            az = มุมหมุนกล้องของสาขานี้ในมุมบ้าน (ไม่ใส่ = ใช้มุมบ้านปกติ)
+//            pins (ผังตาราง): [ข้อความ, ชนิด, [คอลัมน์ซ้าย, แถวบน, คอลัมน์ขวา, แถวล่าง]]
+const BRANCHES = [
+  { tag: 'สาขา SG', name: 'ประตูกรุงเทพ', sub: 'ผังจริงจากแผนที่ · แยก คปอ.', sg: true, az: 1 },   // az: เจ้าของสั่ง 28 ต.ค. 69 หมุนให้ฝั่งสำนักงาน (ทิศใต้) อยู่ใกล้
+  { tag: 'สาขา SB', name: 'บางนา', sub: 'ผังสมมติ · ตลาดเย็น 16:00–23:00', map: [
+    'RRRRRRRRRRRRRR',
+    'BB.TTTTTTTT.GG',
+    'BB.T......T.GG',
+    '...T.SSSS.T...',
+    'PP.T.SSSS.T.PP',
+    'PP.T......T.PP',
+    'PP.TTTTTTTT.PP',
+    'GG....EE....GG',
+    'GGGGGGGGGGGGGG',
+  ], pins: [
+    ['🍢 เต็นท์อาหาร', 'food', [3, 1, 10, 1]], ['🍽️ ลานโต๊ะกิน', 'event', [5, 3, 8, 4]], ['🅿️ ลานจอด', 'park', [0, 4, 1, 6]],
+    ['🅿️ ลานจอด', 'park', [12, 4, 13, 6]], ['📍 สำนักงาน', 'spot', [0, 1, 1, 2]], ['🚪 ทางเข้า', 'spot', [6, 7, 7, 7]],
+  ]},
+  { tag: 'ตลาดเซฟวัน', name: 'โคราช', sub: 'ผังจริงจากแผนที่ตลาด', korat: true },
+];
+const COLS = 14, ROWS = 9;
+BRANCHES.forEach(b => b.map && console.assert(b.map.length === ROWS && b.map.every(r => r.length === COLS), 'ผังผิดขนาด', b.name));
+
+// ── ฉาก ──
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+document.body.prepend(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = (() => {           // ฟ้าเย็นย่ำ: ครามเข้มด้านบน → ส้มอิฐที่ขอบฟ้า
+  const c = document.createElement('canvas'); c.width = 2; c.height = 256;
+  const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
+  gr.addColorStop(0, '#17133a'); gr.addColorStop(.5, '#2b2160'); gr.addColorStop(.8, '#5e3a73'); gr.addColorStop(1, '#b8604d');
+  g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+
+const camera = new THREE.PerspectiveCamera(35, 1, .02, 200);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true; controls.enablePan = false;
+controls.screenSpacePanning = false;   // Ctrl+ลาก / คลิกขวาลาก = เลื่อนไปตามพื้น (แบบแผนที่) ไม่ใช่ขึ้นลงตามจอ
+controls.minPolarAngle = .2; controls.maxPolarAngle = 1.35;   // เงยได้ 13°–78°
+controls.minAzimuthAngle = -Infinity; controls.maxAzimuthAngle = Infinity;   // อิสระ: หมุนรอบได้ 360°
+controls.target.set(0, 0, .4);
+
+scene.add(new THREE.HemisphereLight('#8f86c8', '#2a2440', 1.35));
+const sun = new THREE.DirectionalLight('#ffe0c4', 2.3);   // แดดเย็นต่ำๆ ทางซ้าย · อุ่นแต่ไม่ส้มจัด (ตึกไม่เป็นสีชมพู)
+sun.position.set(-9, 7, 5); sun.castShadow = true;
+const SUN0 = sun.position.clone();   // แดดของมุมบ้าน (มองจากหน้าตลาดโคราช) · สาขาที่หันกล้องต่างไป แดดหมุนตาม → ส่องข้าง-หลังเหมือนกันทุกสาขา ไม่ส่องเข้าหน้ากล้องจนจ้า
+sun.shadow.mapSize.set(4096, 4096);
+Object.assign(sun.shadow.camera, { left: -11, right: 11, top: 11, bottom: -11, near: 1, far: 40 });
+sun.shadow.bias = -.0003; sun.shadow.normalBias = .01;
+scene.add(sun);
+
+// วาดผ่านพื้นที่ที่ลบรอยหยักขอบ (MSAA 4 เท่า) — ค่าเริ่มต้นของ EffectComposer ไม่ลบ ขอบรางรถไฟ/เส้นบางๆ เลยหยักและกะพริบ
+const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(1, 1, { samples: 4, type: THREE.HalfFloatType }));
+composer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), .7, .45, .85);
+composer.addPass(bloom);
+composer.addPass(new OutputPass());
+
+// ── วัสดุ + รูปทรงใช้ซ้ำ ──
+const MC = {};
+const std = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .85, ...o });
+const mat = (color, o = {}) => { const k = color + JSON.stringify(o); return MC[k] || (MC[k] = std(color, o)); };
+const glow = (color, k) => new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: k });
+const TOPC = {   // สีพื้นช่อง (วาดลงภาพพื้น)
+  R: '#2f2b44', '.': '#57516e', T: '#57516e', P: '#46405e', B: '#57516e', G: '#5f7d48', S: '#8a6c52', E: '#57516e',
+};
+const M = {
+  cream: std('#ece6da'), roof: std('#c9c3b8'), pole: std('#d8d2c6'), dash: std('#d9cfa8'),
+  trunk: std('#6b4e3a'), leaf: std('#5d7350'), leaf2: std('#73905a'), table: std('#c9a77d'),
+  line: std('#c9c3b5'), go: std('#84e62d', { emissive: '#84e62d', emissiveIntensity: .35 }),
+  glassB: std('#6d93b3', { roughness: .22, metalness: .35 }), metal: std('#8d939b', { roughness: .45, metalness: .4 }),
+  bulb: glow('#ffd36b', 3), lamp: glow('#fff1d6', 1.7),   // หัวเสาไฟ: ไม่จ้าเกินจนวงแสงฟุ้งเป็นก้อน
+  side: std('#231e3d'), white: std('#ffffff'), whiteGloss: std('#ffffff', { roughness: .5 }),
+  basin: std('#d8d2c6'), water: std('#5fa9c4', { roughness: .15 }),
+  glass: std('#cfd6e6', { transparent: true, opacity: .28, roughness: .3, depthWrite: false }),
+};
+const CANOPY = ['#efe8dc', '#e7d2b0', '#cbd9b4', '#f0c3a2', '#cdd5ea', '#e9b8b8'];
+const CAR = ['#c9c3b5', '#6b6478', '#a8664a', '#4b5872', '#e9e1d1', '#7fa64a', '#f4f5f7', '#2f3542'];
+const GOODS = ['#ff8a3d', '#ffd36b', '#84e62d', '#e36b6b', '#f6f1e7'];
+const CANOPY_M = CANOPY.map(c => std(c)), CAR_M = CAR.map(c => std(c, { roughness: .5 })), GOODS_M = GOODS.map(c => std(c));
+const GEO = {
+  box: new THREE.BoxGeometry(1, 1, 1), cyl: new THREE.CylinderGeometry(.5, .5, 1, 10),
+  cone4: new THREE.ConeGeometry(.5, 1, 4, 1), sph: new THREE.SphereGeometry(.5, 12, 8),
+  ico: new THREE.IcosahedronGeometry(.5, 0), decal: new THREE.PlaneGeometry(1, 1).rotateX(-Math.PI / 2),
+};
+const isLight = m => !!(m.emissive && m.emissive.getHex() && m.emissiveIntensity >= 1);   // หลอดไฟไม่ทำเงา
+function part(geo, m, sx, sy, sz, x, y, z, ry = 0) {
+  const o = new THREE.Mesh(geo, m);
+  o.scale.set(sx, sy, sz); o.position.set(x, y, z); o.rotation.y = ry;
+  o.castShadow = o.receiveShadow = !isLight(m);
+  return o;
+}
+// สุ่มแบบคงที่: ช่องเดิม สาขาเดิม ได้หน้าตาเดิมทุกครั้ง
+function rnd(a, b, c) {
+  let h = Math.imul(a + 1, 374761393) ^ Math.imul(b + 7, 668265263) ^ Math.imul(c + 13, 2246822519);
+  h = Math.imul(h ^ (h >>> 13), 1274126177); h ^= h >>> 16;
+  return (h >>> 0) / 4294967296;
+}
+const pTex = (() => {   // ป้ายจอดรถ: P ขาวบนพื้นน้ำเงิน
+  const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+  x.fillStyle = '#2f7bd9'; x.fillRect(0, 0, 64, 64); x.fillStyle = '#fff'; x.font = 'bold 46px sans-serif';
+  x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('P', 32, 35);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+})();
+const P_SIGN = [mat('#2f7bd9'), mat('#2f7bd9'), std('#ffffff', { map: pTex, roughness: .6 }), mat('#2f7bd9'), mat('#2f7bd9'), mat('#2f7bd9')];
+
+// ── ภาพพื้น: วาดผังทั้งแผ่นลง canvas แล้วแต่ละช่องโชว์ส่วนของตัวเอง → พลิกทีละช่องแล้วยังต่อกันเป็นภาพเดียว ──
+const PX = 128;   // พิกเซลต่อ 1 ช่อง
+function groundMat(draw) {
+  const c = document.createElement('canvas'); c.width = COLS * PX; c.height = ROWS * PX;
+  draw(c.getContext('2d'));
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return std('#ffffff', { map: t, roughness: .92 });
+}
+function grain(g, n, seed) {   // เม็ดผิวพื้นจางๆ ให้ไม่เรียบเป็นพลาสติก
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = rnd(seed, i, 0) < .5 ? 'rgba(0,0,0,.07)' : 'rgba(255,255,255,.04)';
+    g.fillRect(rnd(seed, i, 1) * COLS * PX, rnd(seed, i, 2) * ROWS * PX, 2, 2);
+  }
+}
+const gridGround = (map, bi) => groundMat(g => {
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) { g.fillStyle = TOPC[map[r][c]]; g.fillRect(c * PX, r * PX, PX, PX); }
+  grain(g, 40000, bi);
+});
+
+// ── ของในแต่ละช่อง (สาขาผังตาราง) ──
+function build(type, bi, r, c) {
+  const g = new THREE.Group(), map = BRANCHES[bi].map, at = (rr, cc) => (map[rr] || '')[cc];
+  const R = k => rnd(bi * 31 + k, r, c);
+  switch (type) {
+    case 'T': {                                     // เต็นท์ + โต๊ะ + ของ + หลอดไฟ
+      for (const [x, z] of [[-.36, -.36], [.36, -.36], [-.36, .36], [.36, .36]]) g.add(part(GEO.cyl, M.pole, .03, .62, .03, x, .31, z));
+      g.add(part(GEO.cone4, CANOPY_M[Math.floor(R(1) * CANOPY.length)], 1.12, .34, 1.12, 0, .79, 0, Math.PI / 4));
+      g.add(part(GEO.box, M.table, .62, .06, .32, 0, .38, .12));
+      for (let i = 0; i < 3; i++) g.add(part(GEO.box, GOODS_M[Math.floor(R(2 + i) * GOODS.length)], .12, .1, .12, -.2 + i * .2, .46, .12));
+      g.add(part(GEO.sph, M.bulb, .09, .09, .09, 0, .58, 0));
+      break;
+    }
+    case 'P': {                                     // ที่จอด: เส้นขาว + รถ (บางช่องว่าง)
+      g.add(part(GEO.box, M.line, .02, .005, .8, -.47, .003, 0));
+      if (R(1) < .7) {
+        const m = CAR_M[Math.floor(R(2) * CAR.length)];
+        g.add(part(GEO.box, m, .38, .16, .66, 0, .12, 0));
+        g.add(part(GEO.box, M.glassB, .32, .14, .34, 0, .27, .04));
+      }
+      break;
+    }
+    case 'B': {                                     // ตึก: ช่องติดกันสูงเท่ากัน เลยดูเป็นตึกเดียว · กระจก 2 ชั้น · ขอบหลังคา · แอร์
+      const h = 1.5;
+      g.add(part(GEO.box, M.cream, 1, h, 1, 0, h / 2, 0));
+      g.add(part(GEO.box, M.glassB, 1.006, .22, 1.006, 0, h * .3, 0));
+      g.add(part(GEO.box, M.glassB, 1.006, .22, 1.006, 0, h * .62, 0));
+      g.add(part(GEO.box, M.roof, 1, .04, 1, 0, h + .02, 0));
+      g.add(part(GEO.box, M.cream, 1, .08, .04, 0, h + .04, -.48));
+      if (R(1) < .6) g.add(part(GEO.box, mat('#f2f3f5'), .22, .12, .18, (R(2) - .5) * .5, h + .06, (R(3) - .5) * .5));
+      break;
+    }
+    case 'G': {
+      if (R(1) < .55) {
+        g.add(part(GEO.cyl, M.trunk, .07, .3, .07, 0, .15, 0));
+        g.add(part(GEO.ico, R(2) < .5 ? M.leaf : M.leaf2, .55, .6, .55, 0, .55, 0, R(3) * 3));
+      } else if (R(1) < .8) g.add(part(GEO.ico, M.leaf2, .35, .22, .35, (R(4) - .5) * .4, .1, (R(5) - .5) * .4));
+      break;
+    }
+    case 'R': {                                     // ถนน: เส้นประตามแนวถนน
+      const along = at(r, c - 1) === 'R' || at(r, c + 1) === 'R';
+      g.add(part(GEO.box, M.dash, along ? .4 : .06, .006, along ? .06 : .4, 0, .003, 0));
+      break;
+    }
+    case 'S': {                                     // ลานโต๊ะกิน + ไฟราว
+      g.add(part(GEO.cyl, M.table, .44, .04, .44, 0, .3, 0));
+      g.add(part(GEO.cyl, M.pole, .05, .3, .05, 0, .15, 0));
+      for (const a of [0, 2.1, 4.2]) g.add(part(GEO.cyl, M.table, .14, .16, .14, Math.cos(a + R(1)) * .32, .08, Math.sin(a + R(1)) * .32));
+      for (let i = 0; i < 3; i++) g.add(part(GEO.sph, M.bulb, .06, .06, .06, -.33 + i * .33, .95, -.4));
+      break;
+    }
+    case 'E': {                                     // ซุ้มทางเข้า: เสาที่ปลาย + คานเขียว GO
+      if (at(r, c - 1) !== 'E') g.add(part(GEO.box, M.cream, .12, 1.25, .12, -.44, .625, 0));
+      if (at(r, c + 1) !== 'E') g.add(part(GEO.box, M.cream, .12, 1.25, .12, .44, .625, 0));
+      g.add(part(GEO.box, M.go, 1, .2, .14, 0, 1.15, 0));
+      break;
+    }
+    case '.': {
+      if (R(1) < .12) {                             // เสาไฟลาน
+        g.add(part(GEO.cyl, M.pole, .04, 1, .04, 0, .5, 0));
+        g.add(part(GEO.sph, M.lamp, .12, .12, .12, 0, 1.03, 0));
+      }
+      break;
+    }
+  }
+  return g;
+}
+
+// ── โมเดลของเราเอง (ฝังใน models-embed.js) → ชิ้นส่วนอบตำแหน่งแล้ว ใช้วางแบบ instance ──
+const MODELS = {};
+async function loadModels() {
+  const L = new GLTFLoader();
+  await Promise.all(Object.entries(window.GLB || {}).map(async ([k, b64]) => {
+    const bin = Uint8Array.from(atob(b64), ch => ch.charCodeAt(0)).buffer;
+    const g = await L.parseAsync(bin, '');
+    g.scene.updateMatrixWorld(true);
+    const parts = [];
+    g.scene.traverse(o => { if (o.isMesh) {
+      const geo = o.geometry.clone(); geo.applyMatrix4(o.matrixWorld);
+      o.material.metalness = 0; o.material.roughness = .75;
+      parts.push({ geo, mat: o.material });
+    } });
+    MODELS[k] = { parts, minY: new THREE.Box3().setFromObject(g.scene).min.y };
+  }));
+}
+
+// ── โคราช: พิกัดจริง → แผ่น 14×9 (ย่อเท่ากันทั้งสองแกน ไม่บิดสัดส่วน · ขอบที่เหลือเป็นหญ้า) ──
+const K = window.KORAT;
+const KB = (() => {
+  const pts = [...K.site.flat(), ...K.road, ...K.zones.flatMap(z => z.b)];
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+  return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, s: Math.min((COLS - .4) / (x1 - x0), (ROWS - .4) / (y1 - y0)) };
+})();
+const kp = (x, y) => [(x - KB.cx) * KB.s, (y - KB.cy) * KB.s];   // ผัง → แผ่น (X, Z)
+const KM = K.U * KB.s;                                           // 1 เมตร = กี่หน่วยบนแผ่น
+const KCOL = { food: '#ff8a3d', boot: '#b48cf0', event: '#2cc9b5', park: '#5aaeea', spot: '#f6f1e7', moto: '#5aaeea', wc: '#f6f1e7' };   // wc = ห้องน้ำ (สีเดียวกับจุดบริการ)   // moto = ลานจอดมอเตอร์ไซค์ (สีเดียวกับลานจอด)
+
+const koratGround = () => groundMat(g => {
+  const P = (x, y) => { const [X, Z] = kp(x, y); return [(X + COLS / 2) * PX, (Z + ROWS / 2) * PX]; };
+  const path = b => { g.beginPath(); b.forEach((p, i) => i ? g.lineTo(...P(...p)) : g.moveTo(...P(...p))); g.closePath(); };
+  const poly = (b, col) => { path(b); g.fillStyle = col; g.fill(); };
+  const line = (x0, y0, x1, y1, w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.moveTo(...P(x0, y0)); g.lineTo(...P(x1, y1)); g.stroke(); };
+  const px = KB.s * PX;   // พิกเซลต่อหน่วยผัง
+  g.fillStyle = TOPC.G; g.fillRect(0, 0, COLS * PX, ROWS * PX);
+  K.site.forEach(b => poly(b, TOPC['.']));
+  poly(K.road, TOPC.R); poly(K.corner, TOPC.R);
+  K.lanes.forEach(([x0, y0, x1, y1, w]) => line(x0, y0, x1, y1, w * px, TOPC.R));
+  poly(K.dirt, '#6b5a48');
+  const ZT = { food: '#7a5a52', boot: '#5c5078', event: '#4f6070' };
+  K.zones.forEach(z => ZT[z.kind] && poly(z.b, ZT[z.kind]));
+  grain(g, 90000, 77);
+  // ขอบทางเท้า (ขอบที่ดินสว่างกว่า) + เส้นขอบถนนใหญ่ + เส้นประกลางถนน
+  g.lineJoin = 'round';
+  K.site.forEach(b => { path(b); g.strokeStyle = '#8d86a3'; g.lineWidth = 2.5; g.stroke(); });
+  line(388, 90, 1738, 24, 1.5, 'rgba(246,241,231,.45)'); line(388, 142, 1738, 76, 1.5, 'rgba(246,241,231,.45)');
+  g.setLineDash([14, 14]); line(320, 120, 1800, 47, 2, '#d9cfa8'); g.setLineDash([]);
+  K.lanes.slice(-2).forEach(([x0, y0, x1, y1]) => { g.setLineDash([6, 8]); line(x0, y0, x1, y1, 1.2, 'rgba(246,241,231,.6)'); g.setLineDash([]); });
+  // ทางม้าลายที่ปากทางเข้าหลัก (GATE) และทางรถเข้า (LANE)
+  for (const [x0, y0, , , w] of K.lanes.slice(-2)) for (let i = -2; i <= 2; i++) {
+    g.fillStyle = 'rgba(246,241,231,.75)'; const [cx, cy] = P(x0 + i * w / 5.5, y0 + 34);
+    g.fillRect(cx - w * px / 14, cy - 5 * px, w * px / 7, 10 * px);
+  }
+  // ขอบโซน (เส้นสีตามชนิด) · ให้เห็นว่าตรงไหนขายอะไรตั้งแต่ยังไม่กด
+  K.zones.forEach(z => { path(z.b); g.strokeStyle = KCOL[z.kind] + '99'; g.lineWidth = 2; g.stroke(); });
+  // เส้นช่องจอด 2.5 × 5 ม.
+  const u = K.U;
+  K.park.forEach(([x, y, f, , a]) => {   // หมุนตามแนวโซน
+    const cs = Math.cos(a), sn = Math.sin(a), q = (dx, dy) => [x + (dx * cs - dy * sn) * u, y + (dx * sn + dy * cs) * u];
+    line(...q(-1.25, -2.5), ...q(-1.25, 2.5), 1, 'rgba(230,225,210,.5)');
+    if (f) line(...q(-1.25, -2.5), ...q(1.25, -2.5), 1, 'rgba(230,225,210,.5)');
+  });
+  // เงาใต้ตึก + อ่างน้ำพุ
+  K.bld.forEach(B => poly(B.b, '#231e3d'));
+  const [fx, fy] = P(...K.fountain); g.fillStyle = M.basin.color.getStyle(); g.beginPath(); g.arc(fx, fy, 11.6 * px, 0, 7); g.fill();
+});
+
+// ── ตัวช่วยสร้างผังจากพิกัดจริง (โคราช + ประตูกรุงเทพใช้ร่วมกัน) ──
+//    kpF = พิกัดผัง → แผ่น · km = 1 เมตร = กี่หน่วยบนแผ่น · ของแต่ละชิ้นเข้ากลุ่มของช่องที่มันตั้งอยู่ (ช่องพลิกแล้วของไปด้วย)
+function makeBuilder(kpF, km) {
+  const groups = Array.from({ length: COLS * ROWS }, () => new THREE.Group());
+  const IK = new Map();   // ของซ้ำ: ช่อง|ชื่อ → InstancedMesh ทีเดียว
+  // a = มุมเอียงของช่อง (ตามแนวโซน) · ของที่วางจากจุดนี้หมุนตามทั้งตำแหน่งและทิศ
+  const at = (x, y, a = 0) => {
+    const [X, Z] = kpF(x, y);
+    const c = THREE.MathUtils.clamp(Math.floor(X + COLS / 2), 0, COLS - 1), r = THREE.MathUtils.clamp(Math.floor(Z + ROWS / 2), 0, ROWS - 1);
+    return { ti: r * COLS + c, x: X - (c - (COLS - 1) / 2), z: Z - (r - (ROWS - 1) / 2), a, cs: Math.cos(a), sn: Math.sin(a) };
+  };
+  // วางของ 1 ชิ้น: o = จุดยึดจาก at() · dx/y/dz เป็นเมตรตามแกนของช่อง · s = ขนาดเป็นเมตร
+  const put = (o, key, geo, m, [dx, y, dz], s, ry = 0, color) => {
+    const k = o.ti + '|' + key;
+    if (!IK.has(k)) IK.set(k, { ti: o.ti, geo, mat: m, list: [] });
+    const wx = dx * o.cs - dz * o.sn, wz = dx * o.sn + dz * o.cs;
+    IK.get(k).list.push({ p: [o.x + wx * km, y * km, o.z + wz * km], s: s.map(v => v * km), ry: ry - o.a, color });
+  };
+  const putModel = (o, name, ry, scale = 1, [dx, dz] = [0, 0], y = 0) => {
+    const m = MODELS[name]; if (!m) return false;
+    m.parts.forEach((p, j) => put(o, name + j, p.geo, p.mat, [dx, y - m.minY * scale, dz], [scale, scale, scale], ry));
+    return true;
+  };
+  const add = (o, mesh) => { groups[o.ti].add(mesh); return mesh; };
+  const finish = () => {
+    const o3 = new THREE.Object3D();
+    for (const { ti, geo, mat: m, list } of IK.values()) {
+      const im = new THREE.InstancedMesh(geo, m, list.length);
+      list.forEach((it, i) => {
+        o3.position.set(...it.p); o3.rotation.set(0, it.ry, 0); o3.scale.set(...it.s); o3.updateMatrix();
+        im.setMatrixAt(i, o3.matrix);
+        if (it.color) im.setColorAt(i, new THREE.Color(it.color));
+      });
+      im.castShadow = im.receiveShadow = !isLight(m) && !m.transparent;
+      groups[ti].add(im);
+    }
+    return groups;
+  };
+  return { groups, at, put, putModel, add, finish, kp: kpF, km };
+}
+// ── ตึก: แบบผังโซนเดิมโคราช · ผนัง/หลังคาตามข้อมูล · ฐานเข้ม · กระจก · แถบป้ายสี · ขอบกันตกหลังคา · แอร์ ──
+//    B.b = ขอบในพิกัดผัง · B.h = สูง (หน่วยผัง) · s = หน่วยแผ่นต่อหน่วยผัง · U = หน่วยผังต่อ 1 เมตร
+function addBuilding(B, { at, put, add, kp: kpF }, s, U) {
+  const cx = B.b.reduce((a, p) => a + p[0], 0) / B.b.length, cy = B.b.reduce((a, p) => a + p[1], 0) / B.b.length;
+  const o = at(cx, cy), [AX, AZ] = kpF(cx, cy), h = B.h * s;
+  const loc = (x, y) => { const [X, Z] = kpF(x, y); return [o.x + X - AX, o.z + Z - AZ]; };
+  const pts = (k = 1) => B.b.map(([x, y]) => new THREE.Vector2(...loc(cx + (x - cx) * k, cy + (y - cy) * k)));
+  const ext = (shp, depth, top, m, cast = true) => {
+    const me = new THREE.Mesh(new THREE.ExtrudeGeometry(shp, { depth, bevelEnabled: false }), m);
+    me.rotation.x = Math.PI / 2; me.position.y = top; me.castShadow = cast; me.receiveShadow = true;
+    return add(o, me);
+  };
+  const wall = mat(B.wall || '#f2efe9'), roof = mat(B.roof || '#e3e5e8');
+  ext(new THREE.Shape(pts()), h, h, [roof, wall]);
+  ext(new THREE.Shape(pts(1.006)), h * .06, h * .06, mat('#7d7a86'), false);               // ฐานตึก
+  const ring = new THREE.Shape(pts()); ring.holes.push(new THREE.Path(pts(.93)));
+  ext(ring, 1.234 * U * s, h + 1.234 * U * s, wall);                                       // ขอบกันตกบนหลังคา (≈1.2 ม.)
+  const A = B.b.reduce((a, p, i) => { const q = B.b[(i + 1) % B.b.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0);
+  B.b.forEach((a, i) => {
+    const q = B.b[(i + 1) % B.b.length], dx = q[0] - a[0], dy = q[1] - a[1], L = Math.hypot(dx, dy); if (L < 3.5 * U) return;
+    const n = A > 0 ? [dy / L, -dx / L] : [-dy / L, dx / L], ang = -Math.atan2(dy, dx);
+    const band = (hh, y, d, m) => {
+      const [bx, bz] = loc((a[0] + q[0]) / 2 + n[0] * d / 2, (a[1] + q[1]) / 2 + n[1] * d / 2);
+      const me = new THREE.Mesh(GEO.box, m); me.scale.set(L * .97 * s, hh, d * s); me.position.set(bx, y + hh / 2, bz); me.rotation.y = ang;
+      me.receiveShadow = true; add(o, me);
+    };
+    band(h * .2, h * .28, .423 * U, M.glassB);                                               // กระจกชั้นล่าง
+    if (B.h >= 14 * U) band(h * .14, h * .54, .423 * U, M.glassB);                           // ตึกสูง: กระจกชั้นบน
+    if (B.sign) band(h * .15, h * .74, .635 * U, mat(B.sign, { roughness: .55 }));            // แถบป้ายสี
+  });
+  (B.ac || []).forEach(([x, y]) => {
+    const oa = at(x, y);
+    put(oa, 'ac', GEO.box, mat('#f2f3f5'), [0, (B.h + 3) / U, 0], [13 / U, 6 / U, 10 / U]);
+    put(oa, 'fan', GEO.cyl, mat('#4f555d'), [0, (B.h + 6.4) / U, 0], [6.4 / U, 1 / U, 6.4 / U]);
+  });
+}
+
+function buildKorat() {
+  const BK = makeBuilder(kp, KM), { at, put, putModel, add } = BK;
+  const U = K.U, PAL = i => CANOPY[i % CANOPY.length];
+
+  for (const B of K.bld) addBuilding(B, BK, KB.s, U);
+  // ── โลโก้บนหลังคา (เจ้าของสั่งใส่) + ป้ายตัวหนังสือ · กลับหัวให้อ่านถูกจากมุมกล้องหลัก (มองจากหน้าตลาด = กลับ 180°) ──
+  const READ = Math.abs(VIEWS.home.az) > 90 ? Math.PI : 0;
+  if (SHOW_LOGOS) K.logos.forEach(([n, x, y, w, h, ang = 0]) => {
+    const src = (window.LOGO || {})[n]; if (!src) return;
+    const o = at(x, y);
+    new THREE.TextureLoader().load(src, tx => {
+      tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+      const m = new THREE.MeshStandardMaterial({ map: tx, transparent: true, roughness: .55, polygonOffset: true, polygonOffsetFactor: -2 });
+      const me = new THREE.Mesh(GEO.decal, m);
+      me.scale.set(w * KB.s, 1, w * KB.s * tx.image.height / tx.image.width);
+      me.position.set(o.x, (h + .8) * KB.s, o.z); me.rotation.y = -ang + READ; me.receiveShadow = true;
+      add(o, me);
+    });
+  });
+  const FONT = '"IBM Plex Sans Thai", sans-serif';
+  K.signs.forEach(([L, x, y, w, h, bg, fg]) => {
+    const c = document.createElement('canvas'), H = 150 + 100 * (L.length - 1); c.width = 512; c.height = H; const g = c.getContext('2d');
+    if (bg) { g.fillStyle = bg; g.beginPath(); g.roundRect(4, 4, 504, H - 8, 36); g.fill(); }
+    g.fillStyle = fg; g.textAlign = 'center'; g.textBaseline = 'middle';
+    L.forEach((t, i) => { let f = i ? 64 : 88; g.font = `700 ${f}px ${FONT}`; while (g.measureText(t).width > 460 && f > 30) { f -= 4; g.font = `700 ${f}px ${FONT}`; } g.fillText(t, 256, 75 + i * 100); });
+    const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+    const o = at(x, y), me = new THREE.Mesh(GEO.decal, new THREE.MeshStandardMaterial({ map: tx, transparent: true, roughness: .55, polygonOffset: true, polygonOffsetFactor: -2 }));
+    me.scale.set(w * KB.s, 1, w * KB.s * H / 512); me.position.set(o.x, (h + .8 + (bg ? 0 : 2)) * KB.s, o.z); me.rotation.y = READ; me.receiveShadow = true;
+    add(o, me);
+  });
+
+  // ── สตรีทฟู้ด: เต็นท์ขาว (Blender ของเรา) · ทุก 5 หลังเป็นรถเข็นอาหาร · หลอดไฟใต้เต็นท์ ──
+  K.food.forEach(([x, y, face, a], i) => {
+    const o = at(x, y, a), ry = face > 0 ? Math.PI / 2 : -Math.PI / 2;
+    if (!(i % 5 === 2 && putModel(o, 'cart', ry)) && !putModel(o, 'tent', ry, 3 * .94 / 3.04))
+      put(o, 'canopy', GEO.cone4, M.white, [0, 2.6, 0], [3.4, 1, 3.4], Math.PI / 4, PAL(i));
+    put(o, 'table', GEO.box, M.table, [face * .9, .74, 0], [.75, .06, 1.5]);
+    put(o, 'bulb', GEO.sph, M.bulb, [0, 2.2, 0], [.9, .9, .9]);
+  });
+  // ร่มหน้าศูนย์อาหาร (ร่ม Blender ของเรา) + โต๊ะใต้ร่ม
+  for (let y = 465; y <= 600; y += 12) [592, 603].forEach((x, j) => {
+    const o = at(x, y);
+    putModel(o, 'umb', (y + j) % 7);
+    put(o, 'utable', GEO.cyl, M.table, [0, .72, 0], [1.1, .06, 1.1]);
+  });
+  // ── เปิดท้าย: รถ (ทรงกล่องของเรา) ฝั่งใน · ผ้าใบ + ของ + ราวเสื้อ ฝั่งทางเดิน · บางล็อกมีร่ม/ไฟ ──
+  K.boot.forEach(([x, y, d, a], i) => {
+    if (rnd(91, i, 0) > .88) return;
+    const o = at(x, y, a), car = CAR[i % CAR.length], cx = -d * 1.75, sx = d * 2.25;
+    put(o, 'carB', GEO.box, M.whiteGloss, [cx, .65, 0], [4.4, .9, 1.8], 0, car);
+    put(o, 'carC', GEO.box, M.glassB, [cx + d * .3, 1.35, 0], [2.2, .6, 1.6]);
+    put(o, 'hatch', GEO.box, M.whiteGloss, [cx + d * 2.4, 1.9, 0], [.08, .9, 1.5], 0, car);   // ฝาท้ายเปิด
+    put(o, 'tarp', GEO.box, M.white, [sx, .05, 0], [2.6, .08, 2], 0, PAL(i + 2));
+    for (let j = 0; j < 3; j++) put(o, 'goods', GEO.box, M.white, [sx - .6 + j * .6, .25, ((i + j) % 3 - 1) * .5], [.45, .3 + (j % 2) * .2, .45], 0, GOODS[(i + j) % GOODS.length]);
+    if (i % 3 === 0) {                                                                         // ราวแขวนเสื้อ
+      put(o, 'rackL', GEO.cyl, M.metal, [sx + d * 1.2, .8, -.9], [.08, 1.6, .08]);
+      put(o, 'rackL', GEO.cyl, M.metal, [sx + d * 1.2, .8, .9], [.08, 1.6, .08]);
+      for (let j = 0; j < 4; j++) put(o, 'shirt', GEO.box, M.white, [sx + d * 1.2, 1.2, -.65 + j * .43], [.12, .65, .38], 0, CANOPY[(i + j) % CANOPY.length]);
+    }
+    if (i % 5 === 0) putModel(o, 'umb', i, 1, [sx, 0]);
+    if (i % 4 === 1) put(o, 'bulb', GEO.sph, M.bulb, [sx, 2.3, 0], [.9, .9, .9]);
+  });
+  // ── ลานจอด: รถจอดครึ่งหนึ่ง · ลานกิจกรรมจอดบางตา ──
+  K.park.forEach(([x, y, f, ev, a], i) => {
+    if (rnd(57, i, 1) > (ev ? .22 : .5)) return;
+    const o = at(x, y, a), car = CAR[Math.floor(rnd(57, i, 2) * CAR.length)];
+    put(o, 'carB', GEO.box, M.whiteGloss, [0, .65, 0], [1.8, .9, 4.4], 0, car);
+    put(o, 'carC', GEO.box, M.glassB, [0, 1.35, f ? .3 : -.3], [1.6, .6, 2.2]);
+  });
+  // ── ต้นไม้ (ทรงของเรา · 2 ก้อนใบ) ──
+  K.trees.forEach(([x, y], i) => {
+    const o = at(x, y), s = i % 3 ? 1 : 1.25, col = ['#4f7a4a', '#5d7350', '#6f8a55'][i % 3];
+    put(o, 'trunk', GEO.cyl, M.trunk, [0, 1.8 * s, 0], [.9 * s, 3.6 * s, .9 * s]);
+    put(o, 'leaf', GEO.ico, M.white, [0, 5.3 * s, 0], [7.8 * s, 6.4 * s, 7.8 * s], i, col);
+    put(o, 'leaf', GEO.ico, M.white, [1.4 * s, 6.8 * s, -1 * s], [4.6 * s, 3.8 * s, 4.6 * s], i + 1, '#7ea062');
+  });
+  // ── เสาไฟริมถนนใหญ่ + ริมทางเข้า (หัวไฟเรืองแสงตอนค่ำ) ──
+  const lamp = (x, y) => { const o = at(x, y); put(o, 'lpole', GEO.cyl, M.metal, [0, 3.2, 0], [.25, 6.4, .25]); put(o, 'lhead', GEO.sph, M.lamp, [0, 6.5, 0], [1, .6, 1]); };
+  for (let t = .03; t < 1; t += 1 / 18) lamp(388 + 1350 * t, 142 - 66 * t + 6);
+  K.lanes.slice(-2).forEach(([x0, y0, x1, y1, w]) => { for (let t = .1; t < 1; t += .15) lamp(x0 + (x1 - x0) * t - w / 2 - 4, y0 + (y1 - y0) * t); });
+  // ── ป้าย P (ตำแหน่งจากผังโซนเดิม) · ป้อมทางเข้าหลัก ──
+  [[518, 350], [880, 322], [1210, 310], [1325, 605], [1548, 638], [328, 524], [872, 1333]].forEach(([x, y]) => {
+    const o = at(x, y);
+    put(o, 'ppole', GEO.cyl, M.metal, [0, 1.6, 0], [.18, 3.2, .18]);
+    const sg = new THREE.Mesh(GEO.box, P_SIGN); sg.scale.set(1.4 * KM, .3 * KM, 1.4 * KM); sg.position.set(o.x, 3.35 * KM, o.z); sg.castShadow = true; add(o, sg);
+  });
+  { const [gx, gy] = K.lanes[K.lanes.length - 1]; put(at(gx, gy + 40), 'booth', GEO.box, mat('#c9ced4'), [0, 1.4, 0], [2.1, 2.8, 3.2]); }
+  // ── น้ำพุ: อ่างกลม + ม้าโลหะ 2 ตัว (โมเดลจากรูปเจ้าของ) ──
+  {
+    const [fx, fy] = K.fountain, o = at(fx, fy), m = 1 / U;
+    put(o, 'basin', GEO.cyl, M.basin, [0, .35, 0], [8.2, .7, 8.2]);
+    put(o, 'water', GEO.cyl, M.water, [0, .62, 0], [6.9, .2, 6.9]);
+    putModel(o, 'horse', -.7, 1, [-5 * m, -1 * m], .7);
+    putModel(o, 'horse', .5, 1, [5 * m, 2 * m], .7);
+  }
+  // ── หลังคาเหล็กโปร่งเหนือสตรีทฟู้ด 2 + เสา ──
+  {
+    const R0 = K.roof, o = at(R0.x, R0.y);
+    put(o, 'roofTop', GEO.box, M.glass, [0, R0.h / U, 0], [R0.w / U, .3, R0.d / U], Math.PI / 2);
+    [[845, 548], [888, 548], [845, 692], [888, 692], [845, 620], [888, 620]].forEach(([x, y]) =>
+      put(at(x, y), 'rpost', GEO.cyl, M.metal, [0, R0.h / U / 2, 0], [.5, R0.h / U, .5]));
+  }
+  return BK.finish();
+}
+
+// ── ประตูกรุงเทพ: ผังจาก sg-layout.js (กรอบที่เจ้าของวาด เกลาขอบให้ตรง) · สไตล์เดียวกับโคราช ──
+const SG = window.SG;
+const SGB = (() => { const [x0, y0, x1, y1] = SG.frame; return { cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, s: Math.min((COLS - .4) / (x1 - x0), (ROWS - .4) / (y1 - y0)) }; })();
+const sgp = (x, y) => [(x - SGB.cx) * SGB.s, (y - SGB.cy) * SGB.s];   // ภาพดาวเทียม → แผ่น (X, Z)
+const SU = 1 / SG.mpp, SM = SGB.s * SU;                               // พิกเซลต่อเมตร · 1 เมตร = กี่หน่วยบนแผ่น
+// เส้นโค้งเรียบ (ตัดมุมซ้ำ 3 รอบ) · ถนนวาดจากเส้นกลาง ไม่ใช่จากกรอบที่ลากมือ
+const chaikin = (pts, n = 3) => {
+  let p = pts;
+  for (let k = 0; k < n; k++) {
+    const q = [p[0]];
+    for (let i = 0; i < p.length - 1; i++) { const a = p[i], b = p[i + 1]; q.push([a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]); }
+    q.push(p[p.length - 1]); p = q;
+  }
+  return p;
+};
+const bandPoly = (line, w) => {
+  const L = [], R = [];
+  line.forEach((p, i) => {
+    const a = line[Math.max(0, i - 1)], b = line[Math.min(line.length - 1, i + 1)];
+    let dx = b[0] - a[0], dy = b[1] - a[1]; const n = Math.hypot(dx, dy) || 1; dx /= n; dy /= n;
+    L.push([p[0] - dy * w, p[1] + dx * w]); R.push([p[0] + dy * w, p[1] - dx * w]);
+  });
+  return [...L, ...R.reverse()];
+};
+const inPoly = (x, y, b) => {
+  let c = false;
+  for (let i = 0, j = b.length - 1; i < b.length; j = i++) { const [xi, yi] = b[i], [xj, yj] = b[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; }
+  return c;
+};
+// เดินตามเส้นทุก step เมตร → fn(x, y, ทิศ)
+const alongLine = (line, stepM, fn) => {
+  let carry = 0;
+  for (let i = 0; i < line.length - 1; i++) {
+    const [ax, ay] = line[i], [bx, by] = line[i + 1], L = Math.hypot(bx - ax, by - ay), d = [(bx - ax) / L, (by - ay) / L];
+    for (let t = carry; t < L; t += stepM * SU) fn(ax + d[0] * t, ay + d[1] * t, d);
+    carry = (carry - L) % (stepM * SU); if (carry < 0) carry += stepM * SU;
+  }
+};
+const SGZ = Object.fromEntries(SG.zones.map(([id, name, kind, b, opt = {}]) => [id, { id, name, kind, b, ...opt }]));
+const sgRoads = SG.roads.map(([name, line, w, main]) => { const L = line.length > 2 ? chaikin(line) : line; return { name, line: L, w, main, poly: bandPoly(L, w) }; });
+const sgRail = chaikin(SG.rail, 4);
+const onBoard = (x, y, m = 0) => { const [X, Z] = sgp(x, y); return Math.abs(X) < COLS / 2 - m && Math.abs(Z) < ROWS / 2 - m; };
+
+// ช่องในโซน: แถวขนานแกน along ('x' = ตะวันออก–ตก · 'y' = เหนือ–ใต้) · ทุก module เมตรมีแถวตาม rows[].off
+//   pitch = ระยะระหว่างช่องในแถว · half = ครึ่งขนาดรอยเท้า [ตามแถว, ขวางแถว] (เมตร) ต้องอยู่ในโซนทั้งช่อง
+function sgFill(b, { along = 'x', pitch, module, rows, half }, fn) {
+  const xs = b.map(p => p[0]), ys = b.map(p => p[1]);
+  const [u0, u1, v0, v1] = along === 'x' ? [Math.min(...xs), Math.max(...xs), Math.min(...ys), Math.max(...ys)] : [Math.min(...ys), Math.max(...ys), Math.min(...xs), Math.max(...xs)];
+  const xy = (u, v) => along === 'x' ? [u, v] : [v, u], hu = half[0] * SU, hv = half[1] * SU;
+  for (let m = v0; m < v1; m += module * SU) for (const row of rows) {
+    const v = m + row.off * SU;
+    for (let u = u0 + pitch * SU / 2; u < u1; u += pitch * SU)
+      if ([[-1, -1], [1, -1], [1, 1], [-1, 1]].every(([a, c]) => inPoly(...xy(u + a * hu, v + c * hv), b))) fn(...xy(u, v), row);
+  }
+}
+let SGS = null;
+function sgSlots() {   // ตำแหน่งเต็นท์/ล็อก/ช่องจอด (ใช้ทั้งเส้นบนพื้นและของ 3D) · จำนวนไม่ใช่ของจริง (เจ้าของบอก: ตัวเลขจริงใส่เป็นตัวหนังสือทีหลัง)
+  if (SGS) return SGS;
+  const S = { food: [], boot: [], park: [], moto: [], seat: [] };
+  const bldBox = [...SG.bld.map(B => B.b), SG.canopy.b, ...SG.sheds.map(R => R.b)].map(b => { const xs = b.map(p => p[0]), ys = b.map(p => p[1]), m = 3 * SU; return [Math.min(...xs) - m, Math.min(...ys) - m, Math.max(...xs) + m, Math.max(...ys) + m]; });
+  const nearBld = (x, y) => bldBox.some(([a, b, c, d]) => x > a && x < c && y > b && y < d);
+  for (const z of Object.values(SGZ)) {
+    const k = z.kind;
+    // สตรีทฟู้ด: โซนละ 9 แถวตามตัวอักษร (เจ้าของบอก) · เต็นท์ขาวแบบโคราชตั้งกลางแถว โต๊ะขาย 2 ฝั่ง · ทางเดินคั่นระหว่างแถว
+    if (k === 'food') {
+      const xs = z.b.map(p => p[0]), lane = (Math.max(...xs) - Math.min(...xs)) / SU / z.rows.split(' ').length;
+      sgFill(z.b, { along: 'y', pitch: 3.2, module: lane, half: [1.5, 1.5], rows: [{ off: lane / 2 }] }, (x, y) => S.food.push([x, y]));
+    }
+    // เปิดท้าย: แถวตะวันออก–ตก · รถหันท้ายเข้าทางเดิน 5 ม. · ผ้าใบวางของฝั่งทางเดิน (แบบโคราช) · ~690 ล็อก (8 แถว × 3.2 ม.)
+    if (k === 'boot') sgFill(z.b, { pitch: 3.2, module: 20.2, half: [1.4, 3.6], rows: [{ off: 8.55, d: -1 }, { off: 16.65, d: 1 }] }, (x, y, r) => S.boot.push([x, y, r.d]));
+    // ลานจอด: ช่อง 2.5 × 5 ม. · แถวคู่ + ทางวิ่ง 6 ม.
+    if (k === 'park' || k === 'vpark') sgFill(z.b, { pitch: 2.5, module: 16, half: [1.2, 2.45], rows: [{ off: 2.5, f: 1 }, { off: 13.5, f: 0 }] }, (x, y, r) => S.park.push([x, y, r.f, k === 'vpark']));
+    if (k === 'moto') sgFill(z.b, { pitch: .95, module: 5.2, half: [.4, 1], rows: [{ off: 1.1 }, { off: 4.1 }] }, (x, y) => S.moto.push([x, y]));
+    if (k === 'seat' || k === 'seatT') sgFill(z.b, { pitch: 3.6, module: 3.6, half: [1.3, 1.3], rows: [{ off: 1.8 }] }, (x, y) => S.seat.push([x, y, k === 'seatT' ? 'tent' : '']));
+    if (k === 'plaza') sgFill(z.b, { pitch: 7, module: 7, half: [1.5, 1.5], rows: [{ off: 3.5 }] }, (x, y) => { if (!nearBld(x, y) && rnd(23, Math.round(x), Math.round(y)) < .55) S.seat.push([x, y, 'umb']); });
+  }
+  return (SGS = S);
+}
+
+const sgGround = () => groundMat(g => {
+  const P = (x, y) => { const [X, Z] = sgp(x, y); return [(X + COLS / 2) * PX, (Z + ROWS / 2) * PX]; };
+  const path = b => { g.beginPath(); b.forEach((p, i) => i ? g.lineTo(...P(...p)) : g.moveTo(...P(...p))); g.closePath(); };
+  const poly = (b, col) => { path(b); g.fillStyle = col; g.fill(); };
+  const line = (x0, y0, x1, y1, w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); g.moveTo(...P(x0, y0)); g.lineTo(...P(x1, y1)); g.stroke(); };
+  const polyline = (pts, w, col) => { g.strokeStyle = col; g.lineWidth = w; g.beginPath(); pts.forEach((p, i) => i ? g.lineTo(...P(...p)) : g.moveTo(...P(...p))); g.stroke(); };
+  const px = SGB.s * PX;   // พิกเซล canvas ต่อพิกเซลภาพดาวเทียม
+  g.fillStyle = TOPC.G; g.fillRect(0, 0, COLS * PX, ROWS * PX);
+  SG.site.forEach(b => poly(b, TOPC['.']));
+  const ZT = { food: '#7a5a52', boot: '#5c5078', park: TOPC.P, vpark: TOPC.P, moto: TOPC.P, seat: '#6e5f5c', seatT: '#6e5f5c', plaza: '#605a76' };
+  SG.zones.forEach(([, , k, b]) => poly(b, ZT[k]));
+  grain(g, 90000, 61);
+  // ถนน: ผิวถนน · ขอบถนนใหญ่ + เส้นประกลาง (แบบโคราช)
+  g.lineJoin = g.lineCap = 'round';
+  sgRoads.forEach(r => poly(r.poly, TOPC.R));
+  sgRoads.filter(r => r.main).forEach(r => {
+    polyline(bandPoly(r.line, r.w - 2).slice(0, r.line.length), 1.5, 'rgba(246,241,231,.45)');
+    polyline(bandPoly(r.line, r.w - 2).slice(r.line.length), 1.5, 'rgba(246,241,231,.45)');
+    g.setLineDash([14, 14]); polyline(r.line, 2, '#d9cfa8'); g.setLineDash([]);
+  });
+  SG.site.slice(0, 1).forEach(b => { path(b); g.strokeStyle = '#8d86a3'; g.lineWidth = 2.5; g.stroke(); });
+  // ขอบโซน (สีตามชนิด) · ให้เห็นว่าตรงไหนขายอะไรตั้งแต่ยังไม่กด
+  const ZC = { food: KCOL.food, boot: KCOL.boot, park: KCOL.park, vpark: KCOL.park, moto: KCOL.park, seat: KCOL.event, seatT: KCOL.event };
+  SG.zones.forEach(([, , k, b]) => { if (!ZC[k]) return; path(b); g.strokeStyle = ZC[k] + '99'; g.lineWidth = 2; g.stroke(); });
+  // เส้นช่องจอด 2.5 × 5 ม.
+  const u = SU, c = 'rgba(230,225,210,.5)';
+  sgSlots().park.forEach(([x, y, f]) => { line(x - 1.25 * u, y - 2.5 * u, x - 1.25 * u, y + 2.5 * u, 1, c); line(x - 1.25 * u, y + (f ? -2.5 : 2.5) * u, x + 1.25 * u, y + (f ? -2.5 : 2.5) * u, 1, c); });
+  // เงาใต้ตึก
+  SG.bld.forEach(B => poly(B.b, '#231e3d'));
+  void px;
+});
+
+function buildSG() {
+  const BK = makeBuilder(sgp, SM), { at, put, putModel } = BK, PAL = i => CANOPY[i % CANOPY.length], S = sgSlots();
+  // ── ตึก (แบบเดียวกับโคราช) ──
+  SG.bld.forEach(B => addBuilding({ ...B, h: B.h * SU }, BK, SGB.s, SU));
+  // ── ป้ายโลโก้บนหลังคาสำนักงาน (โลโก้ 3D ลุค B ที่เจ้าของเลือก) · ตั้งตรง หันหน้าเข้ากล้องของสาขานี้ ไม่ตามแนวตึก ──
+  const OF = SG.bld.find(B => B.name === 'สำนักงาน');
+  if (OF && window.SIGN_SVG) {
+    // ตัวอักษร 3D จริง: เวกเตอร์โลโก้ → ยกนูน + ลบมุม (สัดส่วนเดียวกับ logo3d.py: นูน 1.75% ของความกว้าง) · หมึกครีม + GO เขียวเรือง (ลุค B)
+    const svg = new SVGLoader().parse(window.SIGN_SVG), [vx, vy, vw, vh] = svg.xml.getAttribute('viewBox').split(' ').map(Number);
+    const cx = OF.b.reduce((a, p) => a + p[0], 0) / OF.b.length, cy = OF.b.reduce((a, p) => a + p[1], 0) / OF.b.length;
+    const o = at(cx, cy), W = 26 * SM, k = W / vw, H = vh * k, y0 = (OF.h + 1.2) * SM, pad = .06 * W;
+    const az = THREE.MathUtils.degToRad(viewAzOf(BRANCHES.findIndex(b => b.sg))), fwd = 10 * SM;   // เลื่อนไปขอบหลังคาฝั่งกล้อง ไม่ให้หมุดบัง
+    const g = new THREE.Group(); g.position.set(o.x + Math.sin(az) * fwd, 0, o.z + Math.cos(az) * fwd);
+    g.rotation.y = az;   // ด้านหน้า (+Z) หันเข้ากล้องของสาขานี้ ไม่ตามแนวตึก
+    const back = new THREE.Mesh(GEO.box, mat('#17133a', { roughness: .8 })); back.scale.set(W + 2 * pad, H + 2 * pad, .3 * SM);
+    back.position.set(0, y0 + H / 2 + pad, 0); back.castShadow = back.receiveShadow = true; g.add(back);
+    svg.paths.forEach(p => {
+      const go = p.color.getHexString() === '84e62d';
+      const geo = new THREE.ExtrudeGeometry(SVGLoader.createShapes(p), { depth: .0175 * vw, bevelEnabled: true, bevelThickness: .0015 * vw, bevelSize: .0012 * vw, bevelSegments: 2, curveSegments: 6 });
+      geo.translate(-vx - vw / 2, -vy - vh / 2, 0);
+      const m = new THREE.MeshStandardMaterial(go ? { color: '#84e62d', emissive: '#84e62d', emissiveIntensity: .45, roughness: .35 }
+                                                  : { color: '#f6f1e7', emissive: '#fff1d6', emissiveIntensity: .3, roughness: .4 });
+      const me = new THREE.Mesh(geo, m); me.scale.set(k, -k, k);   // SVG แกน y ชี้ลง → กลับ
+      me.position.set(0, y0 + H / 2 + pad, .15 * SM); me.castShadow = true; g.add(me);
+    });
+    for (const x of [-.3, .3]) {
+      const p = new THREE.Mesh(GEO.box, M.metal); p.scale.set(.35 * SM, y0 - OF.h * SM + .2 * SM, .35 * SM);
+      p.position.set(x * W, (OF.h * SM + y0) / 2, -.3 * SM); g.add(p);
+    }
+    BK.add(o, g);
+  }
+  // ── ห้องน้ำ: เจ้าของให้ลองทั้ง หมุด และ ป้ายไอคอนบนหลังคา · เลือกดูได้ ?wc=pin | ?wc=roof (ไม่ใส่ = หมุด) ──
+  const WC = SG.bld.find(B => B.name === 'ห้องน้ำลูกค้า'), wcIcon = (window.PIN_ICON || {}).wc;
+  if (WC && wcIcon && SG_WC !== 'pin') new THREE.TextureLoader().load(wcIcon, ic => {
+    const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+    g.fillStyle = '#f6f1e7'; g.beginPath(); g.roundRect(8, 8, 496, 496, 90); g.fill();
+    g.drawImage(ic.image, 56, 56, 400, 400);
+    const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+    const cx = WC.b.reduce((a, p) => a + p[0], 0) / WC.b.length, cy = WC.b.reduce((a, p) => a + p[1], 0) / WC.b.length, o = at(cx, cy);
+    // ป้ายตั้งบนหลังคา หันเข้ากล้องแบบป้ายสำนักงาน (แปะนอนบนหลังคาแล้วเล็ก/จ้าจนอ่านไม่ออก)
+    const S = 14 * SM, y0 = (WC.h + 1) * SM, sg = new THREE.Group(); sg.position.set(o.x, 0, o.z);
+    sg.rotation.y = THREE.MathUtils.degToRad(viewAzOf(BRANCHES.findIndex(b => b.sg)));
+    const face = new THREE.Mesh(new THREE.PlaneGeometry(S, S), new THREE.MeshBasicMaterial({ map: tx, transparent: true, color: '#cfcabf' }));
+    face.position.set(0, y0 + S / 2, .12 * SM); sg.add(face);
+    const back = new THREE.Mesh(GEO.box, mat('#d9d5cc', { roughness: .8 })); back.scale.set(S * .96, S * .96, .2 * SM);
+    back.position.set(0, y0 + S / 2, 0); back.castShadow = true; sg.add(back);
+    const post = new THREE.Mesh(GEO.box, M.metal); post.scale.set(.35 * SM, y0 - WC.h * SM, .35 * SM);
+    post.position.set(0, (WC.h * SM + y0) / 2, -.25 * SM); sg.add(post);
+    BK.add(o, sg);
+  });
+  // ── หลังคาโปร่งสีฟ้าข้างอาคารกานต์มณี + เสา ──
+  {
+    const b = SG.canopy.b, xs = b.map(p => p[0]), ys = b.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const o = at((x0 + x1) / 2, (y0 + y1) / 2), h = SG.canopy.h;
+    put(o, 'cTop', GEO.box, mat('#8fc3e8', { transparent: true, opacity: .45, roughness: .3, depthWrite: false }), [0, h, 0], [(x1 - x0) / SU, .3, (y1 - y0) / SU]);
+    for (let y = y0 + 2; y <= y1 - 1; y += 10 * SU) for (const x of [x0 + 1, x1 - 1]) put(at(x, y), 'cPost', GEO.cyl, M.metal, [0, h / 2, 0], [.4, h, .4]);
+  }
+  // ── ป้ายตัวอักษรแถวสตรีทฟู้ด บนพื้นปลายแถว (GB…GJ ด้านเหนือ · GL…GT ด้านใต้ แบบผังภาพวาดของตลาด) ──
+  Object.values(SGZ).filter(z => z.rows).forEach(z => {
+    const xs = z.b.map(p => p[0]), ys = z.b.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), rows = z.rows.split(' ');
+    const y = z.label === 's' ? Math.max(...ys) + 2.2 * SU : Math.min(...ys) - 2.2 * SU;
+    const READ = Math.abs(viewAzOf(BRANCHES.findIndex(b => b.sg))) > 90 ? Math.PI : 0;   // ให้อ่านถูกจากมุมกล้องของสาขานี้
+    rows.forEach((t, i) => {
+      const c = document.createElement('canvas'); c.width = 256; c.height = 128; const g = c.getContext('2d');
+      g.fillStyle = 'rgba(35,30,61,.85)'; g.beginPath(); g.roundRect(8, 8, 240, 112, 30); g.fill();
+      g.fillStyle = '#f6f1e7'; g.font = '700 84px "IBM Plex Sans Thai", sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(t, 128, 70);
+      const tx = new THREE.CanvasTexture(c); tx.colorSpace = THREE.SRGBColorSpace; tx.anisotropy = 8;
+      const o = at(x0 + (i + .5) * (x1 - x0) / rows.length, y);
+      const me = new THREE.Mesh(GEO.decal, new THREE.MeshStandardMaterial({ map: tx, transparent: true, roughness: .7, polygonOffset: true, polygonOffsetFactor: -2 }));
+      me.scale.set(3.6 * SM, 1, 1.8 * SM); me.position.set(o.x, .012, o.z); me.rotation.y = READ; me.receiveShadow = true;
+      BK.add(o, me);
+    });
+  });
+  // ── หลังคาคลุมทางเดิน/ที่จอดรถ: หลังคาเหล็กบาง + เสาสองแถว · ไม่มีผนัง (มองทะลุเห็นรถข้างใต้) ──
+  SG.sheds.forEach(R => {
+    const xs = R.b.map(p => p[0]), ys = R.b.map(p => p[1]), x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const long = x1 - x0 >= y1 - y0, L = (long ? x1 - x0 : y1 - y0) / SU, seg = Math.ceil(L / 12);
+    for (let i = 0; i < seg; i++) {   // หลังคาเป็นท่อนๆ ตามช่องเสา → ช่องพลิกแล้วหลังคาไปกับช่องของมัน
+      const t = (i + .5) / seg, cx = long ? x0 + (x1 - x0) * t : (x0 + x1) / 2, cy = long ? (y0 + y1) / 2 : y0 + (y1 - y0) * t;
+      const w = L / seg + .05, d = (long ? y1 - y0 : x1 - x0) / SU + .6;
+      put(at(cx, cy), 'shRoof', GEO.box, mat('#b8bcc4', { roughness: .45, metalness: .3 }), [0, R.h, 0], long ? [w, .25, d] : [d, .25, w]);
+      put(at(cx, cy), 'shEdge', GEO.box, M.cream, [0, R.h - .2, 0], long ? [w, .35, d + .1] : [d + .1, .35, w]);
+    }
+    for (let i = 0; i <= seg; i++) {
+      const t = i / seg;
+      for (const k of [.12, .88]) {
+        const x = long ? x0 + (x1 - x0) * t : x0 + (x1 - x0) * k, y = long ? y0 + (y1 - y0) * k : y0 + (y1 - y0) * t;
+        put(at(x, y), 'shPost', GEO.cyl, M.metal, [0, R.h / 2, 0], [.3, R.h, .3]);
+      }
+    }
+  });
+  // ── สตรีทฟู้ด: เต็นท์ขาว (Blender ของเรา · ตัวเดียวกับโคราช) · โต๊ะขาย 2 ฝั่งของแถว · หลอดไฟใต้เต็นท์ ──
+  S.food.forEach(([x, y], i) => {
+    const o = at(x, y), ry = Math.PI / 2;
+    if (!putModel(o, 'tent', ry, 3 * .94 / 3.04)) put(o, 'canopy', GEO.cone4, M.white, [0, 2.6, 0], [3.4, 1, 3.4], Math.PI / 4, PAL(i));
+    for (const f of [-1, 1]) {
+      put(o, 'table', GEO.box, M.table, [f * .9, .74, 0], [.75, .06, 1.5]);
+      put(o, 'fGoods', GEO.box, M.white, [f * .9, .85, ((i + f) % 3) * .4 - .4], [.35, .16, .35], 0, GOODS[(i + f + 2) % GOODS.length]);
+    }
+    if (i % 2 === 0) put(o, 'bulb', GEO.sph, M.bulb, [0, 2.2, 0], [.9, .9, .9]);
+  });
+  // ── เปิดท้าย: แถวตะวันออก–ตก → หมุนช่อง 90° ให้รถตั้งฉากกับแถว (ของเหมือนโคราช) ──
+  S.boot.forEach(([x, y, d], i) => {
+    if (rnd(93, i, 0) > .88) return;
+    const o = at(x, y, Math.PI / 2), car = CAR[i % CAR.length], cx = -d * 1.75, sx = d * 2.25;
+    put(o, 'carB', GEO.box, M.whiteGloss, [cx, .65, 0], [4.4, .9, 1.8], 0, car);
+    put(o, 'carC', GEO.box, M.glassB, [cx + d * .3, 1.35, 0], [2.2, .6, 1.6]);
+    put(o, 'hatch', GEO.box, M.whiteGloss, [cx + d * 2.4, 1.9, 0], [.08, .9, 1.5], 0, car);
+    put(o, 'tarp', GEO.box, M.white, [sx, .05, 0], [2.6, .08, 2], 0, PAL(i + 2));
+    for (let j = 0; j < 3; j++) put(o, 'goods', GEO.box, M.white, [sx - .6 + j * .6, .25, ((i + j) % 3 - 1) * .5], [.45, .3 + (j % 2) * .2, .45], 0, GOODS[(i + j) % GOODS.length]);
+    if (i % 3 === 0) {
+      put(o, 'rackL', GEO.cyl, M.metal, [sx + d * 1.2, .8, -.9], [.08, 1.6, .08]);
+      put(o, 'rackL', GEO.cyl, M.metal, [sx + d * 1.2, .8, .9], [.08, 1.6, .08]);
+      for (let j = 0; j < 4; j++) put(o, 'shirt', GEO.box, M.white, [sx + d * 1.2, 1.2, -.65 + j * .43], [.12, .65, .38], 0, CANOPY[(i + j) % CANOPY.length]);
+    }
+    if (i % 5 === 0) putModel(o, 'umb', i, 1, [sx, 0]);
+    if (i % 4 === 1) put(o, 'bulb', GEO.sph, M.bulb, [sx, 2.3, 0], [.9, .9, .9]);
+  });
+  // ── ลานจอด: รถจอดครึ่งหนึ่ง · ลานผู้ค้าแน่นกว่า (ผู้ค้ามาก่อน) ──
+  S.park.forEach(([x, y, f, ven], i) => {
+    if (rnd(59, i, 1) > (ven ? .65 : .5)) return;
+    const o = at(x, y), car = CAR[Math.floor(rnd(59, i, 2) * CAR.length)];
+    put(o, 'carB', GEO.box, M.whiteGloss, [0, .65, 0], [1.8, .9, 4.4], 0, car);
+    put(o, 'carC', GEO.box, M.glassB, [0, 1.35, f ? .3 : -.3], [1.6, .6, 2.2]);
+  });
+  // ── มอเตอร์ไซค์ (ทรงกล่องของเรา) ──
+  S.moto.forEach(([x, y], i) => {
+    if (rnd(61, i, 1) > .6) return;
+    const o = at(x, y);
+    put(o, 'mBody', GEO.box, M.whiteGloss, [0, .5, 0], [.32, .55, 1.75], 0, CAR[i % CAR.length]);
+    put(o, 'mSeat', GEO.box, mat('#2a2633'), [0, .82, .15], [.3, .1, .7]);
+    put(o, 'mBar', GEO.box, M.metal, [0, 1, -.65], [.7, .05, .05]);
+  });
+  // ── ที่นั่งทานอาหาร: โต๊ะกลม + เก้าอี้ · มีเต็นท์ = เต็นท์ขาว · ลานรอบตึก = ร่ม ──
+  S.seat.forEach(([x, y, t], i) => {
+    const o = at(x, y);
+    put(o, 'utable', GEO.cyl, M.table, [0, .72, 0], [1.1, .06, 1.1]);
+    put(o, 'uleg', GEO.cyl, M.pole, [0, .36, 0], [.1, .72, .1]);
+    for (let j = 0; j < 4; j++) { const a = j * Math.PI / 2 + .4; put(o, 'stool', GEO.cyl, M.table, [Math.cos(a) * .85, .22, Math.sin(a) * .85], [.38, .44, .38]); }
+    if (t === 'tent') { if (!putModel(o, 'tent', 0, 3 * .94 / 3.04)) put(o, 'canopy', GEO.cone4, M.white, [0, 2.6, 0], [3.4, 1, 3.4], Math.PI / 4); }
+    else if (t === 'umb') putModel(o, 'umb', i);
+    if (i % 3 === 0) put(o, 'bulb', GEO.sph, M.bulb, [0, 2.1, 0], [.7, .7, .7]);
+  });
+  // ── รางรถไฟฟ้าลอยฟ้า (ไม่ใช่ถนน) · ตัวรางสูง ~12 ม. · ตอม่อทุก ~32 ม. · แถบเขียว BTS ──
+  //    เป็นแผ่นต่อเนื่องตามโค้ง (ท่อนติดกันใช้ขอบร่วมกัน) — ไม่ใช่กล่องต่อกัน ที่โค้งแล้วซ้อน/แหว่งเป็นฟันเลื่อย
+  {
+    const pier = mat('#a9aab3'), green = std('#7ce35a', { emissive: '#7ce35a', emissiveIntensity: .5 });
+    const P = sgRail, N = P.map((p, i) => {   // ทิศตั้งฉากที่แต่ละจุด (เฉลี่ยสองท่อนข้างๆ → รอยต่อเรียบ)
+      const a = P[Math.max(0, i - 1)], b = P[Math.min(P.length - 1, i + 1)], L = Math.hypot(b[0] - a[0], b[1] - a[1]);
+      return [-(b[1] - a[1]) / L, (b[0] - a[0]) / L];
+    });
+    // ชั้นของราง: [ระยะจากเส้นกลาง ซ้าย, ขวา (ม.), ความสูงด้านบน, ความหนา, วัสดุ]
+    const LAYERS = [
+      [[[-4.75, 4.75]], 12, 1.6, mat('#b9bac2')],
+      [[[-4.75, -4.4], [4.4, 4.75]], 12.9, .9, M.cream],
+      [[[-4.85, -4.75], [4.75, 4.85]], 11.7, .4, green],
+      [[[-3.6, -1], [1, 3.6]], 12.06, .1, mat('#8e9099')],
+    ];
+    const tiles = new Map();   // ช่อง → ท่อนของแต่ละชั้น (รวมเป็นชิ้นเดียวต่อช่อง)
+    for (let i = 0; i < P.length - 1; i++) {
+      const [ax, ay] = P[i], [bx, by] = P[i + 1];
+      if (!onBoard(ax, ay) || !onBoard(bx, by)) continue;
+      const mx = (ax + bx) / 2, my = (ay + by) / 2, o = at(mx, my), [MX, MZ] = sgp(mx, my);
+      const loc = (x, y) => { const [X, Z] = sgp(x, y); return new THREE.Vector2(o.x + X - MX, o.z + Z - MZ); };
+      if (!tiles.has(o.ti)) tiles.set(o.ti, { o, shapes: LAYERS.map(() => []) });
+      LAYERS.forEach(([offs], li) => offs.forEach(([l, r]) => {
+        const q = (j, d) => loc(P[j][0] + N[j][0] * d * SU, P[j][1] + N[j][1] * d * SU);
+        tiles.get(o.ti).shapes[li].push(new THREE.Shape([q(i, l), q(i + 1, l), q(i + 1, r), q(i, r)]));
+      }));
+    }
+    for (const { o, shapes } of tiles.values()) LAYERS.forEach(([, top, depth, m], li) => {
+      const me = new THREE.Mesh(new THREE.ExtrudeGeometry(shapes[li], { depth: depth * SM, bevelEnabled: false }), m);
+      me.rotation.x = Math.PI / 2; me.position.y = top * SM; me.castShadow = me.receiveShadow = true;
+      BK.add(o, me);
+    });
+    alongLine(sgRail, 32, (x, y, d) => {
+      if (!onBoard(x, y, .1)) return;
+      if (Object.values(SGZ).some(z => z.kind === 'food' && inPoly(x, y, z.b))) return;   // เจ้าของสั่ง: ไม่มีเสาในลานสตรีทฟู้ด (รางยังลอยผ่าน)
+      const o = at(x, y, Math.atan2(d[1], d[0]));
+      put(o, 'rPier', GEO.cyl, pier, [0, 5.2, 0], [2, 10.4, 2]);
+      put(o, 'rCap', GEO.box, pier, [0, 10, 0], [2.4, 1.2, 7.5]);
+    });
+  }
+  // ── ซุ้มประตูกรุงเทพ (เสา 4 ต้น หลังคาแดง) + รูปปั้นบนแท่นกลม (ทรงเรียบๆ ของเรา) ──
+  {
+    const o = at(...SG.gate.pavilion);
+    for (const [x, z] of [[-3.6, -3.6], [3.6, -3.6], [-3.6, 3.6], [3.6, 3.6]]) put(o, 'gPost', GEO.cyl, mat('#e9dcc6'), [x, 2.1, z], [.5, 4.2, .5]);
+    put(o, 'gBeam', GEO.box, mat('#7a2a24'), [0, 4.35, 0], [8.4, .4, 8.4]);
+    put(o, 'gRoof', GEO.cone4, mat('#9c2f2a', { roughness: .6 }), [0, 5.9, 0], [11, 3, 11], Math.PI / 4);
+    put(o, 'gLamp', GEO.sph, M.lamp, [0, 3.7, 0], [.8, .8, .8]);
+    const s = at(...SG.gate.statue), gold = mat('#d9a441', { roughness: .35, metalness: .5, emissive: '#5a3d0a', emissiveIntensity: .45 });
+    put(s, 'sBase', GEO.cyl, M.basin, [0, .5, 0], [9, 1, 9]);
+    put(s, 'sBase2', GEO.cyl, M.cream, [0, 1.6, 0], [6, 1.2, 6]);
+    put(s, 'sPed', GEO.box, M.cream, [0, 3.3, 0], [2.4, 2.2, 2.4]);
+    put(s, 'sFig', GEO.cyl, gold, [0, 5.9, 0], [1.3, 3, 1.3]);
+    put(s, 'sHead', GEO.sph, gold, [0, 7.9, 0], [1.1, 1.1, 1.1]);
+  }
+  // ── เสาไฟ: ริมถนนใหญ่ฝั่งตลาด + ถนนในตลาด (หัวไฟเรืองแสงตอนค่ำ) ──
+  const lamp = (x, y) => { if (!onBoard(x, y, .1)) return; const o = at(x, y); put(o, 'lpole', GEO.cyl, M.metal, [0, 3.2, 0], [.25, 6.4, .25]); put(o, 'lhead', GEO.sph, M.lamp, [0, 6.5, 0], [1, .6, 1]); };
+  sgRoads.forEach(r => {
+    const side = r.main ? r.w + 3 : r.w + 2, step = r.main ? 30 : 24;
+    alongLine(r.line, step, (x, y, d) => { const nx = -d[1], ny = d[0], sx = x + nx * side, sy = y + ny * side, ox = x - nx * side, oy = y - ny * side;
+      lamp(...(SG.site.some(b => inPoly(sx, sy, b)) ? [sx, sy] : [ox, oy])); });
+  });
+  // ── ป้าย P กลางลานจอด ──
+  SG.zones.filter(([, n, k]) => n && (k === 'park' || k === 'vpark')).forEach(([, , , b]) => {
+    const x = b.reduce((a, p) => a + p[0], 0) / b.length, y = b.reduce((a, p) => a + p[1], 0) / b.length, o = at(x, y);
+    put(o, 'ppole', GEO.cyl, M.metal, [0, 1.6, 0], [.18, 3.2, .18]);
+    const sg = new THREE.Mesh(GEO.box, P_SIGN); sg.scale.set(1.4 * SM, .3 * SM, 1.4 * SM); sg.position.set(o.x, 3.35 * SM, o.z); sg.castShadow = true; BK.add(o, sg);
+  });
+  // ── ต้นไม้ (ทรงของเรา) บนหญ้านอกตลาด ──
+  for (let i = 0, n = 0; i < 400 && n < 34; i++) {
+    const x = SG.frame[0] + rnd(41, i, 1) * (SG.frame[2] - SG.frame[0]), y = SG.frame[1] + rnd(41, i, 2) * (SG.frame[3] - SG.frame[1]);
+    if (!onBoard(x, y, .3) || SG.site.some(b => inPoly(x, y, b)) || sgRoads.some(r => inPoly(x, y, bandPoly(r.line, r.w + 6)))) continue;
+    const o = at(x, y), s = n % 3 ? 1 : 1.25, col = ['#4f7a4a', '#5d7350', '#6f8a55'][n % 3]; n++;
+    put(o, 'trunk', GEO.cyl, M.trunk, [0, 1.8 * s, 0], [.9 * s, 3.6 * s, .9 * s]);
+    put(o, 'leaf', GEO.ico, M.white, [0, 5.3 * s, 0], [7.8 * s, 6.4 * s, 7.8 * s], i, col);
+    put(o, 'leaf', GEO.ico, M.white, [1.4 * s, 6.8 * s, -1 * s], [4.6 * s, 3.8 * s, 4.6 * s], i + 1, '#7ea062');
+  }
+  return BK.finish();
+}
+
+// ── แผ่นตลาด: ฐาน + ช่อง 14×9 ──
+const platform = new THREE.Group(); scene.add(platform);
+const base = new THREE.Mesh(new THREE.BoxGeometry(COLS + .4, .5, ROWS + .4), [M.cream, M.cream, M.side, M.cream, M.cream, M.cream]);
+base.position.y = -.37; base.receiveShadow = true; platform.add(base);
+
+const tiles = [];
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const t = new THREE.Group();
+  t.position.set(c - (COLS - 1) / 2, 0, r - (ROWS - 1) / 2);
+  // ผิวบน (+Y = จุด 8–11 ของ BoxGeometry) ชี้ UV ไปที่ส่วนของช่องนี้ในภาพพื้นทั้งแผ่น
+  const geo = new THREE.BoxGeometry(.996, .12, .996), pos = geo.attributes.position, uv = geo.attributes.uv;
+  for (let i = 8; i < 12; i++) uv.setXY(i, (c + .5 + pos.getX(i)) / COLS, 1 - (r + .5 + pos.getZ(i)) / ROWS);
+  const top = new THREE.Mesh(geo, M.side); top.position.y = -.06; top.receiveShadow = true;
+  const content = new THREE.Group();
+  t.add(top, content);
+  t.userData = { r, c, i: r * COLS + c, top, content };
+  platform.add(t); tiles.push(t);
+}
+// สร้างของแต่ละสาขาครั้งเดียว แล้วเก็บไว้สลับ
+const CACHE = [];
+function branchData(bi) {
+  if (CACHE[bi]) return CACHE[bi];
+  const b = BRANCHES[bi];
+  const ground = b.korat ? koratGround() : b.sg ? sgGround() : gridGround(b.map, bi);
+  const groups = b.korat ? buildKorat() : b.sg ? buildSG() : tiles.map(({ userData: { r, c } }) => build(b.map[r][c], bi, r, c));
+  return (CACHE[bi] = { mats: [M.side, M.side, ground, M.side, M.side, M.side], groups, pins: pinsFor(bi) });
+}
+function setTile(t, bi) {
+  const { i, top, content } = t.userData, d = branchData(bi);
+  top.material = d.mats;
+  content.clear(); content.add(d.groups[i]);
+}
+
+// ── หมุด: ตำแหน่งบนแผ่น + จุด/รัศมีที่กล้องจะบินไป + รูปโซนไว้ไฮไลต์ ──
+function pinsFor(bi) {
+  const b = BRANCHES[bi];
+  if (b.sg) return SG.pins.filter(([, , kind]) => kind !== 'wc' || SG_WC !== 'roof').map(([id, label, kind]) => {
+    const z = SGZ[id], B = SG.bld.find(B => B.name === id), b2 = z ? z.b : B ? B.b : null;
+    const [px, py] = b2 ? [b2.reduce((a, p) => a + p[0], 0) / b2.length, b2.reduce((a, p) => a + p[1], 0) / b2.length] : SG.gate.pavilion;
+    const [X, Z] = sgp(px, py), h = B ? B.h : id === 'gate' ? 8 : 0, poly = b2 ? b2.map(([x, y]) => sgp(x, y)) : null;
+    let center = new THREE.Vector3(X, 0, Z), radius = 25 * SM;
+    if (poly) {
+      const xs = poly.map(p => p[0]), zs = poly.map(p => p[1]);
+      center = new THREE.Vector3((Math.min(...xs) + Math.max(...xs)) / 2, 0, (Math.min(...zs) + Math.max(...zs)) / 2);
+      radius = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs)) / 2 + 12 * SM;
+    }
+    return { label, kind, id, sg: true, poly, center, radius, a: 0, pos: new THREE.Vector3(X, h * SM + .04, Z) };
+  });
+  if (!b.korat) return b.pins.map(([label, kind, [c0, r0, c1, r1]]) => {
+    const x0 = c0 - COLS / 2, x1 = c1 + 1 - COLS / 2, z0 = r0 - ROWS / 2, z1 = r1 + 1 - ROWS / 2;
+    const center = new THREE.Vector3((x0 + x1) / 2, 0, (z0 + z1) / 2);
+    return { label, kind, fake: true, name: label.replace(/^\S+\s/, ''), center, pos: center.clone().setY(.02),
+      radius: Math.max(x1 - x0, z1 - z0) / 2 + .6, poly: [[x0, z0], [x1, z0], [x1, z1], [x0, z1]] };
+  });
+  return K.pins.map(([x, y, h, label, kind, id]) => {
+    const [X, Z] = kp(x, y), zone = K.zones.find(z => z.id === id);
+    const poly = zone ? zone.b.map(([zx, zy]) => kp(zx, zy)) : null;
+    let center = new THREE.Vector3(X, 0, Z), radius = 40 * KB.s;
+    if (poly) {
+      const xs = poly.map(p => p[0]), zs = poly.map(p => p[1]);
+      center = new THREE.Vector3((Math.min(...xs) + Math.max(...xs)) / 2, 0, (Math.min(...zs) + Math.max(...zs)) / 2);
+      radius = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...zs) - Math.min(...zs)) / 2 + 25 * KB.s;
+    }
+    return { label, kind, id, poly, center, radius, a: zone ? zone.a : 0, pos: new THREE.Vector3(X, (h + 6) * KB.s + .04, Z), minor: id === 'fountain' };
+  });
+}
+
+// ── รายละเอียดในการ์ด (ข้อความจาก content.js ผ่าน esc/rt ทุกจุด) ──
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const rt = s => esc(s).replace(/\[([^\]\n]*)\]/g, '<small>$1</small>').replace(/\n/g, '<br>');
+const now = new Date(), md = (now.getMonth() + 1) * 100 + now.getDate();
+const season = md >= 413 && md <= 1031 ? 'low' : 'high', wk = [5, 6, 0].includes(now.getDay()) ? 1 : 0, dayTxt = wk ? 'ศ.–อา.' : 'จ.–พฤ.';
+const range = z => { const v = z.tiers.map(t => t[season][wk]), a = Math.min(...v), b = Math.max(...v); return a === b ? `${a}` : `${a}–${b}`; };
+const m2txt = v => `≈ ${v.toLocaleString('th-TH')} ตร.ม. · ${(v / 1600).toFixed(1)} ไร่`;
+const KINDNAME = { ...K.about.kinds, spot: 'จุดบริการ', wc: 'ห้องน้ำ' };
+const head = (kind, name, where) => `<span class="tag ${kind}">${esc(KINDNAME[kind] || '')}</span><h2>${esc(name)}</h2>${where ? `<p class="where">📍 ${esc(where)}</p>` : ''}<!--ph-->`;
+// ── รูปจริงในการ์ด: ใส่ชื่อไฟล์ตาม "สาขา/id หมุด" (ไฟล์อยู่ prototypes/photos/ ชื่อตัวพิมพ์เล็ก) · ยังไม่มี = ช่องว่างเส้นประ ──
+//    เช่น 'sg/สำนักงาน': ['photos/sg/office-1.jpg', 'photos/sg/office-2.jpg'] · หลายรูป = เลื่อนซ้าย-ขวา
+const PHOTOS = {};
+const photoKey = p => `${p.sg ? 'sg' : p.fake ? 'sb' : 'korat'}/${p.id || p.name}`;
+const photoSlot = p => { const a = PHOTOS[photoKey(p)];
+  return a && a.length ? `<div class="ph">${a.map((u, i) => `<img src="${esc(u)}" alt="${esc(p.name || p.label)} รูปที่ ${i + 1}" loading="lazy">`).join('')}</div>`
+                       : `<div class="ph empty"><div>📷 รูปจริง<small>เพิ่มทีหลัง</small></div></div>`; };
+const todo = (e, k, w = 0) => [e, k, 'รอข้อมูล', w, 1];   // ช่องข้อมูลที่ยังไม่มี → กรอบเส้นประ
+const LOT_TODO = [todo('💰', 'ราคาต่อล็อก/วัน', 1), todo('📐', 'ขนาดล็อก'), todo('🕓', 'เวลาขาย'), todo('⚡', 'ไฟฟ้า'), todo('📞', 'ติดต่อจอง')];
+const chips = (a, c) => `<div class="chips">${a.map(([e, t]) => `<span class="chip ${c}">${esc(e)} ${rt(t)}</span>`).join('')}</div>`;
+const can = z => z.ok ? `<div class="sec"><p class="sec-h">✅ ขายได้</p>${chips(z.ok, 'ok')}${z.no && z.no.length ? `<p class="sec-h" style="margin-top:10px">🚫 ห้ามขาย${z.noTo ? ` <small>→ ${esc(z.noTo)}</small>` : ''}</p>${chips(z.no, 'no')}` : ''}</div>` : '';
+const facts = a => `<div class="sec facts">${a.map(([e, k, v, w, t]) => `<div class="fact${w ? ' w' : ''}${t || v === '—' ? ' todo' : ''}"><small>${esc(e)} ${esc(k)}</small><b>${rt(v)}</b></div>`).join('')}</div>`;
+const flow = a => a && a.length ? `<div class="sec"><p class="sec-h">วิธีจอง</p><ol class="flow">${a.map(([t, d]) => `<li><div><b>${rt(t)}</b><span>${rt(d)}</span></div></li>`).join('')}</ol></div>` : '';
+const telBtn = (t, label, pri) => `<a class="btn${pri ? ' pri' : ''}" href="tel:${esc(String(t).replace(/[^\d+]/g, ''))}">📞 ${esc(t)}${label ? ` <small>${esc(label)}</small>` : ''}</a>`;
+const calls = tel => tel && tel.length ? `<div class="actions">${tel.map((t, i) => telBtn(t, '', i === 0)).join('')}</div>` : '';
+const warn = z => z.warn ? `<p class="warn">${rt(z.warn)}</p>` : '';
+
+// ประตูกรุงเทพ: ผังจากแผนที่ที่ตลาดเผยแพร่เอง (sg-layout.js → info) + เนื้อหาจาก content/site.json (ชุดเดียวกับหน้าแรก · แก้ได้ที่ admin)
+let SITE = null;
+const S = p => SITE ? CMS.get(SITE, p) : '';
+const sf = (e, k, p, w = 0) => `<div class="fact${w ? ' w' : ''}${S(p) ? '' : ' todo'}"><small>${esc(e)} ${esc(k)}</small><b>${SITE ? CMS.T(SITE, p) : 'รอข้อมูล'}</b></div>`;
+const FACT_EMOJI = { size: '📐', online: '📱', walk: '🏢', clock: '🕓', bolt: '⚡', box: '📦', car: '🚗' };
+const lineHref = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
+function sgLot(kind) {   // การ์ดโซนขาย: ราคาวันนี้ + รูปตัวอย่างล็อก + ข้อมูลล็อก + วิธีจอง
+  const V = SITE.vendor, Z = V.zones[kind], P = `vendor.zones.${kind}`;
+  const season = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
+  const i = Z.rows.findIndex(r => (!r.season || r.season === season) && r.dow === dow), r = Z.rows[i];
+  const today = r ? `<div class="today ${kind}"><small>ราคาวันนี้ · ${dow === 'weekday' ? 'จันทร์–พฤหัส' : 'ศุกร์–อาทิตย์'}${r.season ? ' · ' + esc(V.seasons[r.season].label) : ''} · จองออนไลน์</small>`
+    + `<b>${CMS.T(SITE, `${P}.rows.${i}.online`)}</b> <span class="u">บาท/ล็อก/วัน · จองหน้างาน ${CMS.T(SITE, `${P}.rows.${i}.walkin`)}</span></div>` : '';
+  return today
+    + `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><img class="lotimg" src="${esc(Z.img)}" alt="${esc(Z.imgAlt)}" loading="lazy"></div>`
+    + `<div class="sec facts">${Z.facts.map((f, j) => sf(FACT_EMOJI[f[0]] || '•', f[1], `${P}.facts.${j}.2`, j === 0)).join('')}</div>`
+    + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
+    + `<div class="actions"><a class="btn pri" href="${esc(S('links.booking'))}" target="_blank" rel="noopener">จองล็อก ↗</a><a class="btn" href="${esc(lineHref(S('contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE ${esc(S('contact.lineVendor'))}</a></div>`;
+}
+function sgCard(p) {
+  const I = SG.info, where = 'ประตูกรุงเทพ · แยก คปอ.', T = (q, tag, cls) => SITE ? CMS.T(SITE, q, tag, cls) : '';
+  if (p.id === 'gate') return head('spot', 'ประตูกรุงเทพ', S('sgMap.gate.where')) + T('sgMap.gate.note', 'p', 'muted')
+    + `<div class="sec facts">${sf('🕓', 'เวลาตลาดเปิด', 'sgMap.gate.hours', 1)}${sf('🚆', 'เดินจาก BTS แยก คปอ.', 'sgMap.gate.bts', 1)}</div>`;
+  if (p.id === 'ห้องน้ำลูกค้า') return head('wc', 'ห้องน้ำลูกค้า', S('sgMap.wc.where'))
+    + `<div class="sec facts">${sf('🕓', 'เวลาเปิด', 'sgMap.wc.hours')}${sf('💰', 'ค่าบริการ', 'sgMap.wc.fee')}</div>`;
+  if (p.id === 'สำนักงาน') return head('spot', 'สำนักงานตลาด', S('sgMap.office.where')) + T('sgMap.office.note', 'p', 'muted')
+    + `<div class="sec facts">${sf('📞', 'โทร', 'contact.phone')}${sf('🕓', 'เวลาโทร', 'contact.phoneHours')}${sf('💬', 'LINE ผู้ค้า', 'contact.lineVendor')}${sf('🏢', 'เวลาทำการสำนักงาน', 'sgMap.office.hours')}${sf('🧭', 'จุดสังเกต', 'sgMap.office.landmark', 1)}</div>`
+    + `<div class="actions">${S('contact.phone') ? telBtn(S('contact.phone'), '', 1) : ''}<a class="btn" href="${esc(lineHref(S('contact.lineVendor')))}" target="_blank" rel="noopener">💬 LINE</a></div>`;
+  const z = SGZ[p.id];
+  if (z.kind === 'park' || z.kind === 'vpark' || z.kind === 'moto') {
+    const r = I[z.kind === 'vpark' ? 'vpark' : 'park'];
+    return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sgMap.parkEntrance')}</div>`
+      + `<p class="muted">${esc(r.note)} · ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด</p><p class="warn">${esc(I.limit)}</p>`;
+  }
+  return head(z.kind, z.name, where) + `<div class="sec"><p class="sec-h">✅ ขายได้</p><div class="chips"><span class="chip ok">${esc(I[z.kind])}</span></div></div>`
+    + (SITE && SITE.vendor.zones[z.kind] ? sgLot(z.kind) : facts(LOT_TODO));
+}
+function cardHtml(p) {
+  if (p.sg) return sgCard(p);
+  if (p.fake) return head(p.kind, p.name, 'ผังสมมติ') + `<p class="muted">ยังไม่มีผังและรายละเอียดจริงของสาขานี้</p>`
+    + facts(p.kind === 'food' || p.kind === 'boot' ? LOT_TODO
+      : p.kind === 'park' ? [todo('🚗', 'ใครจอดได้'), todo('🕓', 'เวลา')] : [todo('🕓', 'เวลา'), todo('📞', 'ติดต่อ')]);
+  if (p.kind === 'spot') {
+    if (p.id === 'office') return head('spot', 'สำนักงานตลาด', 'จองที่เคาน์เตอร์ได้ที่นี่')
+      + facts(K.about.office.map(([k, v]) => ['', k, v, k === 'ที่อยู่'])) + `<div class="actions">${K.about.calls.map(([t, l], i) => telBtn(t, l, i === 0)).join('')}</div>`
+      + `<div class="sec"><p class="sec-h">มาขายครั้งแรก</p><ol class="flow">${K.about.steps.map(([t, d]) => `<li><div><b>${rt(t)}</b><span>${rt(d)}</span></div></li>`).join('')}</ol></div>`;
+    return head('spot', 'น้ำพุม้า', 'ลานหน้าอาคาร ข้าง WishCo') + `<p class="muted">ม้าโลหะยืนสองขา 2 ตัว กลางอ่างน้ำพุ</p>`;
+  }
+  const z = K.info[p.id], kind = z.kind;
+  if (kind === 'park') return head(kind, z.name, z.where)
+    + `<div class="today park"><small>จอดฟรี · ได้ประมาณ</small><b>${z.count.toLocaleString('th-TH')}</b> <span class="u">คัน</span></div>`
+    + facts([['🚗', 'ช่องจอด', '2.5 × 5 ม.'], ['🕙', 'เวลา', z.hours || '—'], ['🧭', 'ใกล้', z.near || '—', 1], ['🗺️', 'พื้นที่', m2txt(z.m2), 1]])
+    + `<p class="warn">? จำนวนคันนับช่องจากผัง</p>`;
+  if (kind === 'event') return head(kind, z.name, z.where) + can(z)
+    + `<div class="today event"><small>ราคา</small><b>${esc(z.price)}</b> <span class="u">${z.priceNote ? '· ' + esc(z.priceNote) : ''}</span></div>`
+    + facts([...(z.facts || []), ['🗺️', 'พื้นที่', m2txt(z.m2), 1]]) + calls(z.tel) + warn(z);
+  const area = kind === 'boot' ? ['🗺️', 'ล็อกตามผัง', `≈ ${z.count} ล็อก`] : ['🗺️', 'พื้นที่โซน', m2txt(z.m2)];
+  return head(kind, z.name, z.where) + can(z)
+    + `<div class="today ${kind}"><small>ราคาวันนี้ · ${dayTxt} · จองผ่านแอป</small><b>${range(z)}</b> <span class="u">บาท/ล็อก/วัน</span>`
+    + `${K.about.feeNote ? `<small class="sub">${rt(K.about.feeNote)}</small>` : ''}</div>`
+    + facts([...(z.facts || []), ['⚡', 'ไฟฟ้า', K.about.elec], area]) + flow(z.steps) + calls(z.tel) + warn(z);
+}
+
+// ── ตัวจับเวลาแอนิเมชันง่ายๆ ──
+// ครึ่งหลังของท่าพลิกเริ่มใน done ของครึ่งแรกเสมอ — ถ้าเฟรมกระตุก (แท็บพื้นหลัง) ลำดับยังถูก ไม่ค้างตะแคง
+const tweens = [];
+function tween(dur, delay, update, done) { const tw = { t0: performance.now() + delay, dur, update, done }; tweens.push(tw); return tw; }
+function runTweens(now) {
+  for (const tw of [...tweens]) {
+    if (!tweens.includes(tw)) continue;
+    const k = (now - tw.t0) / tw.dur;
+    if (k < 0) continue;
+    tw.update(Math.min(k, 1));
+    if (k >= 1) { tweens.splice(tweens.indexOf(tw), 1); tw.done && tw.done(); }
+  }
+}
+const easeIn = k => k * k * k, easeOut = k => 1 - (1 - k) ** 3, easeInOut = k => k < .5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2;
+const easeOutBack = k => 1 + 2.2 * (k - 1) ** 3 + 1.2 * (k - 1) ** 2;
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ── มุมกล้อง ──
+//    el = มุมเงยจากพื้น · az = กล้องเยื้องไปทางไหน (0 = มองจากทิศใต้ · ลบ = มาจากซ้าย · ±180 = มองจากหน้าตลาด ถ.มิตรภาพ) เป็นองศา
+//    fit = เฟรมเฉพาะพื้นที่ตลาด ไม่ใช่ทั้งแผ่น · rotate = ลากหมุนเองได้ · ซูมเปิด/ปิดแยกที่ปุ่ม 🔍
+//    home = มุมที่เจ้าของจัดเอง (28 ต.ค. 69 · โคราช บนจอ 1920×945) ใช้เป็นมุมเปิดจริง · ปุ่มเลือกมุมอื่นซ่อนไว้ เปิดด้วย ?cam ต่อท้ายลิงก์
+const VIEWS = {
+  home:  { el: 29, az: -179, fit: true, rotate: false, exact: { d: 9.43, t: [.46, 0, -.13], aspect: 1920 / 945 } },
+  front: { el: 50, az: 0,   fit: true,  rotate: false },
+  diagL: { el: 42, az: -40, fit: true,  rotate: false },
+  diagR: { el: 42, az: 40,  fit: true,  rotate: false },
+  low:   { el: 30, az: -28, fit: true,  rotate: false },
+  free:  { el: 51, az: 0,   fit: true,  rotate: true },    // เริ่มจากมุมที่ดูอยู่ แล้วลากหมุนเองรอบ 360°
+};
+// มุมที่เจ้าของหาเองแล้วกด "ใช้มุมนี้" · จำไว้ในเครื่องนี้ (ไม่มีก็ไม่เป็นไร)
+try { const m = JSON.parse(localStorage.getItem('flip-mine')); if (m && isFinite(m.el) && isFinite(m.az)) VIEWS.mine = { el: m.el, az: m.az, fit: true, rotate: false }; } catch {}
+let view = 'home', viewBi = 0, zoomOn = false;
+// มุมหมุนที่ใช้จริง: มุมบ้าน + สาขาที่ตั้ง az ไว้ → ใช้ของสาขา · มุมอื่น (?cam) ใช้ตามมุมนั้น
+const viewAzOf = bi => (view === 'home' && BRANCHES[bi].az != null ? BRANCHES[bi].az : VIEWS[view].az);
+const viewAz = () => viewAzOf(viewBi);
+const dirOf = (elDeg, azDeg) => { const el = THREE.MathUtils.degToRad(elDeg), az = THREE.MathUtils.degToRad(azDeg); return new THREE.Vector3(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)); };
+
+// ── กล้อง: มุมบ้าน · บินไปโซน ──
+const home = { p: new THREE.Vector3(), t: new THREE.Vector3(0, 0, .4), d: 1, full: 1 };
+const VIEW_DIR = new THREE.Vector3(0, .78, .63).normalize();
+let flight = null;
+// จุดขอบพื้นที่ตลาดบนแผ่น: ผังตาราง = มุมแผ่น · โคราช = ขอบที่ดินจริง + โซน + หลังคาตึก (ตัดหญ้ารอบๆ ออก)
+//   ใช้จุดขอบจริง ไม่ใช่กล่องสี่เหลี่ยม — มุมเฉียงแล้วมุมกล่องยื่นเกินผังรูปตัว T มาก กล้องจะถอยไกลเกินจำเป็น
+const boardPts = [];
+for (const x of [-COLS / 2 - .2, COLS / 2 + .2]) for (const y of [0, 1.6]) for (const z of [-ROWS / 2 - .2, ROWS / 2 + .2]) boardPts.push(new THREE.Vector3(x, y, z));
+const sgPts = [
+  ...SG.site.flat().map(([x, y]) => { const [X, Z] = sgp(x, y); return new THREE.Vector3(X, 0, Z); }),
+  ...SG.bld.flatMap(B => B.b.map(([x, y]) => { const [X, Z] = sgp(x, y); return new THREE.Vector3(X, B.h * SM, Z); })),
+].map(v => v.set(THREE.MathUtils.clamp(v.x, -COLS / 2, COLS / 2), v.y, THREE.MathUtils.clamp(v.z, -ROWS / 2, ROWS / 2)));
+const koratPts = [
+  ...[...K.site.flat(), ...K.zones.flatMap(z => z.b)].map(([x, y]) => { const [X, Z] = kp(x, y); return new THREE.Vector3(X, 0, Z); }),
+  ...K.bld.flatMap(B => B.b.map(([x, y]) => { const [X, Z] = kp(x, y); return new THREE.Vector3(X, B.h * KB.s, Z); })),
+];
+// หาระยะ+จุดเล็งที่ทำให้ผังเต็มช่องว่างระหว่างแถบบนกับป้ายสาขาล่าง (ฉายจุดจริงด้วยกล้องจำลอง ไม่เดา)
+function fitView(pts) {
+  const box = new THREE.Box3().setFromPoints(pts);
+  const H = innerHeight, yTop = 1 - 2 * ($('top').getBoundingClientRect().bottom + 10) / H, yBot = -1 + 2 * (H - $('nav').getBoundingClientRect().top + 10) / H;
+  const cam = camera.clone(), t = box.getCenter(new THREE.Vector3()).setY(0), v = new THREE.Vector3();
+  const span = d => {
+    cam.position.copy(t).addScaledVector(VIEW_DIR, d); cam.lookAt(t); cam.updateMatrixWorld();
+    const s = { x0: 9, x1: -9, y0: 9, y1: -9 };
+    for (const p of pts) { v.copy(p).project(cam); s.x0 = Math.min(s.x0, v.x); s.x1 = Math.max(s.x1, v.x); s.y0 = Math.min(s.y0, v.y); s.y1 = Math.max(s.y1, v.y); }
+    return s;
+  };
+  let d = 10;
+  const { right, away } = screenAxes();
+  for (let k = 0; k < 5; k++) {          // หาระยะ (ค้นแบบแบ่งครึ่ง) แล้วเลื่อนจุดเล็งให้ผังอยู่กลางช่องว่าง · ทำซ้ำให้นิ่ง
+    let lo = .5, hi = 120;
+    for (let i = 0; i < 32; i++) { const m = (lo + hi) / 2, s = span(m); if (s.x0 < -.97 || s.x1 > .97 || s.y0 < yBot || s.y1 > yTop) lo = m; else hi = m; }
+    d = hi;
+    const s = span(d), hh = d * Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2);
+    t.addScaledVector(right, (s.x0 + s.x1) / 2 * hh * cam.aspect);
+    t.addScaledVector(away, ((s.y0 + s.y1) / 2 - (yTop + yBot) / 2) * hh / VIEW_DIR.y);
+  }
+  return { t, d };
+}
+// แกนบนพื้นตามมุมกล้อง: right = ขวาของจอ · away = ลึกเข้าไปในจอ (ขึ้นจอ)
+function screenAxes(dir = VIEW_DIR) {
+  const h = new THREE.Vector3(dir.x, 0, dir.z).normalize();
+  return { right: new THREE.Vector3(h.z, 0, -h.x), away: h.clone().negate() };
+}
+function computeHome() {
+  const v = THREE.MathUtils.degToRad(camera.fov) / 2, hz = Math.atan(Math.tan(v) * camera.aspect);
+  home.full = Math.max((COLS + 2) / 2 / Math.tan(hz), (ROWS + 4) / 2 / Math.tan(v)) * 1.05;   // แบบเดิม: เห็นทั้งแผ่น
+  const V = VIEWS[view], korat = BRANCHES[viewBi].korat, sg = BRANCHES[viewBi].sg;
+  if (V.fit) { const f = fitView(korat ? koratPts : sg ? sgPts : boardPts); home.t.copy(f.t); home.d = f.d; }
+  else { home.t.set(0, 0, .4); home.d = home.full; }
+  // โคราช + มุมที่จัดเอง: ใช้ระยะ/จุดเล็งเป๊ะตามที่จัด · จอแคบกว่าตอนจัด ถอยให้เห็นกว้างเท่าเดิม แต่ไม่ไกลกว่าแบบพอดีจอ
+  if (V.exact && korat) {
+    const d = V.exact.d * Math.max(1, V.exact.aspect / camera.aspect);
+    if (d < home.d) { home.d = d; home.t.set(...V.exact.t); }
+  }
+  home.p.copy(home.t).addScaledVector(VIEW_DIR, home.d);
+  zoomLim.min = home.full * .12; zoomLim.max = VIEWS[view].rotate ? home.full * 1.4 : home.d * 1.02;
+  if (!flight) applyZoomLim();   // กำลังบิน: รอใส่ตอนถึง (ใส่ทันที controls จะตัดระยะกลางทาง = กล้องวาป)
+}
+const zoomLim = { min: 0, max: Infinity };
+function applyZoomLim() { controls.minDistance = zoomLim.min; controls.maxDistance = zoomLim.max; }
+// มุมกล้องตอนนี้ เป็นองศา: az = หมุนรอบ (0 = มองจากทิศใต้ตรงๆ · ลบ = จากซ้าย) · el = เงยจากพื้น
+function camAngle() {
+  const o = camera.position.clone().sub(controls.target), r = o.length();
+  return { az: Math.round(THREE.MathUtils.radToDeg(Math.atan2(o.x, o.z))), el: Math.round(THREE.MathUtils.radToDeg(Math.asin(o.y / r))) };
+}
+function applyView(name, fly = true) {
+  if (VIEWS[name].rotate && fly) Object.assign(VIEWS[name], camAngle());   // อิสระ: ตั้งต้นจากมุมที่ดูอยู่ ไม่กระโดด
+  view = name; const V = VIEWS[name], el = THREE.MathUtils.degToRad(V.el), az = THREE.MathUtils.degToRad(viewAz());
+  $('angle').hidden = !V.rotate;
+  VIEW_DIR.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
+  const zoom = V.rotate || zoomOn;
+  controls.enableRotate = V.rotate; controls.enableZoom = zoom; controls.enablePan = zoom;   // ล็อกนิ่งไม่ซูม = ไม่ให้เลื่อนด้วย
+  controls.zoomToCursor = zoom && !V.rotate;   // ล็อกมุม: ซูมเข้าตรงที่นิ้ว/เมาส์ชี้ แทนที่จะซูมเข้ากลางจอ
+  $('hint').textContent = 'แตะหมุดดูรายละเอียด' + (V.rotate ? ' · ลากเพื่อหมุน' : '') + (zoom ? ' · ล้อเมาส์/ถ่างนิ้วเพื่อซูม · Ctrl+ลาก/คลิกขวาลาก/สองนิ้วลากเพื่อเลื่อน' : '');
+  document.querySelectorAll('#segView button[data-view]').forEach(x => x.setAttribute('aria-pressed', x.dataset.view === name));
+  $('zoomBtn').setAttribute('aria-pressed', zoom); $('zoomBtn').disabled = V.rotate;
+  computeHome(); aimSun(fly);
+  if (fly) { closeCard(false); flyTo(home.p, home.t, 700); }
+}
+// ปุ่ม "มุมของฉัน" (โผล่หลังกดใช้มุมนี้)
+function addMineBtn() {
+  if (!VIEWS.mine || document.querySelector('[data-view="mine"]')) return;
+  const b = document.createElement('button');
+  b.dataset.view = 'mine'; b.textContent = '📌 มุมของฉัน'; b.setAttribute('aria-pressed', 'false');
+  b.onclick = () => { if (!busy) applyView('mine'); };
+  $('zoomBtn').before(b);
+}
+let angleTxt = '';
+function showAngle() {
+  if (view !== 'free') return;
+  const a = camAngle(), t = `หมุน ${a.az}° · เงย ${a.el}°`;
+  if (t !== angleTxt) $('angleTxt').textContent = angleTxt = t;
+}
+// บินแบบวนรอบจุดเล็ง (ระยะ/มุมเงย/มุมหมุนค่อยๆ เปลี่ยน) — สาขาที่หันคนละทิศ กล้องหมุนอ้อมไป ไม่บินตัดผ่านเหนือหัว
+const sph0 = new THREE.Spherical(), sph1 = new THREE.Spherical(), sphK = new THREE.Spherical(), flyOff = new THREE.Vector3();
+const UP = new THREE.Vector3(0, 1, 0);
+let sunA = 0, sunTw = null;
+function aimSun(fly = true) {
+  const a1 = THREE.MathUtils.degToRad(viewAz() - VIEWS.home.az), a0 = sunA;
+  if (sunTw && tweens.includes(sunTw)) tweens.splice(tweens.indexOf(sunTw), 1);
+  const set = a => { sunA = a; sun.position.copy(SUN0).applyAxisAngle(UP, a); };
+  if (!fly || reduced) return set(a1);
+  sunTw = tween(1100, 0, k => set(a0 + (a1 - a0) * easeInOut(k)));
+}
+function flyTo(p, t, dur = 900) {
+  if (flight && tweens.includes(flight)) tweens.splice(tweens.indexOf(flight), 1);
+  const t0 = controls.target.clone();
+  sph0.setFromVector3(flyOff.copy(camera.position).sub(t0)); sph1.setFromVector3(flyOff.copy(p).sub(t));
+  const r0 = sph0.radius, f0 = sph0.phi, h0 = sph0.theta, r1 = sph1.radius, f1 = sph1.phi;
+  const dh = ((sph1.theta - h0 + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;   // ทางหมุนที่สั้นกว่า
+  controls.minDistance = 0; controls.maxDistance = Infinity;   // ระหว่างบิน ระยะเปลี่ยนนุ่มตามท่าบินอย่างเดียว (เช่น ซูมเข้าให้พอดีโคราช)
+  flight = tween(reduced ? 1 : dur, 0, k => {
+    const e = easeInOut(k);
+    controls.target.lerpVectors(t0, t, e);
+    camera.position.setFromSpherical(sphK.set(r0 + (r1 - r0) * e, f0 + (f1 - f0) * e, h0 + dh * e)).add(controls.target);
+  }, () => { flight = null; applyZoomLim(); });
+}
+function focusView(p) {
+  const v = THREE.MathUtils.degToRad(camera.fov) / 2, wide = innerWidth > 720, V = VIEWS[view];
+  // หันกล้องตามแนวโซน: โซนเอียง a → กล้องหมุนตาม แถวรถ/ล็อกตรงกับจอ (จุดบริการ a = 0 ใช้มุมหลัก)
+  const dir = V.rotate ? VIEW_DIR : dirOf(V.el, viewAz() - THREE.MathUtils.radToDeg(p.a || 0));
+  let d = Math.max(p.radius / Math.tan(v), p.radius / (Math.tan(v) * camera.aspect * (wide ? .62 : 1))) * 1.15;
+  d = THREE.MathUtils.clamp(d, home.full * .16, Math.min(home.full * .8, home.d));
+  const t = p.center.clone();
+  const { right, away } = screenAxes(dir);
+  if (wide) t.addScaledVector(right, d * Math.tan(v) * camera.aspect * .32);   // เว้นที่ขวาให้การ์ด
+  else t.addScaledVector(away, -d * Math.tan(v) * .55);                         // มือถือ: การ์ดอยู่ล่าง → โซนขึ้นไปครึ่งบน
+  return { p: t.clone().addScaledVector(dir, d), t };
+}
+
+// ── หมุด + การ์ด ──
+const $ = id => document.getElementById(id);
+const pinLayer = $('pins'), card = $('card');
+let pinEls = [], sel = null, hl = null;
+// ── หน้าแรก (home.html) ส่งกลุ่มที่เลือกมา → กรองหมุด · ผู้ค้า: โซนขาย + สำนักงาน + ที่จอด (ซ่อนห้องน้ำ/ประตู/น้ำพุ/ลานกิจกรรม) · ลูกค้า: เห็นทั้งหมด ──
+let pinGroup = null;
+const PIN_HIDE = { ven: p => p.kind === 'wc' || p.kind === 'event' || p.id === 'gate' || p.id === 'fountain' };
+const pinHidden = p => !!(pinGroup && PIN_HIDE[pinGroup] && PIN_HIDE[pinGroup](p));
+addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data) return;
+  if ('pinGroup' in e.data) pinGroup = e.data.pinGroup;
+  if (e.data.content) SITE = e.data.content;   // หน้าแรก/admin ส่งเนื้อหาชุดล่าสุดมา (รวมที่แก้ค้างไว้)
+});
+let cur = 0, mode = 'wave', busy = false;   // เจ้าของเลือก "พลิกไล่ทีละช่อง" (28 ต.ค. 69) · อีก 2 ท่าเก็บไว้ในโค้ด เรียกได้ทาง __flip.setMode
+// ── หมุด 3D แบบ D (เจ้าของเลือก · โมเดล Blender ของเรา brand/3d/pins) ──
+//    เหรียญหันหน้าเข้ากล้องเสมอ · ขนาดคงที่บนจอ · ซ้อนกันเมื่อไร ยกเหรียญขึ้นหนี (เส้นแสงยืดตาม ยังชี้จุดเดิมบนพื้น)
+//    ปุ่ม HTML โปร่งใสวางทับเหรียญ = กด/แท็บคีย์บอร์ดได้เหมือนเดิม · ชื่อโซนเป็นป้ายเล็กใต้เหรียญ
+const PIN_D = .66, PIN_TIP = .47;   // โมเดล: เส้นผ่านศูนย์กลางเหรียญ · จากกลางเหรียญถึงปลายแหลม
+const pin3d = new THREE.Group(); scene.add(pin3d);
+let pinKit = null;
+function makePinKit() {
+  const m = MODELS.pin; if (!m) return null;
+  const part = p => p.mat.name.split('.')[0];
+  const head = m.parts.filter(p => ['body', 'face', 'icon'].includes(part(p))).map(p => ({ geo: p.geo.clone().translate(0, -1.05, 0), part: part(p) }));
+  const ground = m.parts.filter(p => ['glow', 'pool'].includes(part(p))).map(p => ({ geo: p.geo, part: part(p) }));
+  const kinds = {};
+  for (const [kind, col] of Object.entries(KCOL)) {
+    const top = o => Object.assign(o, { depthTest: false, depthWrite: false });   // เหรียญ+เส้นแสงไม่จมหลังตึก
+    const tex = new THREE.TextureLoader().load((window.PIN_ICON || {})[kind] || '');
+    tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 8; tex.flipY = false;   // UV ของ glTF กลับแกน V
+    // เหรียญสว่างในตัวนิดๆ: มุมหลักมองสวนแดด หน้าเหรียญจะมืดถ้าพึ่งแสงฉากอย่างเดียว
+    kinds[kind] = {
+      // หน้าเหรียญ+ไอคอนไม่รับแสงฉาก → สว่างเท่ากันทุกทิศ (หันรับแดดแล้วไม่จ้าจนไอคอนจาง)
+      body: top(std(col, { roughness: .25, metalness: .1, emissive: col, emissiveIntensity: .3 })), face: top(new THREE.MeshBasicMaterial({ color: '#e9e7f1' })),
+      icon: top(new THREE.MeshBasicMaterial({ map: tex, transparent: true })),
+      beam: top(glow(col, 2.5)), glow: glow(col, 3), pool: Object.assign(glow(col, .8), { transparent: true, opacity: .7 }),
+    };
+  }
+  return { head, ground, kinds, beam: new THREE.CylinderGeometry(.012, .012, 1, 8).translate(0, .5, 0) };
+}
+function makePin3d(kind) {
+  const k = pinKit.kinds[kind] || pinKit.kinds.spot, root = new THREE.Group(), head = new THREE.Group(), ground = new THREE.Group();
+  pinKit.head.forEach(({ geo, part }) => head.add(Object.assign(new THREE.Mesh(geo, k[part]), { renderOrder: 10 })));
+  pinKit.ground.forEach(({ geo, part }) => ground.add(new THREE.Mesh(geo, k[part])));
+  const beam = Object.assign(new THREE.Mesh(pinKit.beam, k.beam), { renderOrder: 9 });
+  root.add(head, ground, beam); pin3d.add(root);
+  return { root, head, ground, beam };
+}
+function renderPins(bi) {
+  pinLayer.innerHTML = ''; pin3d.clear();
+  pinKit = pinKit || makePinKit();
+  pinEls = branchData(bi).pins.map(p => {
+    const el = document.createElement('button'), name = p.label.includes(' ') ? p.label.replace(/^\S+\s/, '') : '';
+    el.type = 'button'; el.className = `pin ${p.kind}${p.minor ? ' minor' : ''}`;
+    el.setAttribute('aria-label', name || p.label);
+    el.innerHTML = '<i></i><span></span>'; el.lastChild.textContent = name;
+    el.onclick = () => openCard(p, el);
+    pinLayer.appendChild(el);
+    return { p, el, m: pinKit && makePin3d(p.kind), w: 0, h: 0 };
+  });
+}
+const pv = new THREE.Vector3(), pu = new THREE.Vector3();
+function placePins() {
+  const W = innerWidth, H = innerHeight, near = camera.position.distanceTo(controls.target) < home.d * .6;   // น้ำพุ โผล่เมื่อซูมเข้าจากมุมบ้าน
+  pinLayer.classList.toggle('near', near);
+  const off = pinLayer.classList.contains('hide'), wide = W > 720, D = wide ? 48 : 34, BASE = D * 1.15, MAXLIFT = wide ? 220 : 110;
+  const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  // วัดตำแหน่งบนจอ แล้วเรียงลำดับวาง: หมุดโซนที่มีชื่อก่อน → หมุด P ไม่มีชื่อ → หมุดย่อย · ในกลุ่มเดียวกัน ใกล้กล้อง (ล่างจอ) ก่อน
+  const list = pinEls.map(q => {
+    pv.copy(q.p.pos).project(camera); pu.copy(q.p.pos).setY(q.p.pos.y + 1).project(camera);
+    if (!q.w) { q.el.classList.remove('bare'); q.w = Math.max(D, q.el.offsetWidth); q.h = q.el.offsetHeight; q.named = !!q.el.textContent; }
+    return { q, x: (pv.x + 1) / 2 * W, y: (1 - pv.y) / 2 * H, up: Math.max(((1 - pu.y) / 2 * H - (1 - pv.y) / 2 * H) * -1, .001), front: pv.z < 1,
+      rank: (q.p.minor ? 2 : q.named ? 0 : 1) };
+  }).sort((a, b) => (a.rank - b.rank) || (b.y - a.y));
+  // แถบบน (โลโก้) + ป้ายสาขาล่าง ถือว่าเป็นที่ที่มีของอยู่แล้ว หมุดห้ามทับ
+  const placed = [$('top'), $('nav')].map(e => { const b = e.getBoundingClientRect(); return { x0: b.left, x1: b.right, y0: b.top, y1: b.bottom }; });
+  const hit = r => placed.some(o => r.x0 < o.x1 + 4 && r.x1 + 4 > o.x0 && r.y0 < o.y1 + 4 && r.y1 + 4 > o.y0);
+  const fit = (it, w, h) => {   // หาความสูงที่ไม่ทับใคร (ยกขึ้นก่อน → ไม่ได้ ลองย่อเส้นลง กรณีโซนอยู่ชิดขอบบนจอ) · ไม่ได้ = null
+    const tryLift = lift => {
+      const top = it.y - BASE - lift - D / 2, r = { x0: it.x - w / 2, x1: it.x + w / 2, y0: top, y1: top + h };
+      return r.y0 > 0 && !hit(r) ? { lift, r } : null;
+    };
+    for (let lift = 0; lift <= MAXLIFT; lift += 6) { const f = tryLift(lift); if (f) return f; }
+    for (let lift = -6; lift >= -(BASE - D * .35); lift -= 6) { const f = tryLift(lift); if (f) return f; }   // เส้นแสงเหลืออย่างน้อย ~1/3 เหรียญ
+    return null;
+  };
+  for (const it of list) {
+    const { q } = it;
+    let show = it.front && !off && !pinHidden(q.p) && (!q.p.minor || near), lift = 0, bare = false;
+    if (show) {   // ที่ไม่พอ: ซ่อนชื่อก่อน (เหลือเหรียญ) → ยังไม่พอ ซ่อนทั้งหมุด (แตะหมุดใกล้ๆ หรือกล้องบินเข้าไปแล้วจะโผล่)
+      let f = fit(it, q.w, q.h);
+      if (!f && q.named) { f = fit(it, D, D); bare = !!f; }
+      if (f) { lift = f.lift; placed.push(f.r); } else show = false;
+    }
+    q.el.classList.toggle('bare', bare);
+    q.el.style.visibility = show ? '' : 'hidden';
+    q.el.style.transform = `translate(${(it.x - (bare ? D : q.w) / 2).toFixed(1)}px,${(it.y - BASE - lift - D / 2).toFixed(1)}px)`;
+    if (!q.m) continue;
+    q.m.root.visible = show;
+    if (!show) continue;
+    const s = D * (2 * camera.position.distanceTo(q.p.pos) * tanV / H) / PIN_D, hW = (BASE + lift) / it.up;   // s = ขนาดให้เหรียญกว้าง D px · hW = ความสูงเหรียญเหนือพื้น
+    q.m.root.position.copy(q.p.pos);
+    q.m.head.position.y = hW; q.m.head.scale.setScalar(s * (q.el.classList.contains('on') ? 1.15 : 1));
+    q.m.head.rotation.y = Math.atan2(camera.position.x - q.p.pos.x, camera.position.z - q.p.pos.z);
+    q.m.ground.scale.setScalar(s);
+    q.m.beam.scale.set(s, Math.max(hW - PIN_TIP * s, .001), s);
+  }
+}
+function highlight(p) {
+  if (hl) { platform.remove(hl); hl.traverse(o => o.geometry && o.geometry.dispose()); hl = null; }
+  if (!p || !p.poly) return;
+  const col = KCOL[p.kind], g = new THREE.Group();
+  const fill = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape(p.poly.map(([x, z]) => new THREE.Vector2(x, -z)))),
+    new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: .3, depthWrite: false }));
+  fill.rotation.x = -Math.PI / 2; fill.position.y = .014;
+  const edge = new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(p.poly.map(([x, z]) => new THREE.Vector3(x, .02, z))),
+    new THREE.LineBasicMaterial({ color: col }));
+  g.add(fill, edge); platform.add(g); hl = g;
+}
+function openCard(p, el) {
+  if (busy) return;
+  sel = p;
+  pinEls.forEach(q => q.el.classList.toggle('on', q.el === el));
+  $('cardBody').innerHTML = cardHtml(p).replace('<!--ph-->', photoSlot(p)); card.scrollTop = 0;
+  card.classList.add('on'); card.setAttribute('aria-hidden', 'false'); document.body.classList.add('carded');
+  highlight(p);
+  const v = focusView(p); flyTo(v.p, v.t);
+}
+function closeCard(fly = true) {
+  if (!sel) return;
+  sel = null; highlight(null);
+  pinEls.forEach(q => q.el.classList.remove('on'));
+  card.classList.remove('on'); card.setAttribute('aria-hidden', 'true'); document.body.classList.remove('carded');
+  if (fly) flyTo(home.p, home.t);
+}
+$('cardX').onclick = () => closeCard();
+addEventListener('keydown', e => { if (e.key === 'Escape') closeCard(); });
+
+// ── ท่าพลิก 3 แบบ ──
+const FLIPS = {
+  // 1 พลิกทั้งแผ่น: ยกขึ้น หมุนตะแคง 90° เปลี่ยนผังตอนแผ่นตั้งฉาก แล้วหมุนกลับจากอีกด้าน
+  card(next, dir, swapLabel, end) {
+    tween(560, 0, k => { const e = easeIn(k); platform.rotation.z = -dir * e * Math.PI / 2; platform.position.y = e * 1.4; },
+      () => {
+        tiles.forEach(t => setTile(t, next)); swapLabel(); platform.rotation.z = dir * Math.PI / 2;
+        tween(700, 0, k => { const e = easeOut(k); platform.rotation.z = dir * (1 - e) * Math.PI / 2; platform.position.y = (1 - e) * 1.4; }, end);
+      });
+  },
+  // 2 พลิกไล่ทีละช่อง: แต่ละช่องพลิกเอง เริ่มจากฝั่งลูกศร ไล่เป็นคลื่น
+  wave(next, dir, swapLabel, end) {
+    let left = tiles.length;
+    for (const t of tiles) {
+      const { r, c } = t.userData, order = dir > 0 ? c : COLS - 1 - c;
+      const delay = order * 55 + r * 18;
+      tween(260, delay, k => { t.rotation.z = -dir * easeIn(k) * Math.PI / 2; t.position.y = k * .5; },
+        () => {
+          setTile(t, next); t.rotation.z = dir * Math.PI / 2;
+          tween(320, 0, k => { const e = easeOut(k); t.rotation.z = dir * (1 - e) * Math.PI / 2; t.position.y = (1 - e) * .5; },
+            () => { if (--left === 0) end(); });
+        });
+    }
+    tween(1, 20 * COLS + 260, () => {}, swapLabel);
+  },
+  // 3 ยุบแล้วโผล่: ของยุบลงพื้นจากกลางออกขอบ แล้วของสาขาใหม่เด้งขึ้น
+  rise(next, dir, swapLabel, end) {
+    let left = tiles.length;
+    for (const t of tiles) {
+      const { r, c, content } = t.userData;
+      const d = Math.hypot(c - (COLS - 1) / 2, r - (ROWS - 1) / 2), delay = d * 45;
+      tween(240, delay, k => { content.scale.set(1, Math.max(1 - easeIn(k), .001), 1); },
+        () => {
+          setTile(t, next);
+          tween(480, 20, k => { content.scale.set(1, Math.max(easeOutBack(k), .001), 1); },
+            () => { content.scale.set(1, 1, 1); if (--left === 0) end(); });
+        });
+    }
+    tween(1, 300, () => {}, swapLabel);
+  },
+};
+
+// ── ป้ายชื่อสาขา ──
+$('dots').innerHTML = BRANCHES.map(() => '<i></i>').join('');
+function showLabel(bi) {
+  const b = BRANCHES[bi];
+  $('code').textContent = b.tag; $('name').textContent = b.name; $('sub').textContent = b.sub;
+  [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === bi));
+}
+
+function go(dir) {
+  if (busy) return;
+  const next = (cur + dir + BRANCHES.length) % BRANCHES.length;
+  busy = true; $('prev').disabled = $('next').disabled = true;
+  if (VIEWS[view].rotate) { Object.assign(VIEWS[view], camAngle()); applyView(view, false); }   // อิสระ: พลิกแล้วคงมุมที่หมุนไว้
+  viewBi = next;
+  if (!VIEWS[view].rotate) VIEW_DIR.copy(dirOf(VIEWS[view].el, viewAz()));   // สาขาที่มีมุมของตัวเอง → กล้องหมุนไปมุมนั้น
+  aimSun();
+  computeHome();   // มุมบ้านของสาขาถัดไป (โคราชเฟรมแคบกว่าผังตาราง)
+  closeCard(false); flyTo(home.p, home.t, 1100);   // ช้าพอให้หมุนอ้อมไปมุมของสาขาถัดไปได้นุ่ม
+  branchData(next);   // สร้างของสาขาถัดไปก่อนเริ่มพลิก ไม่ให้สะดุดกลางท่า
+  $('label').classList.add('out'); pinLayer.classList.add('hide');
+  const swapLabel = () => { showLabel(next); $('label').classList.remove('out'); };
+  const end = () => {
+    cur = next; busy = false; $('prev').disabled = $('next').disabled = false;
+    renderPins(cur); pinLayer.classList.remove('hide');
+  };
+  if (reduced) { tiles.forEach(t => setTile(t, next)); swapLabel(); end(); return; }
+  FLIPS[mode](next, VIEW_DIR.z < 0 ? -dir : dir, swapLabel, end);   // มองจากหน้าตลาด ซ้าย-ขวาบนจอกลับด้าน → คลื่นยังวิ่งจากฝั่งลูกศรที่กด
+}
+$('prev').onclick = () => go(-1);
+$('next').onclick = () => go(1);
+addEventListener('keydown', e => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1); });
+document.querySelectorAll('#segView button[data-view]').forEach(b => b.onclick = () => { if (!busy) applyView(b.dataset.view); });
+$('zoomBtn').onclick = () => { if (busy) return; zoomOn = !zoomOn; applyView(view); };
+$('angleSave').onclick = () => {
+  const a = camAngle();
+  VIEWS.mine = { ...a, fit: true, rotate: false };
+  try { localStorage.setItem('flip-mine', JSON.stringify(a)); } catch {}
+  console.log('[มุมของฉัน]', a);
+  addMineBtn(); applyView('mine');
+};
+addMineBtn();
+
+// ── ขนาดจอ: ถอยกล้องให้แผ่นตลาดพอดีจอ ทั้งจอกว้างและมือถือ ──
+function resize() {
+  const w = innerWidth, h = innerHeight, aspect = w / h;
+  renderer.setSize(w, h); composer.setSize(w, h); bloom.setSize(w, h);
+  camera.aspect = aspect; camera.updateProjectionMatrix();
+  computeHome();
+  pinEls.forEach(q => (q.w = 0));   // ขนาดหมุดเปลี่ยนตามจอ → วัดป้ายใหม่
+  const v2 = sel ? focusView(sel) : home;
+  camera.position.copy(v2.p); controls.target.copy(v2.t);
+}
+addEventListener('resize', resize);
+
+await Promise.all([loadModels(), document.fonts.ready, CMS.load().then(c => { SITE = SITE || c; }, e => console.warn(e.message))]);
+if (CMS.EDIT) {   // admin: แก้ในการ์ด → ส่งให้หน้าแม่เก็บ/บันทึก
+  document.body.classList.add('edit');
+  CMS.bind(card, { get vendor() { return SITE.vendor; }, get contact() { return SITE.contact; }, get links() { return SITE.links; }, get sgMap() { return SITE.sgMap; } },
+    (p, v) => parent !== window && parent.postMessage({ patch: { p, v } }, location.origin), () => {});
+}
+if (new URLSearchParams(location.search).has('cam')) document.querySelector('.tools').hidden = false;   // ปุ่มหามุมกล้อง (สำหรับจัดมุมใหม่)
+tiles.forEach(t => setTile(t, cur)); showLabel(cur); applyView(view, false); resize(); renderPins(cur);
+$('loading').remove();
+// เลื่อนได้ไม่เกินขอบแผ่น: ถ้าจุดเล็งหลุดขอบ ดึงทั้งจุดเล็งและกล้องกลับเท่ากัน (มุมไม่เพี้ยน)
+const panPull = new THREE.Vector3();
+function keepOnBoard() {
+  if (flight) return;
+  const t = controls.target;
+  panPull.set(THREE.MathUtils.clamp(t.x, -COLS / 2, COLS / 2) - t.x, 0, THREE.MathUtils.clamp(t.z, -ROWS / 2, ROWS / 2) - t.z);
+  if (panPull.lengthSq()) { t.add(panPull); camera.position.add(panPull); }
+}
+renderer.setAnimationLoop(now => { runTweens(now); controls.update(); keepOnBoard(); placePins(); showAngle(); composer.render(); });
+window.__flip = { go, setMode: m => (mode = m), platform, tiles, camera, controls, pins: () => pinEls };   // ใช้ทดสอบจากคอนโซล
+</script>
+</body>
+</html>
