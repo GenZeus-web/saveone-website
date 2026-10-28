@@ -1,3 +1,6 @@
 .scratch/
 node_modules/
 .DS_Store
+
+# ภาพอ้างอิงสำหรับวาดผัง (ภาพดาวเทียมเป็นของ Google · ไม่ขึ้นเว็บ ไม่เข้า git)
+prototypes/tools/ref/

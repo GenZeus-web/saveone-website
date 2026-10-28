@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>วาดผังสาขา</title>
+<!-- เครื่องมือในเครื่อง: วาดกรอบโซนบนภาพดาวเทียม → ส่งออก JSON ไปทำผัง 3D · ไม่ใช่หน้าเว็บจริง
+     เปิด: http://127.0.0.1:8795/prototypes/tools/zone-draw.html?b=sg  (ภาพอยู่ ref/<สาขา>-satellite.png · ไม่เข้า git) -->
+<style>
+:root{--bg:#14122a;--panel:#1d1a38;--line:#363260;--ink:#ecebf7;--mute:#9d9ac0;--acc:#7ce35a}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.45 "Noto Sans Thai","Leelawadee UI",system-ui,sans-serif;overflow:hidden}
+#stage{position:fixed;inset:0 320px 0 0;cursor:crosshair;background:#0e0c20}
+#stage.m-sel{cursor:default}
+#stage.pan{cursor:grabbing}
+svg{width:100%;height:100%;display:block;user-select:none}
+#grid{display:none}
+.bp #stage{background:#0b2a52}
+.bp #photo{opacity:0!important}
+.bp #grid{display:inline}
+
+.shp{fill:color-mix(in srgb,var(--c) 30%,transparent);stroke:var(--c);stroke-width:2;vector-effect:non-scaling-stroke;cursor:pointer}
+.shp.draft{stroke-dasharray:7 5}
+.shp.k-rail{fill:color-mix(in srgb,var(--c) 14%,transparent);stroke-dasharray:3 4}
+.shp.on{stroke:#fff;stroke-width:3;fill:color-mix(in srgb,var(--c) 45%,transparent)}
+.bp .shp{fill:color-mix(in srgb,var(--c) 18%,transparent)}
+.lbl{fill:#fff;paint-order:stroke;stroke:#000a;stroke-width:3px;font-weight:600;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+.lbl tspan.sub{font-weight:400;fill:#d8d6ee}
+.h{fill:#fff;stroke:#000;stroke-width:1.5;vector-effect:non-scaling-stroke;cursor:move}
+.h.mid{fill:#ffffff80;stroke:#0008}
+.tmp{fill:#ffffff20;stroke:#fff;stroke-width:2;stroke-dasharray:5 4;vector-effect:non-scaling-stroke;pointer-events:none}
+.tmp-pt{fill:var(--acc);pointer-events:none}
+.meas{stroke:#ffd84a;stroke-width:2.5;vector-effect:non-scaling-stroke;pointer-events:none}
+
+aside{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--panel);border-left:1px solid var(--line);overflow:auto;padding:14px 14px 40px}
+h1{font-size:16px;margin:0 0 2px}
+.hint{color:var(--mute);font-size:12px;margin:0}
+section{border-top:1px solid var(--line);margin-top:12px;padding-top:10px}
+section>b{display:block;font-size:12px;color:var(--mute);font-weight:600;margin-bottom:6px}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+button,.chip{font:inherit;color:var(--ink);background:#2a2650;border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
+button:hover,.chip:hover{border-color:#6d68a8}
+button.on{background:var(--acc);color:#10240a;border-color:var(--acc);font-weight:600}
+button.warn{border-color:#c0506a}
+button.warn.armed{background:#c0506a}
+kbd{font:11px ui-monospace,monospace;background:#0006;border-radius:4px;padding:0 4px;margin-left:4px;color:var(--mute)}
+button.on kbd{color:#10240a99;background:#fff6}
+.chip{display:flex;align-items:center;gap:6px;padding:4px 8px;font-size:12px}
+.chip i{width:12px;height:12px;border-radius:3px;background:var(--c);flex:none}
+.chip.on{outline:2px solid #fff}
+input[type=text],input[type=number]{font:inherit;color:var(--ink);background:#0f0d24;border:1px solid var(--line);border-radius:8px;padding:6px 8px;width:100%}
+input[type=range]{width:100%}
+#selbox[hidden],#measbox[hidden]{display:none}
+.stat{color:var(--mute);font-size:12px;margin-top:6px}
+ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+li{display:flex;gap:8px;align-items:center;padding:4px 6px;border-radius:6px;cursor:pointer}
+li:hover{background:#ffffff0d}
+li.on{background:#ffffff1c}
+li i{width:10px;height:10px;border-radius:2px;background:var(--c);flex:none}
+li span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+li small{color:#ffd84a;font-size:11px}
+#ref{position:fixed;left:12px;bottom:12px;width:420px;border:2px solid var(--line);border-radius:10px;overflow:hidden;background:#000;box-shadow:0 10px 30px #0008;cursor:zoom-in}
+#ref.big{width:calc(100vw - 360px);cursor:zoom-out}
+#ref img{display:block;width:100%}
+#ref[hidden]{display:none}
+#toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--acc);color:#10240a;padding:6px 14px;border-radius:20px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none}
+#toast.show{opacity:1}
+#noimg{position:fixed;inset:0 320px 0 0;display:none;place-items:center;color:var(--mute);text-align:center;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="stage">
+  <svg id="svg">
+    <defs>
+      <pattern id="gp" width="20" height="20" patternUnits="userSpaceOnUse">
+        <path d="M20 0H0V20" fill="none" stroke="#ffffff22" stroke-width=".6"/>
+      </pattern>
+    </defs>
+    <g id="world">
+      <image id="photo" x="0" y="0"/>
+      <rect id="grid" x="0" y="0" fill="url(#gp)"/>
+      <g id="shapes"></g>
+      <g id="labels"></g>
+      <g id="temp"></g>
+      <g id="handles"></g>
+    </g>
+  </svg>
+</div>
+<div id="noimg">ไม่พบภาพดาวเทียมของสาขานี้<br>ลากไฟล์ภาพมาวางบนจอได้</div>
+<div id="ref" hidden><img id="refimg" alt="ผังภาพวาดเดิม"></div>
+<div id="toast"></div>
+
+<aside>
+  <h1>วาดผังสาขา <span id="bname"></span></h1>
+  <p class="hint">ล้อเมาส์ = ซูม · คลิกขวาลาก / Space+ลาก = เลื่อนภาพ · Ctrl+Z = ย้อน</p>
+
+  <section>
+    <b>เครื่องมือ</b>
+    <div class="row" id="modes">
+      <button data-m="sel">เลือก/แก้<kbd>V</kbd></button>
+      <button data-m="rect">สี่เหลี่ยม<kbd>R</kbd></button>
+      <button data-m="poly">หลายเหลี่ยม<kbd>P</kbd></button>
+      <button data-m="meas">วัดระยะ<kbd>M</kbd></button>
+    </div>
+    <p class="hint" id="mhint" style="margin-top:6px"></p>
+  </section>
+
+  <section>
+    <b id="kindTitle">ชนิดพื้นที่ (ของกรอบใหม่)</b>
+    <div class="row" id="kinds"></div>
+  </section>
+
+  <section id="selbox" hidden>
+    <b>กรอบที่เลือก</b>
+    <input type="text" id="sname" placeholder="ชื่อ เช่น สตรีทฟู้ด GB–GJ">
+    <div class="row" style="margin-top:8px">
+      <button id="straight" title="ขอบที่เกือบตรงแนว จะถูกดัดให้ตรง (0°/45°/90°)">จัดขอบให้ตรง</button>
+      <button id="confirm">✓ ถูกแล้ว</button>
+      <button id="del" class="warn">ลบ<kbd>Del</kbd></button>
+    </div>
+    <p class="stat" id="sstat"></p>
+    <p class="hint">ลากจุดขาว = ย้ายมุม · ลากจุดจาง = เพิ่มมุม · Alt+คลิกมุม = ลบมุม · ลากในกรอบ = ย้ายทั้งกรอบ</p>
+  </section>
+
+  <section id="measbox" hidden>
+    <b>ระยะจริงของเส้นที่วัด (เมตร)</b>
+    <input type="number" id="meters" min="1" step="0.5" placeholder="เช่น 10">
+    <p class="stat" id="mstat"></p>
+  </section>
+
+  <section>
+    <b>กรอบทั้งหมด <span id="count"></span></b>
+    <ul id="list"></ul>
+  </section>
+
+  <section>
+    <b>มุมมอง</b>
+    <div class="row">
+      <button id="bp">แบบพิมพ์เขียว</button>
+      <button id="refbtn">ภาพผังเดิม</button>
+      <button id="fit">พอดีจอ</button>
+    </div>
+    <label class="hint" style="display:block;margin-top:8px">ความชัดภาพดาวเทียม
+      <input type="range" id="op" min="0" max="1" step=".05" value="1"></label>
+    <label class="hint" style="display:block;margin-top:4px">แนวหลักของผัง (องศา) — สี่เหลี่ยม/จัดขอบ ใช้แนวนี้
+      <input type="number" id="ang" step="0.5" value="0"></label>
+  </section>
+
+  <section>
+    <b>บันทึก</b>
+    <p class="hint">บันทึกในเบราว์เซอร์อัตโนมัติ · เสร็จแล้วกด "คัดลอก" แล้ววางในแชต หรือดาวน์โหลดไฟล์</p>
+    <div class="row" style="margin-top:6px">
+      <button id="copy">คัดลอก JSON</button>
+      <button id="dl">ดาวน์โหลด</button>
+      <button id="reset" class="warn">กลับไปร่างเดิม</button>
+    </div>
+  </section>
+</aside>
+
+<script>
+const $ = s => document.querySelector(s);
+const Q = new URLSearchParams(location.search);
+const B = (Q.get('b') || 'sg').toLowerCase();
+const IMG = Q.get('img') || `ref/${B}-satellite.png`;
+const REF = Q.get('ref') || `ref/${B}-illustration.jpg`;
+const KEY = 'zone-draw:' + B;
+const BNAME = { sg: 'ประตูกรุงเทพ', sb: 'บางนา' };
+
+// ชนิดพื้นที่ · สีเดียวกับหมุดในหน้า 3D
+const KINDS = [
+  ['food', 'สตรีทฟู้ด', '#ff8a3d'],
+  ['boot', 'เปิดท้าย', '#b48cf0'],
+  ['event', 'ลานกิจกรรม', '#2cc9b5'],
+  ['park', 'ที่จอดรถลูกค้า', '#5aaeea'],
+  ['vpark', 'ที่จอดรถผู้ค้า', '#3b78c4'],
+  ['bldg', 'อาคาร/หลังคา', '#b9bec8'],
+  ['spot', 'จุดบริการ/ประตู', '#f2c94c'],
+  ['road', 'ถนน/ทางรถ', '#80869a'],
+  ['rail', 'รางรถไฟฟ้า (ลอยฟ้า)', '#7ce35a'],
+  ['other', 'อื่นๆ', '#ef5da8'],
+];
+const KC = Object.fromEntries(KINDS.map(([k, n, c]) => [k, { n, c }]));
+
+// เส้นกลาง → แถบกว้าง (ใช้กับรางรถไฟฟ้า/ซอยโค้ง)
+function band(line, w) {
+  const L = [], R = [];
+  line.forEach((p, i) => {
+    const a = line[Math.max(0, i - 1)], b = line[Math.min(line.length - 1, i + 1)];
+    let dx = b[0] - a[0], dy = b[1] - a[1]; const n = Math.hypot(dx, dy) || 1; dx /= n; dy /= n;
+    L.push([p[0] - dy * w, p[1] + dx * w]); R.push([p[0] + dy * w, p[1] - dx * w]);
+  });
+  return [...L, ...R.reverse()].map(p => p.map(Math.round));
+}
+
+// ร่างแรกจากภาพดาวเทียม (Claude เดาจากภาพ + ผังภาพวาดเดิม) · เส้นประ = ยังไม่ยืนยัน
+const DRAFT = {
+  sg: [
+    ['rail', 'รางรถไฟฟ้า (ลอยฟ้า ไม่ใช่ถนน)', band([[0, 712], [50, 650], [150, 540], [250, 445], [350, 382], [500, 315], [650, 262], [850, 165], [1050, 65], [1185, 0]], 14)],
+    ['road', 'ถ.พหลโยธิน', [[40, 0], [180, 0], [160, 450], [100, 831], [0, 831], [0, 600]]],
+    ['road', 'ถ.พหลโยธิน–ลำลูกกา', [[150, 40], [1241, 40], [1241, 115], [150, 110]]],
+    ['road', 'ซ.วิเชียรกลิ่นสุคนธ์ (ด้านบน)', [[185, 102], [1030, 120], [1030, 152], [185, 146]]],
+    ['road', 'ซ.พหลโยธิน 54/2', [[300, 146], [313, 146], [313, 560], [300, 560]]],
+    ['road', 'ซ.วิเชียรกลิ่นสุคนธ์ (ด้านล่าง)', band([[150, 490], [330, 575], [500, 640], [620, 690], [760, 680], [900, 600], [1050, 500], [1150, 400], [1185, 340]], 12)],
+    ['spot', 'ประตูกรุงเทพ + รูปปั้น', [[178, 104], [212, 104], [212, 172], [178, 172]]],
+    ['food', 'สตรีทฟู้ด GB–GJ', [[190, 148], [300, 148], [300, 318], [190, 318]]],
+    ['bldg', 'อาคารกานต์มณี', [[312, 198], [422, 198], [422, 326], [312, 326]]],
+    ['bldg', 'หลังคาโปร่งสีฟ้า', [[423, 162], [477, 162], [477, 292], [423, 292]]],
+    ['bldg', 'ห้องแถว', [[490, 155], [615, 155], [615, 248], [490, 248]]],
+    ['bldg', 'อาคารแถวยาว', [[660, 248], [968, 248], [968, 300], [660, 300]]],
+    ['bldg', 'ใบเงิน Cafe / บาร์', [[206, 320], [290, 320], [290, 368], [206, 368]]],
+    ['food', 'สตรีทฟู้ด GL–GT', [[315, 388], [480, 388], [480, 560], [315, 548]]],
+    ['boot', 'เปิดท้าย GW–GZ', [[484, 388], [798, 388], [798, 600], [484, 600]]],
+    ['vpark', 'ที่จอดรถผู้ค้า', [[804, 388], [966, 388], [966, 600], [804, 600]]],
+    ['vpark', 'ลานจอดด้านเหนือ', [[630, 302], [878, 302], [878, 368], [630, 368]]],
+    ['park', 'ลานจอดฝั่งตะวันออก', [[978, 172], [1045, 172], [1150, 350], [1150, 400], [978, 505]]],
+  ],
+};
+
+let S, sel = null, mode = 'sel', kind = 'food', hist = [], uid = 1;
+let IW = 1241, IH = 831, view = { x: 0, y: 0, k: 1 };
+let poly = null, meas = null, drag = null, space = false, hover = null;
+
+const fresh = () => ({ ang: 0, scale: null, shapes: (DRAFT[B] || []).map(([kind, name, pts]) => ({ id: uid++, kind, name, pts, draft: true })) });
+function load() {
+  // เก็บสำเนาของรอบก่อนไว้ทุกครั้งที่เปิด (กู้ได้ถ้ากดพลาด) · งานจริงสำรองเป็นไฟล์ที่ prototypes/layouts/
+  try { const t = localStorage.getItem(KEY); if (t) { localStorage.setItem(KEY + ':bak', t); S = JSON.parse(t);uid = Math.max(0, ...S.shapes.map(s => s.id)) + 1; return; } } catch (e) {}
+  S = fresh();
+}
+function persist() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} }
+function snap() { hist.push(JSON.stringify(S)); if (hist.length > 200) hist.shift(); }
+function undo() { const t = hist.pop(); if (!t) return; S = JSON.parse(t); if (!S.shapes.some(s => s.id === sel)) sel = null; persist(); drawAll(); }
+function commit(fn) { snap(); fn(); persist(); drawAll(); }
+
+const cur = () => S.shapes.find(s => s.id === sel);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ppm = () => S.scale ? Math.hypot(S.scale.b[0] - S.scale.a[0], S.scale.b[1] - S.scale.a[1]) / S.scale.m : 0;
+const area = pts => Math.abs(pts.reduce((a, p, i) => { const q = pts[(i + 1) % pts.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0)) / 2;
+const centroid = pts => { const n = pts.length; return [pts.reduce((a, p) => a + p[0], 0) / n, pts.reduce((a, p) => a + p[1], 0) / n]; };
+const rad = d => d * Math.PI / 180;
+// ป้ายชื่อ: กรอบมุมเยอะ (แถบถนน/ราง) วางกลางเส้น ไม่งั้นค่าเฉลี่ยจะหลุดออกนอกแถบ
+const labelAt = pts => { const n = pts.length, i = n >> 2; return n > 8 ? [(pts[i][0] + pts[n - 1 - i][0]) / 2, (pts[i][1] + pts[n - 1 - i][1]) / 2] : centroid(pts); };
+
+// ── วาด ──
+function drawAll() { draw(); drawList(); drawSel(); }
+function draw() {
+  const k = view.k;
+  $('#shapes').innerHTML = S.shapes.map(s =>
+    `<polygon class="shp k-${s.kind}${s.draft ? ' draft' : ''}${s.id === sel ? ' on' : ''}" data-id="${s.id}" style="--c:${KC[s.kind].c}" points="${s.pts.map(p => p.join(',')).join(' ')}"/>`).join('');
+  const fs = 12 / k;
+  $('#labels').innerHTML = S.shapes.map(s => {
+    const [x, y] = labelAt(s.pts), nm = s.name || KC[s.kind].n;
+    return `<text class="lbl" x="${x}" y="${y}" style="font-size:${fs}px;stroke-width:${3 / k}px">${esc(nm)}${s.draft ? ' ?' : ''}</text>`;
+  }).join('');
+  const s = cur(), r = 5 / k;
+  $('#handles').innerHTML = mode === 'sel' && s ? s.pts.map((p, i) => {
+    const q = s.pts[(i + 1) % s.pts.length];
+    return `<circle class="h mid" data-mid="${i}" cx="${(p[0] + q[0]) / 2}" cy="${(p[1] + q[1]) / 2}" r="${r * .8}"/>`;
+  }).join('') + s.pts.map((p, i) => `<circle class="h" data-h="${i}" cx="${p[0]}" cy="${p[1]}" r="${r}"/>`).join('') : '';
+  drawTemp();
+}
+function drawTemp() {
+  const k = view.k; let h = '';
+  if (poly && poly.length) {
+    const pts = hover ? [...poly, hover] : poly;
+    h += `<polyline class="tmp" points="${pts.map(p => p.join(',')).join(' ')}"/>`;
+    h += poly.map((p, i) => `<circle class="tmp-pt" cx="${p[0]}" cy="${p[1]}" r="${(i ? 3 : 6) / k}"/>`).join('');
+  }
+  if (drag && drag.type === 'rect' && drag.b) h += `<polygon class="tmp" points="${rectPts(drag.a, drag.b).map(p => p.join(',')).join(' ')}"/>`;
+  const m = meas || (S.scale ? [S.scale.a, S.scale.b] : null);
+  if (m && mode === 'meas') {
+    const b = m[1] || hover;
+    if (b) h += `<line class="meas" x1="${m[0][0]}" y1="${m[0][1]}" x2="${b[0]}" y2="${b[1]}"/>`;
+  }
+  $('#temp').innerHTML = h;
+}
+function drawList() {
+  $('#count').textContent = `(${S.shapes.length})`;
+  $('#list').innerHTML = S.shapes.map(s => `<li data-id="${s.id}" class="${s.id === sel ? 'on' : ''}" style="--c:${KC[s.kind].c}"><i></i><span>${esc(s.name || KC[s.kind].n)}</span>${s.draft ? '<small>ร่าง</small>' : ''}</li>`).join('');
+}
+function drawSel() {
+  const s = cur();
+  $('#selbox').hidden = !s;
+  $('#kindTitle').textContent = s ? 'ชนิดพื้นที่ (ของกรอบที่เลือก)' : 'ชนิดพื้นที่ (ของกรอบใหม่)';
+  const k = s ? s.kind : kind;
+  document.querySelectorAll('#kinds .chip').forEach(c => c.classList.toggle('on', c.dataset.k === k));
+  if (!s) return;
+  if (document.activeElement !== $('#sname')) $('#sname').value = s.name;
+  $('#confirm').hidden = !s.draft;
+  const m = ppm();
+  $('#sstat').textContent = m ? `≈ ${Math.round(area(s.pts) / m / m).toLocaleString('th-TH')} ตร.ม. · ${s.pts.length} มุม` : `${s.pts.length} มุม · วัดระยะก่อนถึงจะบอกพื้นที่จริงได้`;
+}
+function applyView() { $('#world').setAttribute('transform', `translate(${view.x} ${view.y}) scale(${view.k})`); draw(); }
+function fit() {
+  const r = $('#svg').getBoundingClientRect(), k = Math.min(r.width / IW, r.height / IH) * .96;
+  view = { k, x: (r.width - IW * k) / 2, y: (r.height - IH * k) / 2 }; applyView();
+}
+
+// ── ช่วยให้เส้นตรง ──
+// สี่เหลี่ยมตามแนวหลัก: a, b = มุมทแยง
+function rectPts(a, b) {
+  const t = rad(S.ang), c = Math.cos(t), s = Math.sin(t);
+  const loc = p => [p[0] * c + p[1] * s, -p[0] * s + p[1] * c], wld = p => [p[0] * c - p[1] * s, p[0] * s + p[1] * c];
+  const A = loc(a), Bq = loc(b);
+  return [[A[0], A[1]], [Bq[0], A[1]], [Bq[0], Bq[1]], [A[0], Bq[1]]].map(wld).map(p => p.map(v => Math.round(v * 10) / 10));
+}
+// ดูดเข้ามุมของกรอบอื่น (ขอบติดกันพอดี ไม่มีช่อง) → ไม่งั้นดัดให้เส้นจากจุดก่อนหน้าตรงแนว 0/45/90° ถ้าเกือบตรง
+function snapPt(w, prev, skipId, free) {
+  const tol = 9 / view.k;
+  let best = null, bd = tol;
+  for (const s of S.shapes) if (s.id !== skipId) for (const p of s.pts) { const d = Math.hypot(p[0] - w[0], p[1] - w[1]); if (d < bd) { bd = d; best = p; } }
+  if (best) return [...best];
+  if (!prev || free) return w;
+  const dx = w[0] - prev[0], dy = w[1] - prev[1], L = Math.hypot(dx, dy), a = Math.atan2(dy, dx), base = rad(S.ang);
+  const st = Math.PI / 4, sa = base + Math.round((a - base) / st) * st;
+  if (Math.abs(a - sa) > rad(7)) return w;
+  return [prev[0] + Math.cos(sa) * L, prev[1] + Math.sin(sa) * L].map(v => Math.round(v * 10) / 10);
+}
+// จัดขอบให้ตรง: ขอบไหนเอียงไม่เกิน 12° จากแนว 0/45/90° → ดัดให้ตรง แล้วหามุมใหม่จากจุดตัดของขอบ
+function straighten(pts) {
+  const n = pts.length, base = rad(S.ang), st = Math.PI / 4;
+  const lines = pts.map((p, i) => {
+    const q = pts[(i + 1) % n], a = Math.atan2(q[1] - p[1], q[0] - p[0]);
+    const sa = base + Math.round((a - base) / st) * st, use = Math.abs(a - sa) <= rad(12) ? sa : a;
+    return { m: [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2], d: [Math.cos(use), Math.sin(use)] };
+  });
+  return pts.map((p, i) => {
+    const A = lines[(i - 1 + n) % n], Bl = lines[i], den = A.d[0] * Bl.d[1] - A.d[1] * Bl.d[0];
+    if (Math.abs(den) < .15) return p;
+    const t = ((Bl.m[0] - A.m[0]) * Bl.d[1] - (Bl.m[1] - A.m[1]) * Bl.d[0]) / den;
+    return [A.m[0] + A.d[0] * t, A.m[1] + A.d[1] * t].map(v => Math.round(v * 10) / 10);
+  });
+}
+
+// ── โหมด ──
+const MHINT = {
+  sel: 'คลิกกรอบเพื่อเลือก แล้วแก้ชื่อ/ชนิด/มุม',
+  rect: 'ลากเป็นสี่เหลี่ยม (ตรงตามแนวหลักเสมอ)',
+  poly: 'คลิกทีละมุม · คลิกจุดแรก/Enter = ปิดกรอบ · Backspace = ลบจุดล่าสุด · เส้นเกือบตรงจะดูดให้ตรงเอง (กด Alt = ไม่ดูด)',
+  meas: 'คลิก 2 จุดบนสิ่งที่รู้ขนาดจริง (เช่น ความยาวอาคาร) แล้วพิมพ์ระยะเป็นเมตร',
+};
+function setMode(m) {
+  mode = m; poly = null; drag = null;
+  if (m !== 'meas') meas = null;
+  document.querySelectorAll('#modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  $('#stage').className = 'm-' + m;
+  $('#mhint').textContent = MHINT[m];
+  $('#measbox').hidden = m !== 'meas';
+  if (m === 'meas') measStat();
+  draw();
+}
+function measStat() {
+  const m = ppm();
+  $('#mstat').textContent = m ? `ตั้งแล้ว: 1 เมตร ≈ ${m.toFixed(2)} พิกเซลภาพ (วัดใหม่ได้)` : 'ยังไม่ได้ตั้งมาตราส่วน';
+  if (S.scale) $('#meters').value = S.scale.m;
+}
+function finishPoly() {
+  if (poly && poly.length >= 3) {
+    const pts = poly; commit(() => { const s = { id: uid++, kind, name: '', pts }; S.shapes.push(s); sel = s.id; });
+    poly = null; setMode('sel'); $('#sname').focus();
+  } else { poly = null; draw(); }
+}
+
+// ── เมาส์ ──
+const svg = $('#svg');
+const toW = e => { const r = svg.getBoundingClientRect(); return [(e.clientX - r.left - view.x) / view.k, (e.clientY - r.top - view.y) / view.k].map(v => Math.round(v * 10) / 10); };
+const scrD = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]) * view.k;
+svg.addEventListener('contextmenu', e => e.preventDefault());
+svg.addEventListener('pointerdown', e => {
+  svg.setPointerCapture(e.pointerId);
+  const w = toW(e), d = e.target.dataset;
+  if (e.button === 1 || e.button === 2 || space) { drag = { type: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y }; $('#stage').classList.add('pan'); return; }
+  if (e.button !== 0) return;
+  if (mode === 'poly') {
+    if (!poly) poly = [];
+    const p = snapPt(w, poly[poly.length - 1], null, e.altKey);
+    if (poly.length >= 3 && scrD(p, poly[0]) < 10) return finishPoly();
+    if (poly.length && scrD(p, poly[poly.length - 1]) < 4) return finishPoly();   // ดับเบิลคลิก
+    poly.push(p); drawTemp(); return;
+  }
+  if (mode === 'rect') { drag = { type: 'rect', a: snapPt(w, null, null, e.altKey) }; return; }
+  if (mode === 'meas') {
+    meas = meas && meas.length === 1 ? [meas[0], w] : [w];
+    if (meas.length === 2) { $('#meters').value = ''; $('#meters').focus(); }
+    drawTemp(); return;
+  }
+  // เลือก/แก้
+  const s = cur();
+  if (s && d.h !== undefined) {
+    const i = +d.h;
+    if (e.altKey) { if (s.pts.length > 3) commit(() => s.pts.splice(i, 1)); return; }
+    snap(); drag = { type: 'vert', i }; return;
+  }
+  if (s && d.mid !== undefined) { snap(); const i = +d.mid + 1; s.pts.splice(i, 0, w); drag = { type: 'vert', i }; draw(); return; }
+  if (d.id) { sel = +d.id; snap(); drag = { type: 'move', last: w, moved: false }; drawAll(); return; }
+  sel = null; drawAll();
+  drag = { type: 'pan', sx: e.clientX, sy: e.clientY, vx: view.x, vy: view.y }; $('#stage').classList.add('pan');
+});
+svg.addEventListener('pointermove', e => {
+  const w = toW(e);
+  if (!drag) { if (poly || (mode === 'meas' && meas && meas.length === 1)) { hover = mode === 'poly' ? snapPt(w, poly[poly.length - 1], null, e.altKey) : w; drawTemp(); } return; }
+  if (drag.type === 'pan') { view.x = drag.vx + e.clientX - drag.sx; view.y = drag.vy + e.clientY - drag.sy; applyView(); return; }
+  const s = cur();
+  if (drag.type === 'vert' && s) { const n = s.pts.length; s.pts[drag.i] = snapPt(w, s.pts[(drag.i - 1 + n) % n], s.id, e.altKey); draw(); drawSel(); }
+  if (drag.type === 'move' && s) {
+    const dx = w[0] - drag.last[0], dy = w[1] - drag.last[1]; drag.last = w; drag.moved = true;
+    s.pts = s.pts.map(p => [Math.round((p[0] + dx) * 10) / 10, Math.round((p[1] + dy) * 10) / 10]); draw();
+  }
+  if (drag.type === 'rect') { drag.b = w; drawTemp(); }
+});
+svg.addEventListener('pointerup', () => {
+  if (!drag) return;
+  $('#stage').classList.remove('pan');
+  if (drag.type === 'rect' && drag.b && scrD(drag.a, drag.b) > 8) {
+    const pts = rectPts(drag.a, drag.b);
+    commit(() => { const s = { id: uid++, kind, name: '', pts }; S.shapes.push(s); sel = s.id; });
+    setMode('sel'); $('#sname').focus();
+  } else if (drag.type === 'move' && !drag.moved) hist.pop();   // แค่คลิกเลือก ไม่นับเป็นการแก้
+  else if (drag.type !== 'pan') { persist(); drawAll(); }
+  drag = null; drawTemp();
+});
+svg.addEventListener('wheel', e => {
+  e.preventDefault();
+  const r = svg.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
+  const k2 = Math.min(30, Math.max(.2, view.k * Math.exp(-e.deltaY * .0015)));
+  view.x = mx - (mx - view.x) * k2 / view.k; view.y = my - (my - view.y) * k2 / view.k; view.k = k2; applyView();
+}, { passive: false });
+
+addEventListener('keydown', e => {
+  if (e.target.matches?.('input')) { if (e.key === 'Enter' || e.key === 'Escape') e.target.blur(); return; }
+  if (e.code === 'Space') { space = true; e.preventDefault(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.code === 'KeyZ') { e.preventDefault(); undo(); return; }
+  if (e.key === 'Enter' && poly) return finishPoly();
+  if (e.key === 'Escape') { poly = null; meas = null; sel = null; drawAll(); return; }
+  if (e.key === 'Backspace' && poly) { e.preventDefault(); poly.pop(); if (!poly.length) poly = null; drawTemp(); return; }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel) { e.preventDefault(); delSel(); return; }
+  const m = { KeyV: 'sel', KeyR: 'rect', KeyP: 'poly', KeyM: 'meas' }[e.code];
+  if (m && !e.ctrlKey && !e.metaKey) setMode(m);
+});
+addEventListener('keyup', e => { if (e.code === 'Space') space = false; });
+addEventListener('resize', () => applyView());
+
+// ── แผงด้านขวา ──
+$('#kinds').innerHTML = KINDS.map(([k, n, c]) => `<span class="chip" data-k="${k}" style="--c:${c}"><i></i>${n}</span>`).join('');
+$('#kinds').addEventListener('click', e => {
+  const c = e.target.closest('.chip'); if (!c) return;
+  const s = cur();
+  if (s) commit(() => { s.kind = c.dataset.k; }); else { kind = c.dataset.k; drawSel(); }
+});
+$('#modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
+$('#list').addEventListener('click', e => {
+  const li = e.target.closest('li'); if (!li) return;
+  sel = +li.dataset.id; if (mode !== 'sel') setMode('sel');
+  const s = cur(), [cx, cy] = centroid(s.pts), r = svg.getBoundingClientRect();
+  view.x = r.width / 2 - cx * view.k; view.y = r.height / 2 - cy * view.k; applyView(); drawAll();
+});
+$('#sname').addEventListener('focus', () => snap());
+$('#sname').addEventListener('input', e => { const s = cur(); if (s) { s.name = e.target.value; persist(); draw(); drawList(); } });
+$('#straight').onclick = () => { const s = cur(); if (s) commit(() => { s.pts = straighten(s.pts); }); };
+$('#confirm').onclick = () => { const s = cur(); if (s) commit(() => { delete s.draft; }); };
+function delSel() { commit(() => { S.shapes = S.shapes.filter(s => s.id !== sel); sel = null; }); }
+$('#del').onclick = delSel;
+$('#meters').addEventListener('change', e => {
+  const m = parseFloat(e.target.value);
+  if (m > 0 && meas && meas.length === 2) { commit(() => { S.scale = { a: meas[0], b: meas[1], m }; }); meas = null; measStat(); toast('ตั้งมาตราส่วนแล้ว'); }
+});
+$('#bp').onclick = e => { document.body.classList.toggle('bp'); e.currentTarget.classList.toggle('on'); };
+$('#op').oninput = e => { $('#photo').style.opacity = e.target.value; };
+$('#ang').value = S?.ang ?? 0;
+$('#ang').addEventListener('change', e => { commit(() => { S.ang = parseFloat(e.target.value) || 0; }); });
+$('#fit').onclick = fit;
+$('#refbtn').onclick = e => { const r = $('#ref'); r.hidden = !r.hidden; e.currentTarget.classList.toggle('on', !r.hidden); };
+$('#ref').onclick = () => $('#ref').classList.toggle('big');
+
+// ── ส่งออก ──
+function out() {
+  const m = ppm();
+  return JSON.stringify({
+    branch: B, image: IMG, size: [IW, IH], mainAngle: S.ang, pxPerMeter: m ? +m.toFixed(3) : null,
+    shapes: S.shapes.map(s => ({
+      kind: s.kind, kindName: KC[s.kind].n, name: s.name, ...(s.draft ? { draft: true } : {}),
+      ...(s.kind === 'rail' ? { elevated: true } : {}), ...(m ? { areaM2: Math.round(area(s.pts) / m / m) } : {}),
+      pts: s.pts.map(p => p.map(v => Math.round(v * 10) / 10)),
+    })),
+  }, null, 1);
+}
+function toast(t) { const el = $('#toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 1600); }
+$('#copy').onclick = async () => {
+  try { await navigator.clipboard.writeText(out()); toast('คัดลอกแล้ว — วางในแชตได้เลย'); }
+  catch (e) { toast('คัดลอกไม่ได้ — ใช้ดาวน์โหลดแทน'); }
+};
+$('#dl').onclick = () => {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([out()], { type: 'application/json' }));
+  a.download = `zones-${B}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+};
+$('#reset').onclick = e => {
+  const b = e.currentTarget;
+  if (!b.classList.contains('armed')) { b.classList.add('armed'); b.textContent = 'กดอีกครั้งเพื่อยืนยัน'; setTimeout(() => { b.classList.remove('armed'); b.textContent = 'กลับไปร่างเดิม'; }, 2500); return; }
+  b.classList.remove('armed'); b.textContent = 'กลับไปร่างเดิม';
+  commit(() => { uid = 1; S = fresh(); sel = null; }); $('#ang').value = 0;
+};
+
+// ลากไฟล์ภาพมาวาง (ใช้กับสาขาที่ยังไม่มีภาพในโฟลเดอร์ ref)
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => {
+  e.preventDefault(); const f = e.dataTransfer.files[0]; if (!f || !f.type.startsWith('image/')) return;
+  const r = new FileReader(); r.onload = () => setPhoto(r.result); r.readAsDataURL(f);
+});
+
+function setPhoto(src) {
+  const im = new Image();
+  im.onload = () => {
+    IW = im.naturalWidth; IH = im.naturalHeight;
+    const p = $('#photo'); p.setAttribute('href', src); p.setAttribute('width', IW); p.setAttribute('height', IH);
+    const g = $('#grid'); g.setAttribute('width', IW); g.setAttribute('height', IH);
+    $('#noimg').style.display = 'none'; fit();
+  };
+  im.onerror = () => { $('#noimg').style.display = 'grid'; fit(); };
+  im.src = src;
+}
+
+load();
+$('#ang').value = S.ang || 0;
+$('#bname').textContent = BNAME[B] || B.toUpperCase();
+$('#refimg').src = REF; $('#refimg').onerror = () => { $('#refbtn').hidden = true; };
+setMode('sel'); drawAll(); setPhoto(IMG);
+</script>
+</body>
+</html>
