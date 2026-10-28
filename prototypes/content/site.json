@@ -30,7 +30,7 @@
     "quick": [
       { "ic": "search", "title": "ตามหาร้าน", "sub": "หาร้าน/สินค้าได้ทุกสาขา · เปิดใน LINE", "link": "findShop", "main": true },
       { "ic": "parking", "title": "ที่จอดรถ · ห้องน้ำ", "sub": "ดูบนผังด้านบน", "href": "#map" },
-      { "ic": "cam", "title": "ดูกล้อง", "sub": "ดูบรรยากาศตลาดตอนนี้", "link": "cctv" },
+      { "ic": "cam", "title": "ดูกล้อง · ประตูกรุงเทพ", "sub": "ดูบรรยากาศตลาดตอนนี้ (โคราชยังไม่มีลิงก์)", "link": "cctv" },
       { "ic": "chat", "title": "แจ้งปัญหา", "sub": "LINE @saveone.go.cs", "line": "lineCustomer" }
     ],
     "branchesTitle": "สาขา",
@@ -49,7 +49,7 @@
     "quick": [
       { "ic": "store", "title": "จองล็อก", "sub": "เข้าระบบจองของตลาด", "link": "booking", "main": true },
       { "ic": "chat", "title": "แจ้งปัญหา / ติดต่อแอดมิน", "sub": "LINE @saveone.go", "line": "lineVendor" },
-      { "ic": "cam", "title": "ดูกล้องแต่ละโซน", "sub": "กล้องสดของตลาด", "link": "cctv" },
+      { "ic": "cam", "title": "ดูกล้องแต่ละโซน", "sub": "กล้องสดสาขาประตูกรุงเทพ", "link": "cctv" },
       { "ic": "phone", "title": "092-895-0699", "sub": "โทร 14:00–22:00 · แจ้งเข้าสายต้องโทร", "tel": "phone" }
     ],
     "priceTitle": "ราคาและขนาดล็อก",

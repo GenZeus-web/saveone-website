@@ -11,8 +11,9 @@
 <style>
 :root{--bg:#15122b;--bg2:#252050;--ink:#f6f1e7;--muted:#b3aec6;--line:rgba(246,241,231,.2);--go:#84e62d;--bad:#ff7a7a;--warn:#ffcf6b;--ed:#5fb3ff}
 *{box-sizing:border-box;margin:0}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",sans-serif;line-height:1.55}
+html{scroll-behavior:smooth;overflow-x:hidden;touch-action:pan-y}   /* มือถือ: เลื่อนขึ้นลงได้อย่างเดียว ไม่ซูม/ไม่ลากข้างจนล้นจอ */
+.w{display:inline-block;max-width:100%}
+body{overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",sans-serif;line-height:1.55}
 a{color:inherit}
 button{font-family:inherit}
 .wrap{max-width:1080px;margin:0 auto;padding:0 16px}
@@ -36,7 +37,11 @@ button{font-family:inherit}
 .who .go{display:block;margin-top:12px;color:var(--go);font-weight:600;font-size:14px}
 .skip{margin-top:16px;font-size:14px;background:none;border:0;color:var(--muted);text-decoration:underline;cursor:pointer}
 .chipg{position:absolute;z-index:4;top:16px;left:50%;transform:translateX(-50%);font-weight:600;font-size:14px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(29,25,64,.92);color:var(--ink);cursor:pointer;white-space:nowrap}
-@media (max-width:640px){ .map{height:80vh;height:80svh} .who{grid-template-columns:1fr;gap:10px} .who ul{display:none} .who b{font-size:19px} .gate h1{margin-bottom:14px} }
+/* กดหมุดบนมือถือ: ผังขยายเต็มจอ (ผังบน + รายละเอียดล่าง เลื่อนอ่านในแผ่นเดียว) */
+html.mapfull,html.mapfull body{overflow:hidden}
+html.mapfull .map{position:fixed;inset:0;height:100vh;height:100dvh;z-index:60}
+html.mapfull .chipg{display:none}
+@media (max-width:640px){ .chipg{left:auto;right:12px;transform:none;font-size:13px;padding:6px 12px} .map{height:80vh;height:80svh} .who{grid-template-columns:1fr;gap:10px} .who ul{display:none} .who b{font-size:19px} .gate h1{margin-bottom:14px} }
 
 /* ── เนื้อหา ── */
 .grp{display:none}.grp.on{display:block}
@@ -119,6 +124,10 @@ body.edit .edpanel{display:block}
 .edpanel input:focus{border-color:var(--ed)}
 .edgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
 body.edit{padding-bottom:90px}
+
+/* ซ่อนแถบเลื่อน (ยังเลื่อนได้) — แถบกินที่ทำให้หน้าไม่สมส่วน */
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body>
@@ -134,7 +143,7 @@ body.edit{padding-bottom:90px}
 <main class="grp" id="g-ven"></main>
 <footer id="foot"></footer>
 
-<script src="content/cms.js"></script>
+<script src="content/cms.js?v=20261028c"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -253,7 +262,7 @@ function renderPanel() {
   if (!EDIT) return;
   const inp = (p, label) => `<label>${esc(label)}<input data-p="${esc(p)}" value="${esc(get(C, p))}"></label>`;
   $('edpanel').innerHTML = `<section class="sec"><h2>ลิงก์และเบอร์ติดต่อ</h2><p class="sub">ปุ่มบนหน้าเว็บใช้ค่าพวกนี้ · แก้ตรงนี้ที่เดียว ทุกปุ่มเปลี่ยนตาม</p>
-    <div class="card edgrid">${inp('links.booking', 'ลิงก์จองล็อก')}${inp('links.cctv', 'ลิงก์ดูกล้อง')}${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF)')}
+    <div class="card edgrid">${inp('links.booking', 'ลิงก์จองล็อก')}${inp('links.cctv', 'ลิงก์ดูกล้อง (ประตูกรุงเทพ)')}${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF)')}
     ${inp('contact.lineVendor', 'LINE ผู้ค้า')}${inp('contact.lineCustomer', 'LINE ลูกค้า')}${inp('contact.phone', 'เบอร์โทร')}${inp('contact.phoneHours', 'เวลาโทร')}</div></section>`;
 }
 function renderAll() { renderGate(); renderCus(); renderVen(); renderFoot(); renderPanel(); wireGate(); }
@@ -263,6 +272,8 @@ const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
 let group = null;
 const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
 frame.addEventListener('load', tellMap);
+// ผังบอกว่าเปิด/ปิดการ์ด → มือถือขยายผังเต็มจอ
+addEventListener('message', e => { if (e.origin === location.origin && e.data && 'cardOpen' in e.data) document.documentElement.classList.toggle('mapfull', !!e.data.cardOpen && innerWidth <= 720); });
 function pick(g) {
   group = g; tellMap();
   gate.classList.add('off'); chip.hidden = false; chip.textContent = (g ? C.gate[g].title : 'ดูผังทั้งหมด') + ' · เปลี่ยน';
@@ -319,7 +330,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html' + (EDIT ? '?edit' : '');
+  frame.src = 'branch-flip.html?v=20261028c' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);

@@ -3,13 +3,15 @@
 (() => {
   const EDIT = new URLSearchParams(location.search).has('edit');
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  // วลีเดียวกันไม่ให้ตัดกลางบรรทัด: แยกตาม " · " และช่องว่าง ห่อแต่ละวลีเป็นก้อน (ขึ้นบรรทัดใหม่ได้แค่ระหว่างก้อน · จุดคั่นติดท้ายวลีก่อนหน้า)
+  const phr = s => String(s ?? '').split(' · ').map((c, i, a) => c.split(/ +/).map((w, j, b) => `<span class="w">${esc(w)}${i < a.length - 1 && j === b.length - 1 ? '&nbsp;·' : ''}</span>`).join(' ')).join(' ');
   const keys = p => String(p).split('.');
   const get = (o, p) => keys(p).reduce((a, k) => (a == null ? a : a[k]), o);
   const set = (o, p, v) => { const k = keys(p), last = k.pop(); const t = k.reduce((a, x) => a[x], o); t[last] = v; };
   // ช่องข้อความผูก json · ว่าง = "รอข้อมูล" (กรอบเส้นประ)
   const T = (C, p, tag = 'span', cls = '') => {
     const v = get(C, p), empty = v == null || v === '';
-    return `<${tag} data-p="${esc(p)}" class="${cls}${empty ? ' empty' : ''}"${EDIT ? ' contenteditable="plaintext-only" spellcheck="false"' : ''}>${empty ? (EDIT ? '' : 'รอข้อมูล') : esc(v)}</${tag}>`;
+    return `<${tag} data-p="${esc(p)}" class="${cls}${empty ? ' empty' : ''}"${EDIT ? ' contenteditable="plaintext-only" spellcheck="false"' : ''}>${empty ? (EDIT ? '' : 'รอข้อมูล') : EDIT ? esc(v) : phr(v)}</${tag}>`;
   };
   // ปุ่มเพิ่ม/ลบรายการ (โชว์เฉพาะโหมดแก้)
   const del = p => EDIT ? `<button type="button" class="ed-del" data-del="${esc(p)}" title="ลบ" aria-label="ลบรายการนี้">×</button>` : '';
@@ -59,5 +61,5 @@
     if (!r.ok) throw new Error('โหลด ' + url + ' ไม่ได้ (' + r.status + ')');
     return r.json();
   }
-  window.CMS = { EDIT, esc, get, set, T, del, add, bind, sync, seasonNow, dowNow, load };
+  window.CMS = { EDIT, esc, phr, get, set, T, del, add, bind, sync, seasonNow, dowNow, load };
 })();

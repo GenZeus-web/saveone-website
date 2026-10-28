@@ -121,12 +121,18 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 .edit [data-p].empty{min-width:5em}
 .edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:#ffcf6b;opacity:.7;font-weight:400}
 .muted{color:var(--muted);font-size:13px;margin-top:10px}
+.w{display:inline-block;max-width:100%}
 
 @media (max-width:720px){
-  .card{top:auto;left:0;right:0;bottom:0;width:auto;max-height:62%;border-radius:20px 20px 0 0;transform:translateY(105%)}
+  /* มือถือ: การ์ดเต็มจอใต้แถบผังด้านบน (ผังเหลือ 36% บน · รายละเอียดเลื่อนอ่านในแผ่นเดียว) */
+  .card{top:36%;left:0;right:0;bottom:0;width:auto;max-height:none;border-radius:20px 20px 0 0;transform:translateY(105%);overscroll-behavior:contain;touch-action:pan-y;padding-bottom:28px}
   body.carded .nav{opacity:0;pointer-events:none}
 }
 @media (max-width:520px){ .label{min-width:0;padding:6px 14px} .label h2{font-size:18px} .label p{display:none} .seg button{padding:6px 8px;font-size:12px} .seg span{display:none} .tools{align-items:flex-start} }
+
+/* ซ่อนแถบเลื่อน (ยังเลื่อนได้) — แถบกินที่ทำให้หน้าไม่สมส่วน */
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
 </style>
 </head>
 <body>
@@ -165,7 +171,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <script src="sg-layout.js?v=5"></script>
 <script src="office-sign.js?v=2"></script>
 <script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=1"></script>
+<script src="content/cms.js?v=20261028c"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -1044,13 +1050,14 @@ function pinsFor(bi) {
 
 // ── รายละเอียดในการ์ด (ข้อความจาก content.js ผ่าน esc/rt ทุกจุด) ──
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const rt = s => esc(s).replace(/\[([^\]\n]*)\]/g, '<small>$1</small>').replace(/\n/g, '<br>');
+const rt1 = s => esc(s).replace(/\[([^\]\n]*)\]/g, '<small>$1</small>').replace(/\n/g, '<br>');
+const rt = s => String(s ?? '').split(' · ').map((c, i, a) => `<span class="w">${rt1(c)}${i < a.length - 1 ? '&nbsp;·' : ''}</span>`).join(' ');   // วลีที่คั่นด้วย · ไม่ตัดกลาง
 const now = new Date(), md = (now.getMonth() + 1) * 100 + now.getDate();
 const season = md >= 413 && md <= 1031 ? 'low' : 'high', wk = [5, 6, 0].includes(now.getDay()) ? 1 : 0, dayTxt = wk ? 'ศ.–อา.' : 'จ.–พฤ.';
 const range = z => { const v = z.tiers.map(t => t[season][wk]), a = Math.min(...v), b = Math.max(...v); return a === b ? `${a}` : `${a}–${b}`; };
 const m2txt = v => `≈ ${v.toLocaleString('th-TH')} ตร.ม. · ${(v / 1600).toFixed(1)} ไร่`;
 const KINDNAME = { ...K.about.kinds, spot: 'จุดบริการ', wc: 'ห้องน้ำ' };
-const head = (kind, name, where) => `<span class="tag ${kind}">${esc(KINDNAME[kind] || '')}</span><h2>${esc(name)}</h2>${where ? `<p class="where">📍 ${esc(where)}</p>` : ''}<!--ph-->`;
+const head = (kind, name, where) => `<span class="tag ${kind}">${esc(KINDNAME[kind] || '')}</span><h2>${esc(name)}</h2>${where ? `<p class="where">📍 ${rt(where)}</p>` : ''}<!--ph-->`;
 // ── รูปจริงในการ์ด: ใส่ชื่อไฟล์ตาม "สาขา/id หมุด" (ไฟล์อยู่ prototypes/photos/ ชื่อตัวพิมพ์เล็ก) · ยังไม่มี = ช่องว่างเส้นประ ──
 //    เช่น 'sg/สำนักงาน': ['photos/sg/office-1.jpg', 'photos/sg/office-2.jpg'] · หลายรูป = เลื่อนซ้าย-ขวา
 const PHOTOS = {};
@@ -1248,7 +1255,8 @@ function applyView(name, fly = true) {
   VIEW_DIR.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el));
   const zoom = V.rotate || zoomOn;
   controls.enableRotate = V.rotate; controls.enableZoom = zoom; controls.enablePan = zoom;   // ล็อกนิ่งไม่ซูม = ไม่ให้เลื่อนด้วย
-  controls.zoomToCursor = zoom && !V.rotate;   // ล็อกมุม: ซูมเข้าตรงที่นิ้ว/เมาส์ชี้ แทนที่จะซูมเข้ากลางจอ
+  controls.zoomToCursor = zoom && !V.rotate;
+  renderer.domElement.style.touchAction = V.rotate || zoom ? 'none' : 'pan-y';   // ล็อกมุม: ปัดบนผังแล้วหน้าเว็บเลื่อนขึ้นลงได้ (ไม่ติดค้างที่ผัง)   // ล็อกมุม: ซูมเข้าตรงที่นิ้ว/เมาส์ชี้ แทนที่จะซูมเข้ากลางจอ
   $('hint').textContent = 'แตะหมุดดูรายละเอียด' + (V.rotate ? ' · ลากเพื่อหมุน' : '') + (zoom ? ' · ล้อเมาส์/ถ่างนิ้วเพื่อซูม · Ctrl+ลาก/คลิกขวาลาก/สองนิ้วลากเพื่อเลื่อน' : '');
   document.querySelectorAll('#segView button[data-view]').forEach(x => x.setAttribute('aria-pressed', x.dataset.view === name));
   $('zoomBtn').setAttribute('aria-pressed', zoom); $('zoomBtn').disabled = V.rotate;
@@ -1297,12 +1305,13 @@ function focusView(p) {
   const v = THREE.MathUtils.degToRad(camera.fov) / 2, wide = innerWidth > 720, V = VIEWS[view];
   // หันกล้องตามแนวโซน: โซนเอียง a → กล้องหมุนตาม แถวรถ/ล็อกตรงกับจอ (จุดบริการ a = 0 ใช้มุมหลัก)
   const dir = V.rotate ? VIEW_DIR : dirOf(viewEl(), viewAz() - THREE.MathUtils.radToDeg(p.a || 0));
-  let d = Math.max(p.radius / Math.tan(v), p.radius / (Math.tan(v) * camera.aspect * (wide ? .62 : 1))) * 1.15;
+  // มือถือ: การ์ดกินจอล่าง 64% → โซนต้องพอดีแถบผังบน 36%
+  let d = Math.max(p.radius / (Math.tan(v) * (wide ? 1 : .36)), p.radius / (Math.tan(v) * camera.aspect * (wide ? .62 : 1))) * 1.15;
   d = THREE.MathUtils.clamp(d, home.full * .16, Math.min(home.full * .8, home.d));
   const t = p.center.clone();
   const { right, away } = screenAxes(dir);
   if (wide) t.addScaledVector(right, d * Math.tan(v) * camera.aspect * .32);   // เว้นที่ขวาให้การ์ด
-  else t.addScaledVector(away, -d * Math.tan(v) * .55);                         // มือถือ: การ์ดอยู่ล่าง → โซนขึ้นไปครึ่งบน
+  else t.addScaledVector(away, -d * Math.tan(v) * .64 / dir.y);                 // มือถือ: การ์ดอยู่ล่าง → โซนขึ้นไปกลางแถบบน
   return { p: t.clone().addScaledVector(dir, d), t };
 }
 
@@ -1431,6 +1440,7 @@ function openCard(p, el) {
   pinEls.forEach(q => q.el.classList.toggle('on', q.el === el));
   $('cardBody').innerHTML = cardHtml(p).replace('<!--ph-->', photoSlot(p)); card.scrollTop = 0;
   card.classList.add('on'); card.setAttribute('aria-hidden', 'false'); document.body.classList.add('carded');
+  if (parent !== window) parent.postMessage({ cardOpen: true }, location.origin);   // หน้าแรกบนมือถือ: ขยายผังเต็มจอ
   highlight(p);
   const v = focusView(p); flyTo(v.p, v.t);
 }
@@ -1439,6 +1449,7 @@ function closeCard(fly = true) {
   sel = null; highlight(null);
   pinEls.forEach(q => q.el.classList.remove('on'));
   card.classList.remove('on'); card.setAttribute('aria-hidden', 'true'); document.body.classList.remove('carded');
+  if (parent !== window) parent.postMessage({ cardOpen: false }, location.origin);
   if (fly) flyTo(home.p, home.t);
 }
 $('cardX').onclick = () => closeCard();
@@ -1539,7 +1550,8 @@ function resize() {
   computeHome();
   pinEls.forEach(q => (q.w = 0));   // ขนาดหมุดเปลี่ยนตามจอ → วัดป้ายใหม่
   const v2 = sel ? focusView(sel) : home;
-  camera.position.copy(v2.p); controls.target.copy(v2.t);
+  if (flight) flyTo(v2.p, v2.t, 600);   // กำลังบินอยู่ (เช่น หน้าแรกขยายผังเต็มจอตอนกดหมุด) → บินต่อไปจุดใหม่ ไม่กระตุก
+  else { camera.position.copy(v2.p); controls.target.copy(v2.t); }
 }
 addEventListener('resize', resize);
 
