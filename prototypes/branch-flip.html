@@ -1319,9 +1319,9 @@ function focusView(p) {
 const $ = id => document.getElementById(id);
 const pinLayer = $('pins'), card = $('card');
 let pinEls = [], sel = null, hl = null;
-// ── หน้าแรก (home.html) ส่งกลุ่มที่เลือกมา → กรองหมุด · ผู้ค้า: โซนขาย + สำนักงาน + ที่จอด (ซ่อนห้องน้ำ/ประตู/น้ำพุ/ลานกิจกรรม) · ลูกค้า: เห็นทั้งหมด ──
+// ── หน้าแรก (home.html) ส่งกลุ่มที่เลือกมา → กรองหมุด · ผู้ค้า: โซนขาย + ลานกิจกรรม (เช่าจัดงาน) + สำนักงาน + ที่จอด (ซ่อนห้องน้ำ/ประตู/น้ำพุ) · ลูกค้า: เห็นทั้งหมด ──
 let pinGroup = null;
-const PIN_HIDE = { ven: p => p.kind === 'wc' || p.kind === 'event' || p.id === 'gate' || p.id === 'fountain' };
+const PIN_HIDE = { ven: p => p.kind === 'wc' || p.id === 'gate' || p.id === 'fountain' };
 const pinHidden = p => !!(pinGroup && PIN_HIDE[pinGroup] && PIN_HIDE[pinGroup](p));
 addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
