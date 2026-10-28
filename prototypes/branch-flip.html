@@ -1561,10 +1561,15 @@ $('angleSave').onclick = () => {
 addMineBtn();
 
 // ── ขนาดจอ: ถอยกล้องให้แผ่นตลาดพอดีจอ ทั้งจอกว้างและมือถือ ──
+let lastW = 0, lastH = 0;
 function resize() {
   const w = innerWidth, h = innerHeight, aspect = w / h;
+  // ความสูงเปลี่ยนนิดหน่อยแบบความกว้างเท่าเดิม (แถบที่อยู่มือถือหด/โผล่ตอนเลื่อนจอ) → แค่ปรับภาพ ไม่จัดกล้องใหม่ (ไม่งั้นผังย่อขยายตาม)
+  const small = w === lastW && Math.abs(h - lastH) < h * .15 && !flight && !sel;
+  lastW = w; lastH = h;
   renderer.setSize(w, h); composer.setSize(w, h); bloom.setSize(w, h);
   camera.aspect = aspect; camera.updateProjectionMatrix();
+  if (small) return;
   if (!VIEWS[view].rotate) VIEW_DIR.copy(dirOf(viewEl(), viewAz()));   // หมุนจอ ตั้ง↔นอน → มุมก้มเปลี่ยนตาม
   bloom.strength = w < 720 ? .42 : .7;
   faceCam();   // จอเล็ก ของเล็กลงแต่แสงฟุ้งเท่าเดิม → ดูจ้า ลดลง

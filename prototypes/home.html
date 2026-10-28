@@ -40,7 +40,7 @@ button{font-family:inherit}
 .chipg{position:absolute;z-index:4;top:16px;left:50%;transform:translateX(-50%);font-weight:600;font-size:14px;padding:8px 16px;border-radius:999px;border:1px solid var(--line);background:rgba(29,25,64,.92);color:var(--ink);cursor:pointer;white-space:nowrap}
 /* กดหมุดบนมือถือ: ผังขยายเต็มจอ (ผังบน + รายละเอียดล่าง เลื่อนอ่านในแผ่นเดียว) */
 html.mapfull,html.mapfull body{overflow:hidden}
-html.mapfull .map{position:fixed;inset:0;height:100vh;height:100dvh;z-index:60}
+html.mapfull .map{position:fixed;inset:0;height:100vh !important;height:100dvh !important;z-index:60}   /* ชนะความสูงที่ล็อกเป็นพิกเซล */
 html.mapfull .chipg{display:none}
 @media (max-width:640px){ .chipg{left:auto;right:12px;transform:none;font-size:13px;padding:6px 12px} .map{height:80vh;height:80svh} .who{grid-template-columns:1fr;gap:10px} .who ul{display:none} .who b{font-size:19px} .gate h1{margin-bottom:14px} }
 
@@ -341,6 +341,15 @@ const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
 let group = null;
 const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
 frame.addEventListener('load', tellMap);
+// มือถือ: แถบที่อยู่เบราว์เซอร์หด/โผล่ตอนเลื่อนจอ → ความสูงจอเปลี่ยน → ผังเคยยืดหด (ดูเหมือนซูมเข้าออก)
+// ล็อกความสูงกรอบผังเป็นพิกเซล เปลี่ยนเฉพาะตอนความกว้างเปลี่ยน (หมุนจอ) · จอคอมใช้ค่าใน CSS ตามเดิม
+let mapW = 0;
+function lockMapHeight() {
+  if (innerWidth === mapW) return;
+  mapW = innerWidth;
+  $('map').style.height = innerWidth <= 640 ? Math.round(innerHeight * .8) + 'px' : '';
+}
+lockMapHeight(); addEventListener('resize', lockMapHeight);
 // ผังบอกว่าเปิด/ปิดการ์ด → มือถือขยายผังเต็มจอ
 addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
@@ -410,7 +419,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261028k' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261028l' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);
