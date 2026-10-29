@@ -11,11 +11,11 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029g"></script>
+<script src="b/common.js?v=20261029h"></script>
 <script>
 // เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
 page((C) => {
-  const box = k => { const b = C[k], c = b.contact, same = c.lineCustomer === c.lineVendor, map = get(C, `${k}.links.map`);
+  const box = k => { const b = C[k], c = b.contact, same = c.lineCustomer === c.lineVendor, map = get(C, `${k}.links.map`), fb = get(C, `${k}.links.facebook`);
     if (!hasInfo(C, k)) return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note">ยังไม่มีข้อมูลติดต่อ · เร็วๆ นี้</p></div>`;
     return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note" style="margin-top:4px">${phr(b.where)}</p>
       <a href="tel:${digits(c.phone)}" style="display:block;font-size:32px;font-weight:700;color:var(--price);margin-top:14px;line-height:1.2">${esc(c.phone)}</a>
@@ -24,6 +24,7 @@ page((C) => {
       <div class="cta" style="margin-top:16px">
         <a class="btn pri sm" href="${esc(lineUrl(c.lineCustomer))}" target="_blank" rel="noopener">${ic('chat')} ${same ? 'LINE' : 'LINE ลูกค้า'} ${esc(c.lineCustomer)}</a>
         ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('chat')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
+        ${fb ? `<a class="btn alt sm" href="${esc(fb)}" target="_blank" rel="noopener">${ic('fb')} Facebook</a>` : ''}
         ${map ? `<a class="btn alt sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}</div></div>`; };
   return `${pageHead('ติดต่อ', 'phone', 'ติดต่อตลาด', 'โทรหรือทัก LINE ของสาขาที่ต้องการได้เลย')}
   <section class="sec" style="padding-top:36px"><div class="wrap">
