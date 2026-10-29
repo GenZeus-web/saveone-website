@@ -2,7 +2,7 @@
   "name": "บางนา",
   "tag": "สาขา SB",
   "where": "",
-  "source": "กฎ: เหมือนประตูกรุงเทพ (เจ้าของ 29 ต.ค. 69) · ราคาเปิดท้าย/เวลาเข้า–ออก/ตารางบางนา: Wix (docs/content-source) · เบอร์/LINE: เจ้าของส่งมา 29 ต.ค. 69 · ยังไม่มี: ที่อยู่ นำทาง กล้อง รูป",
+  "source": "กฎ: เหมือนประตูกรุงเทพ (เจ้าของ 29 ต.ค. 69) · ราคาเปิดท้าย/เวลาเข้า–ออก/ตารางบางนา: Wix (docs/content-source) · เบอร์/LINE: เจ้าของส่งมา 29 ต.ค. 69 · นำทาง: Google Maps ที่เจ้าของส่ง 29 ต.ค. 69 · ยังไม่มี: ที่อยู่ กล้อง รูป",
   "facts": [
     [
       "food",
@@ -18,7 +18,7 @@
   "links": {
     "booking": "https://services.saveone.co.th/SaveoneGo/Login.aspx?openExternalBrowser=1",
     "cctv": "",
-    "map": "",
+    "map": "https://www.google.com/maps/place/%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B9%80%E0%B8%8B%E0%B8%9F%E0%B8%A7%E0%B8%B1%E0%B8%99%E0%B9%82%E0%B8%81+%E0%B8%9A%E0%B8%B2%E0%B8%87%E0%B8%99%E0%B8%B2/@13.6654302,100.6404296,194m/data=!3m1!1e3!4m6!3m5!1s0x311d5f004b89ea49:0x54a50a90dec5763f!8m2!3d13.6653855!4d100.640761!16s%2Fg%2F11yn8_ztjk",
     "facebook": ""
   },
   "contact": {
