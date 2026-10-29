@@ -4,7 +4,30 @@
   const EDIT = new URLSearchParams(location.search).has('edit');
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   // วลีเดียวกันไม่ให้ตัดกลางบรรทัด: แยกตาม " · " และช่องว่าง ห่อแต่ละวลีเป็นก้อน (ขึ้นบรรทัดใหม่ได้แค่ระหว่างก้อน · จุดคั่นติดท้ายวลีก่อนหน้า)
-  const phr = s => String(s ?? '').split(' · ').map((c, i, a) => c.split(/ +/).map((w, j, b) => `<span class="w">${esc(w)}${i < a.length - 1 && j === b.length - 1 ? '&nbsp;·' : ''}</span>`).join(' ')).join(' ');
+  // คำสั้น (≤ 16 ตัว เช่น "สตรีทฟู้ด") ห้ามตัดในคำ (.nb) · คำยาวกว่านั้นยอมตัด ไม่งั้นล้นกล่องแคบ
+  // วลีสั้น (≤ 24 ตัว เช่น "เปิด 12:00" · "หรือโทร 044-222-588") = ก้อนเดียว ไม่แยกคำในวลีออกจากกัน
+  const phr = s => String(s ?? '').split(' · ').map((c, i, a) => {
+    const dot = i < a.length - 1 ? '&nbsp;·' : '', ws = c.trim().split(/\s+/);
+    const words = ws.map((w, j) => `<span class="w${w.length <= 16 ? ' nb' : ''}">${esc(w)}${j === ws.length - 1 ? dot : ''}</span>`).join(' ');
+    return c.length <= 24 && ws.length > 1 ? `<span class="w">${words}</span>` : words;   // ก้อนวลีกว้างเกินกล่อง → ตัดได้แค่ระหว่างคำ
+  }).join(' ');
+  // ข้อความไทยที่หน้าเว็บวาดเอง (ไม่ผ่าน phr) → ห่อด้วย phr อัตโนมัติ · ไม่งั้น Chrome ตัดกลางคำ เช่น "สตรี|ทฟู้ด" "บัตร|ประชาชน"
+  // (CSS word-break:keep-all ไม่มีผลกับภาษาไทย) · โหมดแก้ไม่ห่อ ให้ช่องพิมพ์เป็นข้อความล้วน
+  const TH = /[฀-๿]/, SKIP = 'script,style,textarea,title,option,svg,.w,[contenteditable]';
+  const wrap = root => {
+    if (!root) return;
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), list = [];
+    for (let n; (n = tw.nextNode());) if (TH.test(n.data) && !n.parentElement?.closest(SKIP)) list.push(n);
+    for (const n of list) {
+      const [, a, body, z] = n.data.match(/^(\s*)([\s\S]*?)(\s*)$/), t = document.createElement('template');
+      t.innerHTML = esc(a) + phr(body) + esc(z); n.replaceWith(t.content);
+    }
+  };
+  if (!EDIT) {
+    new MutationObserver(ms => { for (const m of ms) for (const n of m.addedNodes) wrap(n.nodeType === 3 ? n.parentNode : n); })
+      .observe(document.documentElement, { childList: true, subtree: true });
+    document.addEventListener('DOMContentLoaded', () => wrap(document.body));
+  }
   const keys = p => String(p).split('.');
   const get = (o, p) => keys(p).reduce((a, k) => (a == null ? a : a[k]), o);
   const set = (o, p, v) => { const k = keys(p), last = k.pop(); const t = k.reduce((a, x) => a[x], o); t[last] = v; };

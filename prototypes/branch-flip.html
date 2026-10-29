@@ -132,6 +132,8 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 .edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:#ffcf6b;opacity:.7;font-weight:400}
 .muted{color:var(--muted);font-size:13px;margin-top:10px}
 .w{display:inline-block;max-width:100%}
+td .w,th .w{max-width:none}
+.nb{white-space:nowrap}
 
 @media (max-width:720px){
   /* มือถือ: การ์ดเต็มจอใต้แถบผังด้านบน (ผังเหลือ 36% บน · รายละเอียดเลื่อนอ่านในแผ่นเดียว) */
@@ -177,11 +179,11 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 <p class="note" id="hint">แตะหมุดดูรายละเอียด</p>
 <div class="angle" id="angle" hidden><span id="angleTxt"></span><button id="angleSave">📌 ใช้มุมนี้เป็นมุมเปิด</button></div>
 
-<script src="korat-layout.js?v=2"></script>
+<script src="korat-layout.js?v=3"></script>
 <script src="sg-layout.js?v=5"></script>
 <script src="office-sign.js?v=2"></script>
 <script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=20261028i"></script>
+<script src="content/cms.js?v=20261029c"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",

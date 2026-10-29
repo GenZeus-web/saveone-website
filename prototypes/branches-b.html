@@ -6,11 +6,11 @@
 <title>สาขา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029l">
+<link rel="stylesheet" href="b/style.css?v=20261029n">
 </head>
 <body>
 <main id="main"></main>
-<script src="content/cms.js?v=20261028i"></script>
+<script src="content/cms.js?v=20261029c"></script>
 <script src="b/common.js?v=20261029h"></script>
 <script>
 // ทุกสาขาเรียงในหน้าเดียว (ไม่มีแท็บ) · ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน
@@ -32,7 +32,7 @@ page((C) => {
 
   <section class="sec" id="map"><div class="wrap">
     <span class="kick">${ic('map')} ผังตลาด</span><h2 class="h2">ผังตลาด 3D</h2><p class="lead">แตะหมุดเพื่อดูโซน ที่จอดรถ และจุดบริการ · เปลี่ยนสาขาได้ที่ลูกศรด้านล่างผัง</p>
-    <div class="mapbox" id="mapbox"${photos(C, 'korat')[1] ? ` style="background-image:url('${esc(photos(C, 'korat')[1][0])}')"` : ''}><button class="cover" id="mapCover"><span>${ic('map')} แตะเพื่อเปิดผัง 3D</span></button></div>
+    <div class="mapbox" id="mapbox"${photos(C, 'korat')[1] ? ` style="background-image:url('${esc(photos(C, 'korat')[1][0])}')"` : ''}><button class="cover" id="mapCover"><span>${ic('map')} แตะเพื่อเปิด ผัง 3D</span></button></div>
   </div></section>
 
   ${evPh ? `<section class="sec" id="event"><div class="wrap"><span class="kick">${ic('area')} ${esc(ev.title)}</span><h2 class="h2">${esc(ev.title)} <span class="br">· ${esc(ko.name)}</span></h2>
