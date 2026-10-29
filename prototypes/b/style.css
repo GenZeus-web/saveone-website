@@ -107,7 +107,7 @@ img{display:block;max-width:100%}
 .door .go{margin-top:auto;padding-top:10px;font-size:14px;font-weight:600;color:var(--link)}
 
 /* ── สาขา ── */
-.branches{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px}
+.branches{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px;margin-top:24px}
 .br-card{border-radius:24px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);display:flex;flex-direction:column}
 .br-card .ph{height:220px;background:var(--card2) center/cover no-repeat}
 .br-card .ph.none{display:grid;place-items:center;background:radial-gradient(100% 120% at 80% 0%,#4a2f8a,#211c45)}

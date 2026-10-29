@@ -6,12 +6,12 @@
 <title>ระเบียบตลาด · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029c">
+<link rel="stylesheet" href="b/style.css?v=20261029d">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029b"></script>
+<script src="b/common.js?v=20261029c"></script>
 <script>
 // ระเบียบผู้ค้าของสาขาที่เลือก: วันขาย · มาสาย · แจ้งลา · คะแนน/ข้อที่ถูกหัก (แยกโซน ?z=) · สิทธิ์ · คำถาม
 // ส่วนที่สาขายังไม่มีข้อมูล = ไม่แสดง · ไม่มีเลยทั้งหน้า = บอกให้ถาม LINE ผู้ค้า
@@ -34,12 +34,12 @@ page((C, k) => {
         <div class="grid2">${V.penalties[z].filter(g => filled(g.rows)).map(g => `<div class="card rv"><h3>${ic(g.ic)}${esc(g.title)}</h3><div style="margin-top:8px">${g.rows.filter(([t]) => t).map(([t, p]) => `<div class="pen"><span>${phr(t)}</span><b>−${esc(p)}</b></div>`).join('')}</div></div>`).join('')}</div>
         <p class="note">ตัวเลขสีแดง = คะแนนที่ถูกหัก</p></div>` : ''}`,
     rights.length && `<h2 class="h3">${esc(V.rightsTitle)}</h2><div class="grid2">${rights.map(r => `<div class="card rv"><h3>${ic(r.ic)}${esc(r.title)}</h3>${dots(r.items)}</div>`).join('')}</div>`,
-    faq.length && `<h2 class="h3">${esc(V.faqTitle)}</h2><div class="card rv" style="margin-top:22px;padding-top:6px;padding-bottom:6px">${faq.map(([q, a]) => `<details><summary>${phr(q)}</summary><div>${phr(a)}</div></details>`).join('')}</div>`,
+    faq.length && `<h2 class="h3">${esc(V.faqTitle)}</h2><div class="card rv" style="margin-top:22px;padding-top:6px;padding-bottom:6px">${faq.map(([q, a]) => `<details><summary><span>${phr(q)}</span></summary><div>${phr(a)}</div></details>`).join('')}</div>`,
   ].filter(Boolean);
   return `${pageHead(C.gate.ven.title, 'list', `ระเบียบตลาด <span class="br">· ${esc(b.name)}</span>`, 'สำหรับผู้ค้า · อ่านก่อนเริ่มขาย')}
   <section class="sec" style="padding-top:28px"><div class="wrap">
     ${branchTabs(C, k)}
-    ${body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
+    ${!ready(C, k) ? waitBox(C, k, 'ระเบียบ') : body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
   </div></section>`;
 });
 </script>

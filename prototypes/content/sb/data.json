@@ -1,0 +1,320 @@
+{
+  "name": "บางนา",
+  "tag": "สาขา SB",
+  "where": "",
+  "source": "โครงว่างจากประตูกรุงเทพ (29 ต.ค. 69) · ยังไม่ใส่ข้อมูล",
+  "facts": [
+    [
+      ""
+    ]
+  ],
+  "links": {
+    "booking": "",
+    "cctv": "",
+    "map": "",
+    "facebook": ""
+  },
+  "contact": {
+    "phone": "",
+    "phoneHours": "",
+    "lineVendor": "",
+    "lineCustomer": "",
+    "phones": [
+      [
+        ""
+      ]
+    ]
+  },
+  "customer": {
+    "sub": "",
+    "quick": [
+      {
+        "ic": "search",
+        "title": "ตามหาร้าน",
+        "sub": "",
+        "link": "",
+        "main": true
+      }
+    ],
+    "note": "",
+    "photos": [
+      [
+        ""
+      ]
+    ]
+  },
+  "vendor": {
+    "sub": "",
+    "scope": "",
+    "quick": [
+      {
+        "ic": "store",
+        "title": "จองล็อก",
+        "sub": "",
+        "link": "",
+        "main": true
+      }
+    ],
+    "priceTitle": "ราคาและขนาดล็อก",
+    "seasons": {
+      "high": {
+        "label": "พ.ย.–ก.พ.",
+        "from": "11-01",
+        "to": "02-29"
+      },
+      "low": {
+        "label": "มี.ค.–ต.ค.",
+        "from": "03-01",
+        "to": "10-31"
+      }
+    },
+    "zones": {
+      "food": {
+        "name": "สตรีทฟู้ด",
+        "ic": "food",
+        "rows": [
+          {
+            "season": "",
+            "dow": "weekday",
+            "days": "จันทร์–พฤหัส",
+            "online": "",
+            "walkin": ""
+          },
+          {
+            "season": "",
+            "dow": "weekend",
+            "days": "ศุกร์–อาทิตย์",
+            "online": "",
+            "walkin": ""
+          }
+        ],
+        "note": "",
+        "photos": [
+          [
+            ""
+          ]
+        ],
+        "facts": [
+          [
+            ""
+          ]
+        ]
+      },
+      "boot": {
+        "name": "เปิดท้าย",
+        "ic": "car",
+        "rows": [
+          {
+            "season": "high",
+            "dow": "weekday",
+            "days": "จ–พฤ",
+            "online": "",
+            "walkin": ""
+          },
+          {
+            "season": "high",
+            "dow": "weekend",
+            "days": "ศ–อา",
+            "online": "",
+            "walkin": ""
+          },
+          {
+            "season": "low",
+            "dow": "weekday",
+            "days": "จ–พฤ",
+            "online": "",
+            "walkin": ""
+          },
+          {
+            "season": "low",
+            "dow": "weekend",
+            "days": "ศ–อา",
+            "online": "",
+            "walkin": ""
+          }
+        ],
+        "note": "",
+        "photos": [
+          [
+            ""
+          ]
+        ],
+        "facts": [
+          [
+            ""
+          ]
+        ]
+      },
+      "court": {
+        "name": "ศูนย์อาหาร",
+        "ic": "bag",
+        "rows": [
+          {
+            "season": "",
+            "dow": "weekday",
+            "days": "",
+            "online": "",
+            "walkin": ""
+          }
+        ],
+        "note": "",
+        "photos": [
+          [
+            ""
+          ]
+        ],
+        "facts": [
+          [
+            ""
+          ]
+        ]
+      }
+    },
+    "steps": {
+      "title": "เริ่มขายครั้งแรก",
+      "items": [
+        [
+          ""
+        ]
+      ],
+      "note": ""
+    },
+    "day": {
+      "title": "วันขาย",
+      "head": [
+        "",
+        "เข้าพื้นที่",
+        "รถเข้าได้ถึง",
+        "พร้อมขาย",
+        "ออกก่อน"
+      ],
+      "rows": [
+        [
+          "สตรีทฟู้ด",
+          "",
+          "",
+          "",
+          ""
+        ],
+        [
+          "เปิดท้าย",
+          "",
+          "",
+          "",
+          ""
+        ]
+      ],
+      "note": ""
+    },
+    "late": {
+      "title": "มาสาย",
+      "items": [
+        ""
+      ]
+    },
+    "leave": {
+      "title": "แจ้งลา",
+      "items": [
+        ""
+      ]
+    },
+    "points": {
+      "title": "คะแนนและอันดับ",
+      "chips": [
+        ""
+      ],
+      "text": "",
+      "note": "",
+      "penTitle": "ข้อที่ถูกหักคะแนน"
+    },
+    "penalties": {
+      "food": [
+        {
+          "ic": "shirt",
+          "title": "การแต่งกาย",
+          "rows": [
+            [
+              ""
+            ]
+          ]
+        }
+      ],
+      "boot": [
+        {
+          "ic": "store",
+          "title": "ร้านค้า",
+          "rows": [
+            [
+              ""
+            ]
+          ]
+        }
+      ],
+      "court": [
+        {
+          "ic": "shirt",
+          "title": "",
+          "rows": [
+            [
+              ""
+            ]
+          ]
+        }
+      ]
+    },
+    "rightsTitle": "สิทธิ์ของผู้ค้า",
+    "rights": [
+      {
+        "ic": "rain",
+        "title": "ส่วนลดฝนตก",
+        "items": [
+          ""
+        ]
+      }
+    ],
+    "event": {
+      "title": "เช่าลานจัดงาน",
+      "sub": "",
+      "areas": "",
+      "rows": [
+        [
+          ""
+        ]
+      ],
+      "note": "",
+      "tel": "",
+      "photos": [
+        [
+          ""
+        ]
+      ]
+    },
+    "faqTitle": "คำถามที่พบบ่อย",
+    "faq": [
+      [
+        ""
+      ]
+    ]
+  },
+  "map": {
+    "gate": {
+      "where": "",
+      "note": "",
+      "hours": "",
+      "bts": ""
+    },
+    "wc": {
+      "where": "",
+      "hours": "",
+      "fee": ""
+    },
+    "office": {
+      "where": "",
+      "note": "",
+      "hours": "",
+      "landmark": ""
+    },
+    "parkEntrance": ""
+  },
+  "photos": {}
+}

@@ -49,6 +49,9 @@ const filled = v => Array.isArray(v) ? v.some(filled) : typeof v === 'string' &&
 const photos = (C, k) => (C[k].customer.photos || []).filter(([s]) => s);
 const zonesOf = (C, k) => Object.entries(C[k].vendor.zones).filter(([, Z]) => Z.rows.some(r => nums(r.online).length));
 const here = location.pathname.split('/').pop() || 'home-b.html';
+// สาขาที่ใส่ข้อมูลแล้ว (มีเบอร์หรือมีราคา) · ยังไม่ใส่ = โชว์ชื่อ + "ยังไม่มีข้อมูล"
+const ready = (C, k) => filled(C[k].contact?.phone) || zonesOf(C, k).length > 0;
+const waitBox = (C, k, what = '') => `<div class="empty"><b style="color:var(--head)">สาขา${esc(C[k].name)}</b> · ยังไม่มีข้อมูล${what} · เร็วๆ นี้</div>`;
 
 // ตอนนี้ตลาดเปิดไหม (เวลาเครื่อง เทียบ "16:00–23:00")
 function openStatus(hours) {
@@ -71,11 +74,11 @@ const pageHead = (kick, icon, title, lead = '') => `<section class="phead"><div 
 
 // แท็บสาขา = ลิงก์ ?b=… (เก็บพารามิเตอร์อื่นไว้)
 function branchTabs(C, cur) {
-  return `<nav class="tabs" aria-label="เลือกสาขา">${C.branchKeys.map(k => {
+  return `<nav class="tabs" aria-label="เลือกสาขา">${C.keys.map(k => {
     const u = new URLSearchParams(location.search); u.set('b', k);
     return `<a href="?${u}"${k === cur ? ' class="on" aria-current="true"' : ''}>${esc(C[k].name)}</a>`; }).join('')}</nav>`;
 }
-const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.branchKeys.includes(b) ? b : C.branchKeys[0]; };
+const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
 function header() {
   const top = document.createElement('header');
@@ -119,7 +122,10 @@ function reveal() {
 function page(render, after) {
   header();
   fillWordmarks();
-  CMS.load().then(C => {
+  CMS.load().then(async C => {
+    // siteKeys = ลำดับสาขาบนเว็บนี้ รวมสาขาที่ยังไม่อยู่ใน branchKeys (เช่น บางนา) → โหลดไฟล์ของสาขานั้นเพิ่มเอง
+    C.keys = C.siteKeys || C.branchKeys;
+    await Promise.all(C.keys.filter(k => !C[k]).map(async k => { C[k] = await (await fetch(`content/${k}/data.json`, { cache: 'no-store' })).json(); }));
     const k = pickBranch(C);
     $('main').innerHTML = render(C, k);
     footer(C);

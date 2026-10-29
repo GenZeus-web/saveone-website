@@ -6,17 +6,18 @@
 <title>สาขา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029c">
+<link rel="stylesheet" href="b/style.css?v=20261029d">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029b"></script>
+<script src="b/common.js?v=20261029c"></script>
 <script>
 // ทุกสาขาเรียงในหน้าเดียว (ไม่มีแท็บ) · ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน
 page((C) => {
   const ko = C.korat, ev = ko.vendor.event, evPh = ev.photos.find(([s]) => s)?.[0];
   const branch = k => { const b = C[k], ph = photos(C, k)[0], map = get(C, `${k}.links.map`);
+    if (!ready(C, k)) return `<section class="sec" id="${k}"><div class="wrap"><span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>${waitBox(C, k)}</div></section>`;
     return `<section class="sec" id="${k}"><div class="wrap">
       <span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>
       <div class="grid2">
@@ -26,8 +27,8 @@ page((C) => {
           <div class="acts">${map ? `<a class="btn pri sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}<a class="btn alt sm" href="tel:${digits(b.contact.phone)}">${ic('phone')} ${esc(b.contact.phone)}</a><a class="btn alt sm" href="${esc(lineUrl(b.contact.lineCustomer))}" target="_blank" rel="noopener">LINE ${esc(b.contact.lineCustomer)}</a></div></div></article>
         <div><p class="lead" style="margin-top:0">${phr(b.customer.sub)}</p>${quickCards(C, k, b.customer.quick)}${b.customer.note ? `<p class="note">${phr(b.customer.note)}</p>` : ''}</div>
       </div></div></section>`; };
-  return `${pageHead('สาขา', 'pin', 'สาขาและเวลาเปิด', `${C.branchKeys.length} สาขา · ตลาดเย็นเปิดทุกวัน`)}
-  ${C.branchKeys.map(branch).join('')}
+  return `${pageHead('สาขา', 'pin', 'สาขาและเวลาเปิด', `${C.keys.length} สาขา · เปิดทุกวัน`)}
+  ${C.keys.map(branch).join('')}
 
   <section class="sec" id="map"><div class="wrap">
     <span class="kick">${ic('map')} ผังตลาด</span><h2 class="h2">ผังตลาด 3D</h2><p class="lead">แตะหมุดเพื่อดูโซน ที่จอดรถ และจุดบริการ · เปลี่ยนสาขาได้ที่ลูกศรด้านล่างผัง</p>
