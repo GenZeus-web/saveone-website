@@ -32,7 +32,7 @@ page((C) => {
 
   <section class="sec" id="map"><div class="wrap">
     <span class="kick">${ic('map')} ผังตลาด</span><h2 class="h2">ผังตลาด 3D</h2><p class="lead">แตะหมุดเพื่อดูโซน ที่จอดรถ และจุดบริการ · เปลี่ยนสาขาได้ที่ลูกศรด้านล่างผัง</p>
-    <div class="mapbox" id="mapbox"><button class="cover" id="mapCover"><span>${ic('map')} แตะเพื่อเปิดผัง 3D</span></button></div>
+    <div class="mapbox" id="mapbox"${photos(C, 'korat')[1] ? ` style="background-image:url('${esc(photos(C, 'korat')[1][0])}')"` : ''}><button class="cover" id="mapCover"><span>${ic('map')} แตะเพื่อเปิดผัง 3D</span></button></div>
   </div></section>
 
   ${evPh ? `<section class="sec" id="event"><div class="wrap"><span class="kick">${ic('area')} ${esc(ev.title)}</span><h2 class="h2">${esc(ev.title)} <span class="br">· ${esc(ko.name)}</span></h2>

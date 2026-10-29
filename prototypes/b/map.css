@@ -1,0 +1,133 @@
+/* หน้าแรกแบบ D (ผัง 3D + ม่านเลือกกลุ่ม) ในหน้าตาสไตล์ B · ใช้กับ home-map-b.html เท่านั้น
+   สีทั้งหมดมาจาก b/style.css (ธีมสว่าง/มืด) · โครงหน้า/ชื่อคลาสเหมือน home.html เดิมทุกอย่าง */
+:root{--ed:#5fb3ff;--bad:var(--no);--warn:var(--kick)}
+.wrap{max-width:1120px;padding:0 24px}
+footer{margin-top:72px;padding:32px 24px 40px;text-align:center}
+
+/* ── ผัง 3D + ม่าน ── */
+.map{position:relative;height:min(84vh,780px);background:#100d24;overflow:hidden}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.gate{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:rgba(13,11,29,.72);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);transition:opacity .5s}
+[data-theme="light"] .gate{background:rgba(246,244,251,.80)}
+.gate.off{opacity:0;pointer-events:none}
+.gate-in{max-width:760px;width:100%;text-align:center}
+.gate .hi{color:var(--link);font-weight:600}
+.gate .logo3d{display:block;height:clamp(56px,9vw,90px);width:auto;margin:0 auto 8px;filter:drop-shadow(0 6px 18px rgba(0,0,0,.45))}
+.gate h1{font-size:clamp(30px,5vw,48px);font-weight:700;line-height:1.2;margin:4px 0 22px;color:var(--head)}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left}
+.who>div{position:relative;color:var(--ink);cursor:pointer;padding:22px;border-radius:24px;border:2px solid var(--line);background:var(--card);box-shadow:var(--shadow);transition:border-color .2s,transform .2s}
+.who>div:hover,.who>div:focus-visible{border-color:var(--acc);transform:translateY(-3px);outline:0}
+.who b{display:flex;gap:12px;align-items:center;font-size:24px;font-weight:700;color:var(--head)}
+.who b .i{width:44px;height:44px;padding:10px;border-radius:14px;background:var(--ok-bg);color:var(--link)}
+.who ul{margin:12px 0 0;padding-left:18px;color:var(--sub);font-size:15px}
+.who .go{display:inline-flex;margin-top:14px;padding:8px 18px;border-radius:999px;background:var(--acc);color:var(--acc-ink);font-weight:600;font-size:15px}
+.skip{margin-top:18px;font-size:15px;background:none;border:0;color:var(--sub);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+.chipg{position:absolute;z-index:4;top:16px;left:50%;transform:translateX(-50%);font-weight:600;font-size:14px;padding:9px 18px;border-radius:999px;border:0;background:var(--acc);color:var(--acc-ink);box-shadow:0 6px 20px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
+.map .theme{position:absolute;z-index:6;top:14px;right:14px}
+html.mapfull,html.mapfull body{overflow:hidden}
+html.mapfull .map{position:fixed;inset:0;height:100vh !important;height:100dvh !important;z-index:60}
+html.mapfull .chipg,html.mapfull .map .theme{display:none}
+@media (max-width:640px){
+  .chipg{left:14px;transform:none;font-size:13px;padding:7px 14px}
+  .map{height:80vh;height:80svh}
+  .who{grid-template-columns:1fr;gap:10px} .who ul{display:none} .who b{font-size:20px} .who .go{display:none} .who>div{padding:16px}
+  .gate h1{margin-bottom:14px}
+  .wrap{padding:0 16px}
+}
+
+/* ── เนื้อหา ── */
+.grp{display:none}.grp.on{display:block}
+.sec{padding:64px 0 0}
+.sec h2{font-size:clamp(24px,3.2vw,34px);font-weight:700;line-height:1.3;color:var(--head)}
+.brn{color:var(--link);font-weight:700;white-space:nowrap}
+.sub{color:var(--sub);font-size:16px;margin-top:6px}
+.scope{display:inline-block;margin-top:10px;font-size:13px;font-weight:600;padding:4px 12px;border-radius:999px;background:var(--kick-bg);color:var(--kick)}
+.quick{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin-top:20px}
+.q{position:relative;text-decoration:none}
+.q .arr{color:var(--sub)}
+.card{position:relative;margin-top:16px}
+.card h3{margin-bottom:10px}
+.facts{grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:12px}
+.f{position:relative;padding:12px 14px;border-radius:14px;background:var(--card2)}
+.f small{display:flex;gap:6px;align-items:center;color:var(--sub);font-size:13px}
+.f small .i{color:var(--link)}
+.f b{font-size:15px;font-weight:600;color:var(--head)}
+.seg{display:inline-flex;flex-wrap:wrap;gap:6px;margin-top:18px}
+.seg button{display:flex;gap:8px;align-items:center;font-weight:600;font-size:15px;padding:9px 18px;border-radius:999px;border:2px solid var(--zc);background:none;color:var(--head);cursor:pointer}
+.seg button.on{background:var(--zc);color:var(--zi)}
+.lot{display:grid;grid-template-columns:1.1fr 1fr;gap:16px;margin-top:16px;align-items:start}
+.lot img{width:100%;border-radius:16px;display:block}
+@media (max-width:760px){.lot{grid-template-columns:1fr}}
+.tbl{overflow-x:auto;margin:0;border:0;border-radius:0;background:none;box-shadow:none}
+.tbl table{min-width:0}
+th,td{padding:12px 14px}
+td{font-weight:500}
+td:first-child{font-weight:600}
+td.big{font-size:26px;font-weight:700;color:var(--price);line-height:1.1}
+tr.now td{background:var(--ok-bg)}
+.now-tag{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
+.steps{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+.steps li{position:relative}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.two .card{margin-top:16px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+ul.dots{list-style:none;padding:0;margin-top:4px;display:grid;gap:8px}
+ul.dots li{position:relative;padding-left:20px;font-size:15px;color:var(--ink)}
+ul.dots li::before{content:"";position:absolute;left:2px;top:.62em;width:8px;height:8px;border-radius:50%;background:var(--acc)}
+.pts{margin:4px 0 12px}
+.pt{position:relative}
+details{border-top:1px solid var(--line);border-bottom:0}
+details:first-of-type{border-top:0}
+summary{position:relative;display:flex;align-items:center;gap:10px}
+summary .i{color:var(--link)}
+summary .n{margin-left:auto;color:var(--sub);font-weight:500;font-size:13px}
+summary::after{margin-left:0}
+summary:not(:has(.n))::after{margin-left:auto}
+details>div{color:var(--sub)}
+details table td{font-size:15px}
+.minus{color:var(--no);font-weight:700;white-space:nowrap;text-align:right}
+.brgo{display:inline-flex;gap:8px;align-items:center;margin:14px 8px 0 0;padding:10px 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--head);font-weight:600;font-size:14px;cursor:pointer}
+.brgo:hover{border-color:var(--acc)}.brgo .i{color:var(--link)}
+.pics{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(260px,1fr);gap:12px;margin-top:18px;overflow-x:auto;scroll-snap-type:x mandatory}
+.pics figure{margin:0;scroll-snap-align:start}
+.pics img{width:100%;aspect-ratio:16/10;object-fit:cover;border-radius:18px;display:block;background:var(--card2)}
+.pics figcaption{font-size:13px;color:var(--sub);margin-top:6px}
+.kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:18px}
+.kind{border-radius:22px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.kind img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+.kind>div{padding:16px 18px}
+.kind b{display:flex;gap:10px;align-items:center;font-size:18px;font-weight:700;color:var(--head)}
+.kind b .i{color:var(--link)}
+.kind small{display:block;color:var(--sub);font-size:14px;margin-top:4px}
+.kind small[style]{font-weight:600;font-size:13px}
+.chips{margin-top:6px}
+.chip{position:relative;border:0}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chips .ed-add{margin-top:0;padding:2px 10px}
+.soon{margin-top:48px;padding:32px 20px;border-radius:22px;border:2px dashed var(--line);text-align:center;color:var(--sub)}
+.soon b{display:block;color:var(--head);font-size:22px;margin-bottom:4px}
+
+/* ── โหมดแก้ (admin) เหมือนเดิม ── */
+body.edit [data-p]{outline:1px dashed rgba(95,179,255,.55);outline-offset:2px;border-radius:4px;min-width:2em;cursor:text}
+body.edit span[data-p],body.edit b[data-p],body.edit small[data-p]{display:inline-block}
+body.edit [data-p]:focus{outline:2px solid var(--ed);background:rgba(95,179,255,.1)}
+body.edit [data-p].empty{min-width:5em;background:rgba(255,207,107,.08)}
+body.edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:var(--warn);opacity:.7;font-weight:400}
+.ed-del{position:absolute;top:-8px;right:-8px;z-index:2;width:22px;height:22px;border-radius:50%;border:0;background:var(--bad);color:#fff;font-weight:700;cursor:pointer;line-height:1}
+.ed-add{margin-top:8px;padding:6px 12px;border-radius:999px;border:1px dashed var(--ed);background:none;color:var(--ed);font-weight:600;cursor:pointer}
+.edbar{position:fixed;z-index:50;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);padding:10px 12px;border-radius:18px;background:#0d0b1d;color:#f1eef8;border:1px solid var(--ed);box-shadow:0 10px 40px rgba(0,0,0,.5);font-size:14px}
+.edbar b{color:var(--ed)}
+.edbar button{padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:#211c45;color:#f1eef8;font-weight:600;cursor:pointer}
+.edbar button.pri{background:var(--ed);border-color:var(--ed);color:#0d0b1d}
+.edbar .st{color:#c9c3df}.edbar .st.dirty{color:#ffcf6b}
+.edpanel{display:none}
+body.edit .edpanel{display:block}
+.edpanel label{display:grid;gap:4px;font-size:12px;color:var(--sub)}
+.edpanel input{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--head);font:inherit;font-size:14px;outline:0}
+.edpanel input:focus{border-color:var(--ed)}
+.edgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+body.edit{padding-bottom:90px}
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
+@media (max-width:520px){ th,td{padding:9px 8px} td.big{font-size:22px} }
+details table{min-width:0}
