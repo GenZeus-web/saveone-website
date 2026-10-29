@@ -281,3 +281,5 @@ html.mapfull .ver,body.edit .ver{display:none}
 @media (max-width:760px){.zb{grid-template-columns:1fr}.zp{order:-1}}
 .sn{font-weight:700;color:var(--head);margin-right:2px}
 .sea.dim .sn{color:var(--sub)}
+/* ข้อมูลที่ยังไม่ยืนยัน (เจ้าของ: ใช้ที่มีไปก่อน ใส่ "รอข้อมูล") */
+.wait{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--kick-bg);color:var(--kick);white-space:nowrap}

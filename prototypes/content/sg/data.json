@@ -18,7 +18,7 @@
   "links": {
     "booking": "https://services.saveone.co.th/SaveoneGo/Login.aspx?openExternalBrowser=1",
     "cctv": "https://windwynnn.wixsite.com/saveonegostreetfood/saveonegocctv",
-    "map": "",
+    "map": "https://www.google.com/maps/place/%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B9%80%E0%B8%8B%E0%B8%9F%E0%B8%A7%E0%B8%B1%E0%B8%99%E0%B9%82%E0%B8%81+%E0%B9%81%E0%B8%A2%E0%B8%81+%E0%B8%84%E0%B8%9B%E0%B8%AD./@13.9270463,100.6248639,1029m/data=!3m2!1e3!4b1!4m6!3m5!1s0x311d7d37bed92ccb:0xa445ff8b2529dfd2!8m2!3d13.9270411!4d100.6274388!16s%2Fg%2F11vhgvkl2n",
     "facebook": "https://www.facebook.com/profile.php?id=61551043942735"
   },
   "contact": {
@@ -777,13 +777,13 @@
     },
     "wc": {
       "where": "ข้างสำนักงาน ริมซอยวิเชียรกลิ่นสุคนธ์",
-      "hours": "",
-      "fee": ""
+      "hours": "14:00–ปิดตลาด",
+      "fee": "ฟรี"
     },
     "office": {
       "where": "ริมซอยวิเชียรกลิ่นสุคนธ์ ข้างลานจอดมอเตอร์ไซค์",
       "note": "ติดต่อจองล็อก · จ่ายค่าไฟ/อุปกรณ์เพิ่ม (ก่อน 20:30) · แจ้งเปลี่ยนสินค้า",
-      "hours": "",
+      "hours": "14:00–ปิดตลาด",
       "landmark": ""
     },
     "parkEntrance": ""

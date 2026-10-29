@@ -6,7 +6,7 @@
 <title>ราคาค่าล็อก · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029k">
+<link rel="stylesheet" href="b/style.css?v=20261029l">
 </head>
 <body>
 <main id="main"></main>
@@ -23,7 +23,7 @@ page((C, k) => {
     const seasons = rs => [...new Set(rs.map(r => r.season))].sort((x, y) => (y === now) - (x === now))   // '' = ราคาเดียวทั้งปี · ฤดูปัจจุบันขึ้นก่อน
       .map(s => `<div class="sea${s && s !== now ? ' dim' : ''}"><p class="season">${s ? (SEASON[s] ? `<span class="sn">${SEASON[s]}</span>` : '') + esc(get(V.seasons, s + '.label') || s) + (s === now ? ' <span class="now">ช่วงนี้</span>' : '') : 'ราคาเดียวทั้งปี'}</p>${list(rs, s)}</div>`).join('');
     // ราคาแยกตามฝั่ง/โซนย่อย (โคราช: Z.spots) → กล่องละตำแหน่ง ไม่รวมเป็นช่วง 55–110 (เจ้าของ: "แยก อย่ารวมกัน งง")
-    const prices = Z.spots ? Z.spots.map(sp => `<div class="spot"><p class="sp">${ic('pin')}<b>${esc(sp.name)}</b>${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${seasons(sp.rows)}</div>`).join('') : seasons(Z.rows);
+    const prices = Z.spots ? Z.spots.map(sp => `<div class="spot"><p class="sp">${ic('pin')}<b>${esc(sp.name)}</b>${sp.pending ? `<span class="wait">${esc(sp.pending)}</span>` : ''}${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${seasons(sp.rows)}</div>`).join('') : (Z.pending ? `<p class="sp"><span class="wait">${esc(Z.pending)}</span></p>` : '') + seasons(Z.rows);
     const facts = Z.facts.filter(f => f[0] && f[0] !== 'size' && filled(f[2]));
     return `<div class="zone z-${z} rv"><div class="zt">${ic(R.ic || Z.ic)} ${esc(Z.name)}<small>${esc(Z.facts.find(f => f[0] === 'size')?.[2]?.split(' · ')[0] || '')}</small></div><div class="zb">
       <div class="za"><p class="rule">${phr(R.sub || '')}</p>
