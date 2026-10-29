@@ -16,7 +16,7 @@
     ]
   ],
   "links": {
-    "booking": "",
+    "booking": "https://services.saveone.co.th/Webview/",
     "cctv": "https://thefunzaavoice.wixsite.com/saveoneclean2/livecam",
     "map": "https://www.google.com/maps/place/%E0%B8%95%E0%B8%A5%E0%B8%B2%E0%B8%94%E0%B9%80%E0%B8%8B%E0%B8%9F%E0%B8%A7%E0%B8%B1%E0%B8%99/@14.957095,102.0450516,17.92z/data=!4m5!3m4!1s0x0:0xec5f662e93e55bff!8m2!3d14.9572712!4d102.0455898",
     "facebook": "https://www.facebook.com/saveonekorat"
@@ -99,7 +99,7 @@
       {
         "ic": "store",
         "title": "จองล็อก",
-        "sub": "จองในแอป SAVEONE",
+        "sub": "จองผ่านระบบใน LINE",
         "link": "booking",
         "main": true
       },
