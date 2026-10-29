@@ -253,3 +253,10 @@ footer .fine{flex-basis:100%;font-size:13px}
   .tabs a{padding:8px 14px}
   .card{padding:18px}
 }
+
+/* ปุ่มสลับแบบเว็บ (ชั่วคราว · b/switch.js) — มุมซ้ายล่าง ทุกหน้า ทั้ง 2 แบบ */
+.ver{position:fixed;z-index:70;left:16px;bottom:16px;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:#100d22;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;font-weight:600}
+.ver span{padding:0 8px 0 10px;color:#c9c3df}
+.ver a{padding:7px 14px;border-radius:999px;color:#fff}
+.ver a.on{background:#84e62d;color:#15122b}
+html.mapfull .ver,body.edit .ver{display:none}
