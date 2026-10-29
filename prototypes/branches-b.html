@@ -23,7 +23,7 @@ page((C) => {
       <div class="grid2">
         <article class="br-card rv"><div class="ph${ph ? '' : ' none'}"${ph ? ` style="background-image:url('${esc(ph[0])}')"` : ''}>${ph ? '' : '<span>รอรูปสาขา</span>'}</div>
           <div class="bd"><p class="where">${phr(b.where)}</p>
-          <div class="hours">${b.facts.map(f => `<span>${esc(f[1])} <b>${esc(f[2])}</b></span>`).join('')}</div>
+          <div class="hours">${b.facts.filter(f => f[2]).map(f => `<span>${esc(f[1])} <b>${esc(f[2])}</b></span>`).join('')}</div>
           <div class="acts">${map ? `<a class="btn pri sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}<a class="btn alt sm" href="tel:${digits(b.contact.phone)}">${ic('phone')} ${esc(b.contact.phone)}</a><a class="btn alt sm" href="${esc(lineUrl(b.contact.lineCustomer))}" target="_blank" rel="noopener">LINE ${esc(b.contact.lineCustomer)}</a></div></div></article>
         <div><p class="lead" style="margin-top:0">${phr(b.customer.sub)}</p>${quickCards(C, k, b.customer.quick)}${b.customer.note ? `<p class="note">${phr(b.customer.note)}</p>` : ''}</div>
       </div></div></section>`; };

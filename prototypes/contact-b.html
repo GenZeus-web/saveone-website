@@ -19,7 +19,8 @@ page((C) => {
     if (!hasInfo(C, k)) return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note">ยังไม่มีข้อมูลติดต่อ · เร็วๆ นี้</p></div>`;
     return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note" style="margin-top:4px">${phr(b.where)}</p>
       <a href="tel:${digits(c.phone)}" style="display:block;font-size:32px;font-weight:700;color:var(--price);margin-top:14px;line-height:1.2">${esc(c.phone)}</a>
-      <p class="note" style="margin-top:2px">โทรได้ ${esc(c.phoneHours)}</p>
+      ${c.phoneHours ? `<p class="note" style="margin-top:2px">โทรได้ ${esc(c.phoneHours)}</p>` : ''}
+      ${(c.phones || []).filter(([n]) => n && digits(n) !== digits(c.phone)).map(([n, t]) => `<p style="margin-top:6px;font-size:15px">${t ? esc(t) + ' ' : ''}<a href="tel:${digits(n)}" style="font-weight:700;color:var(--head)">${esc(n)}</a></p>`).join('')}
       <div class="cta" style="margin-top:16px">
         <a class="btn pri sm" href="${esc(lineUrl(c.lineCustomer))}" target="_blank" rel="noopener">${ic('chat')} ${same ? 'LINE' : 'LINE ลูกค้า'} ${esc(c.lineCustomer)}</a>
         ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('chat')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
