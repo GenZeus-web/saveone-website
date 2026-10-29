@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เทียบรีดีไซน์</title>
+<!-- หน้าเทียบรีดีไซน์ (29 ต.ค. 69): เจ้าของสลับดู แบบปัจจุบัน / V1 งาช้าง / V2 ราตรี · จอคอม / มือถือ แล้วเลือกจากของจริง
+     ทั้ง 3 แบบใช้เนื้อหาชุดเดียวกัน (content/) · V1/V2 สร้างจาก home.html ต่างแค่หน้าตา -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#1a1826;--bar:#0f0e18;--ink:#efe9dd;--muted:#9a94a8;--line:rgba(239,233,221,.16);--go:#84e62d}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{display:flex;flex-direction:column;background:var(--bg);color:var(--ink);font-family:"IBM Plex Sans Thai",sans-serif}
+.bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:10px 16px;background:var(--bar);border-bottom:1px solid var(--line)}
+.bar h1{font-size:14px;font-weight:600;margin-right:auto}
+.bar h1 small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
+.seg{display:flex;border:1px solid var(--line)}
+.seg button{font:inherit;font-size:13px;padding:7px 14px;border:0;background:none;color:var(--muted);cursor:pointer;white-space:nowrap}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--ink);color:var(--bar);font-weight:600}
+.open{font-size:13px;color:var(--muted)}
+.desc{padding:8px 16px;font-size:13px;color:var(--muted);border-bottom:1px solid var(--line);background:var(--bar)}
+.desc b{color:var(--ink);font-weight:600}
+.view{flex:1;min-height:0;display:grid;place-items:center;overflow:auto;padding:0}
+.view iframe{display:block;border:0;width:100%;height:100%;background:#fff}
+.view.phone{padding:20px 16px}
+.view.phone iframe{width:390px;max-width:100%;height:min(844px,100%);border-radius:28px;box-shadow:0 0 0 10px #000,0 30px 80px rgba(0,0,0,.6)}
+@media (max-width:640px){ .view.phone{padding:0} .view.phone iframe{width:100%;height:100%;border-radius:0;box-shadow:none} .seg button{padding:7px 10px} }
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>เทียบรีดีไซน์หน้าแรก<small>สลับดูทีละแบบ · ลองกดเลือก "มาขายของ" แล้วเลื่อนลง</small></h1>
+  <div class="seg" id="ver">
+    <button data-v="home.html">ปัจจุบัน</button>
+    <button data-v="home-v1.html">V1 งาช้าง</button>
+    <button data-v="home-v2.html">V2 ราตรี</button>
+  </div>
+  <div class="seg" id="dev">
+    <button data-d="desk">จอคอม</button>
+    <button data-d="phone">มือถือ</button>
+  </div>
+  <a class="open" id="open" target="_blank" rel="noopener">เปิดเต็มจอ ↗</a>
+</div>
+<p class="desc" id="desc"></p>
+<div class="view" id="view"><iframe id="fr" title="ตัวอย่างหน้าแรก"></iframe></div>
+<script>
+const DESC = {
+  'home.html': '<b>แบบปัจจุบัน</b> — ม่วงคราม การ์ดมุมมน ปุ่มเขียว (ไว้เทียบ)',
+  'home-v1.html': '<b>V1 งาช้าง</b> — พื้นขาวงาช้าง ตัวหนังสือหมึกคราม · หัวข้อตัวมีหัว (Noto Serif Thai) · ผังใส่กรอบเหมือนภาพในแกลเลอรี · เส้นบาง มุมเหลี่ยม · ท้ายหน้าแผ่นหมึกคราม',
+  'home-v2.html': '<b>V2 ราตรี</b> — ดำคราม เส้นบางสีครีม · หัวข้อตัวบางมีหัว (Trirong) · ผังเต็มจอ โลโก้ 3D กลางคืน · ลิงก์เรียงแบบเมนูโรงแรม · เขียว GO เป็นจุดไฟดวงเล็ก',
+};
+const $ = id => document.getElementById(id);
+const q = new URLSearchParams(location.search);
+let v = q.get('v') || 'home-v1.html', d = q.get('d') || (innerWidth < 700 ? 'phone' : 'desk');
+function show() {
+  document.querySelectorAll('#ver button').forEach(b => b.classList.toggle('on', b.dataset.v === v));
+  document.querySelectorAll('#dev button').forEach(b => b.classList.toggle('on', b.dataset.d === d));
+  $('view').classList.toggle('phone', d === 'phone');
+  $('desc').innerHTML = DESC[v];
+  $('open').href = v;
+  if (!$('fr').src.endsWith(v)) $('fr').src = v;
+  history.replaceState(null, '', `?v=${v}&d=${d}`);
+}
+$('ver').onclick = e => { const b = e.target.closest('button'); if (b) { v = b.dataset.v; show(); } };
+$('dev').onclick = e => { const b = e.target.closest('button'); if (b) { d = b.dataset.d; show(); } };
+show();
+</script>
+</body>
+</html>

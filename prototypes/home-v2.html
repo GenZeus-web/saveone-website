@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ตลาดเซฟวัน โก</title>
+<!-- รีดีไซน์ V2 ราตรี (Midnight Gallery) (ทดลอง 29 ต.ค. 69 · สร้างจาก home.html ด้วยสคริปต์ — ตรรกะ/ข้อมูลเหมือนกัน ต่างแค่หน้าตา)
+     หน้าแรกแบบ D (เจ้าของเลือก 28 ต.ค. 69): ม่านมืดเลือกกลุ่มทับผัง 3D → เลือกแล้วจางหาย → เลื่อนลงเจอเนื้อหาของกลุ่มนั้น
+     เนื้อหาทั้งหมดอยู่ content/site.json (แก้ได้ที่ admin/ = หน้านี้ ?edit) · หน้านี้มีแค่หน้าตา + วิธีวาด
+     ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=Trirong:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+/* ── รีดีไซน์ V2 · ราตรี (Midnight Gallery) ──
+   ทางการแบบโรงแรม/แกลเลอรีตอนค่ำ: ดำคราม เส้นบางสีครีม ตัวใหญ่บาง เว้นที่ว่างเยอะ
+   หัวข้อ Trirong (เส้นบาง มีหัว) · ตัวเลข Cormorant Garamond · เนื้อความ IBM Plex Sans Thai · เขียว GO เป็นจุดไฟดวงเล็ก */
+:root{--bg:#0c0b16;--surface:#12111f;--raise:#181728;--ink:#efe9dd;--muted:#9a94a8;--line:rgba(239,233,221,.11);--line2:rgba(239,233,221,.22);
+  --go:#84e62d;--bad:#e88a84;--warn:#e6c27a;--ed:#5fb3ff;
+  --sans:"IBM Plex Sans Thai",sans-serif;--serif:"Trirong",serif;--num:"Cormorant Garamond","Trirong",serif;
+  --ease:cubic-bezier(.2,.7,.2,1);--head:76px}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth;overflow-x:hidden;touch-action:pan-y}   /* มือถือ: เลื่อนขึ้นลงได้อย่างเดียว */
+.w{display:inline-block;max-width:100%}
+body{font-variant-numeric:lining-nums;overflow-x:hidden;background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;line-height:1.7;-webkit-font-smoothing:antialiased}
+b,strong{font-weight:600}
+a{color:inherit}
+button{font-family:inherit}
+.wrap{max-width:1160px;margin:0 auto;padding:0 40px}
+.i{display:inline-block;width:1.15em;height:1.15em;vertical-align:-.2em;flex:none}
+.i svg{width:100%;height:100%;display:block}
+.i svg *{stroke-width:1.5}
+.brand{display:block;height:30px;--wm-ink:var(--ink);--wm-go:var(--go)}
+.brand svg{height:100%;width:auto;display:block}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--go);box-shadow:0 0 10px rgba(132,230,45,.7);vertical-align:middle}
+
+/* ── แถบบน: โลโก้กลาง เมนูแยกซ้าย-ขวา ── */
+.top{position:sticky;top:0;z-index:20;background:rgba(12,11,22,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:var(--head);gap:16px}
+.top nav{display:flex;gap:36px;font-size:13px;letter-spacing:.06em}
+.top nav.r{justify-content:flex-end}
+.top nav.r a.m{display:none}
+.top nav a{text-decoration:none;color:var(--muted);padding:6px 0;cursor:pointer;transition:color .3s}
+.top nav a:hover,.top nav a.on{color:var(--ink)}
+/* ม่านเปิดอยู่ = มีโลโก้ 3D กลางจอแล้ว → ซ่อนโลโก้บนแถบ ไม่ให้ซ้ำ */
+.top .brand{transition:opacity .6s var(--ease)}
+body:has(.gate:not(.off)) .top .brand{opacity:0;pointer-events:none}
+.top nav a.on::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:var(--go);margin-right:8px;vertical-align:middle;box-shadow:0 0 8px rgba(132,230,45,.7)}
+
+/* ── ผัง 3D เต็มจอ + ม่านเลือกกลุ่ม ── */
+.map{position:relative;height:max(460px,min(calc(100vh - var(--head)),860px));background:#0c0b16;overflow:hidden;border-bottom:1px solid var(--line);scroll-margin-top:var(--head)}
+.map iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.gate{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:linear-gradient(180deg,rgba(12,11,22,.55),rgba(12,11,22,.88));backdrop-filter:blur(2px);transition:opacity .8s var(--ease)}
+.gate.off{opacity:0;pointer-events:none}
+.gate-in{max-width:760px;width:100%;text-align:center}
+.gate .logo3d{display:block;height:clamp(48px,7vw,72px);width:auto;margin:0 auto 18px;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5))}   /* โลโก้ 3D ลุค B */
+.gate .kick{font-size:13px;letter-spacing:.06em;color:var(--muted);font-weight:400}
+.gate h1{font-family:var(--serif);font-weight:300;font-size:clamp(32px,5.4vw,56px);line-height:1.2;margin:10px 0 36px}
+.who{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left}
+.who>div{position:relative;display:flex;flex-direction:column;padding:28px 28px 22px;border:1px solid var(--line2);background:rgba(12,11,22,.55);backdrop-filter:blur(8px);cursor:pointer;
+  transition:background .45s var(--ease),color .45s,border-color .45s,transform .45s var(--ease)}
+.who>div:hover,.who>div:focus-visible{background:var(--ink);color:var(--bg);border-color:var(--ink);transform:translateY(-4px);outline:0}
+.who b{font-family:var(--serif);font-weight:400;font-size:26px;line-height:1.3}
+.who ul{list-style:none;padding:0;margin:14px 0 0;color:var(--muted);font-size:13px}
+.who li{padding:6px 0;border-top:1px solid var(--line)}
+.who>div:hover ul,.who>div:focus-visible ul{color:rgba(12,11,22,.62)}
+.who>div:hover li,.who>div:focus-visible li{border-color:rgba(12,11,22,.14)}
+.who .go{display:flex;gap:8px;align-items:center;margin-top:18px;font-size:13px;letter-spacing:.06em;color:var(--go);font-weight:500}
+.who>div:hover .go,.who>div:focus-visible .go{color:#2f6b12}
+.who .go .i{transition:transform .45s var(--ease)}
+.who>div:hover .go .i{transform:translateX(6px)}
+.skip{margin-top:26px;font-size:13px;letter-spacing:.06em;background:none;border:0;color:var(--muted);cursor:pointer;border-bottom:1px solid var(--line2);padding:2px 0}
+.skip:hover{color:var(--ink)}
+.chipg{position:absolute;z-index:4;top:18px;left:50%;transform:translateX(-50%);font-size:13px;letter-spacing:.04em;padding:9px 20px;border:1px solid var(--line2);background:rgba(12,11,22,.7);backdrop-filter:blur(8px);color:var(--ink);cursor:pointer;white-space:nowrap}
+/* กดหมุดบนมือถือ: ผังขยายเต็มจอ */
+html.mapfull,html.mapfull body{overflow:hidden}
+html.mapfull .map{position:fixed;inset:0;height:100vh !important;height:100dvh !important;z-index:60}
+html.mapfull .chipg{display:none}
+
+/* ── เนื้อหา ── */
+.grp{display:none;counter-reset:sec;scroll-margin-top:var(--head)}.grp.on{display:block}
+.sec{padding:110px 0 0}
+.sec:not(:has(>h2)){padding-top:32px}
+.sec>h2{counter-increment:sec;font-family:var(--serif);font-weight:300;font-size:clamp(28px,3.8vw,44px);line-height:1.25}
+.sec>h2::before{content:"— " counter(sec,decimal-leading-zero);display:block;font-family:var(--num);font-style:italic;font-size:18px;font-weight:500;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+.brn{color:var(--muted);font-weight:300}
+.sub{color:var(--muted);font-size:15px;margin-top:12px;max-width:62ch}
+/* ลิงก์ด่วน: รายการเรียงแถว เส้นบางคั่น (แบบเมนูโรงแรม) */
+.quick{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));column-gap:48px;margin-top:36px;border-top:1px solid var(--line2)}
+.q{position:relative;display:flex;gap:18px;align-items:center;text-decoration:none;padding:22px 4px;border-bottom:1px solid var(--line);transition:padding .4s var(--ease),background .4s}
+.q:hover{padding-left:14px;background:linear-gradient(90deg,rgba(239,233,221,.05),transparent)}
+.q>.i{width:22px;height:22px;color:var(--muted)}
+.q b{display:block;font-weight:500;font-size:17px;line-height:1.4}
+.q small{display:block;color:var(--muted);font-size:13px;line-height:1.45;margin-top:2px}
+.q.main b::after{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--go);box-shadow:0 0 10px rgba(132,230,45,.7);margin-left:10px;vertical-align:middle}
+.q.main>.i{color:var(--go)}
+.q .arr{margin-left:auto;opacity:.4;transition:transform .4s var(--ease),opacity .3s}
+.q:hover .arr{opacity:1;transform:translate(3px,-3px)}
+.q.off{opacity:.45;pointer-events:none}
+.card{margin-top:28px;padding:32px;background:var(--surface);border:1px solid var(--line)}
+.card h3{display:flex;gap:12px;align-items:center;font-family:var(--serif);font-weight:400;font-size:22px;line-height:1.4;margin-bottom:14px}
+.card h3 .i{color:var(--go)}
+.seg{display:flex;gap:8px;margin-top:36px;overflow-x:auto}
+.seg button{display:flex;gap:8px;align-items:center;font-weight:400;font-size:14px;letter-spacing:.03em;padding:10px 20px;border:1px solid var(--line2);background:none;color:var(--muted);cursor:pointer;white-space:nowrap;transition:all .3s var(--ease)}
+.seg button:hover{color:var(--ink)}
+.seg button.on{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:500}
+.seg+.card{margin-top:-1px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));border-top:1px solid var(--line)}
+.f{position:relative;padding:14px 4px 14px 0;border-bottom:1px solid var(--line)}
+.f small{display:flex;gap:6px;align-items:center;color:var(--muted);font-size:12px;letter-spacing:.02em}
+.f b{font-size:15px;font-weight:500}
+.lot{display:grid;grid-template-columns:1.1fr 1fr;gap:32px;margin-top:28px;align-items:start}
+.lot img{width:100%;display:block}
+@media (max-width:760px){.lot{grid-template-columns:1fr}}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{padding:14px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:baseline}
+th{color:var(--muted);font-weight:400;font-size:12px;letter-spacing:.1em;border-bottom-color:var(--line2)}
+td.big{font-family:var(--num);font-size:32px;font-weight:400;line-height:1;font-variant-numeric:lining-nums}
+tr.now td{background:rgba(132,230,45,.05)}
+.now-tag{display:inline-flex;align-items:center;gap:6px;margin-left:10px;font-size:11px;letter-spacing:.1em;color:var(--go);vertical-align:middle}
+.now-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--go);box-shadow:0 0 8px rgba(132,230,45,.8)}
+.note{font-size:13px;color:var(--muted);margin-top:14px}
+.steps{list-style:none;padding:0;counter-reset:s;display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1px;margin-top:36px;background:var(--line);border:1px solid var(--line)}
+.steps li{position:relative;counter-increment:s;padding:26px 24px 28px;font-size:14px;background:var(--bg)}
+.steps li::before{content:counter(s);display:block;font-family:var(--num);font-style:italic;font-size:44px;font-weight:400;line-height:1;color:var(--ink);margin-bottom:16px}
+.steps b{display:block;font-size:16px;font-weight:500;margin-bottom:4px}.steps li>span{display:block;color:var(--muted)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media (max-width:760px){.two{grid-template-columns:1fr;gap:0}}
+ul.dots{list-style:none;padding:0;font-size:14px}
+ul.dots li{position:relative;padding:10px 0 10px 20px;border-bottom:1px solid var(--line)}
+ul.dots li:last-child{border-bottom:0}
+ul.dots li::before{content:"";position:absolute;left:2px;top:1.35em;width:4px;height:4px;border-radius:50%;background:var(--go)}
+.pts{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px}
+.pt{position:relative;padding:6px 16px;font-weight:500;font-size:14px;border:1px solid var(--go);color:var(--go)}
+.pt:last-of-type{border-color:var(--line2);color:var(--ink)}
+details{border-top:1px solid var(--line)}
+details:first-of-type{border-top:0}
+summary{position:relative;cursor:pointer;padding:18px 2px;font-weight:400;list-style:none;display:flex;align-items:center;gap:12px}
+summary::-webkit-details-marker{display:none}
+summary .i{color:var(--muted)}
+summary .n{margin-left:auto;color:var(--muted);font-size:13px}
+summary::after{content:"+";color:var(--muted);font-family:var(--num);font-size:26px;font-weight:300;line-height:1;width:16px;text-align:center;transition:transform .4s var(--ease)}
+summary:not(:has(.n))::after{margin-left:auto}
+details[open] summary::after{transform:rotate(45deg)}
+details>div{padding:0 2px 20px;font-size:14px;color:#c9c3d4}
+.minus{color:var(--bad);white-space:nowrap;text-align:right;font-family:var(--num);font-size:20px}
+.scope{display:inline-block;margin-top:16px;font-size:12px;letter-spacing:.04em;padding:5px 14px;border:1px solid var(--line2);color:var(--muted)}
+.brgo{display:inline-flex;gap:10px;align-items:center;margin:26px 32px 0 0;padding:4px 0;border:0;border-bottom:1px solid var(--line2);background:none;color:var(--ink);font-size:14px;letter-spacing:.03em;cursor:pointer;transition:border-color .3s}
+.brgo:hover{border-color:var(--ink)}.brgo .i{color:var(--go)}
+.pics{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(300px,1fr);gap:20px;margin-top:36px;overflow-x:auto;scroll-snap-type:x mandatory}
+.pics figure{margin:0;scroll-snap-align:start}
+.pics img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--surface);filter:saturate(.9)}
+.pics figcaption{font-size:12px;letter-spacing:.03em;color:var(--muted);margin-top:10px}
+.kinds{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px;margin-top:36px}
+.kind{border-top:1px solid var(--line2)}
+.kind img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;margin-top:20px;filter:saturate(.9)}
+.kind>div{padding:18px 0 0}
+.kind b{display:flex;gap:10px;align-items:center;font-family:var(--serif);font-weight:400;font-size:22px}.kind b .i{color:var(--go)}
+.kind small{display:block;color:var(--muted);font-size:13px;margin-top:2px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{position:relative;font-size:12px;padding:3px 10px;border:1px solid rgba(132,230,45,.35);color:#cdeeb0}
+.chip.no{border-color:rgba(232,138,132,.35);color:#f0b9b4}
+.chips .ed-add{margin-top:0;padding:2px 10px}
+.soon{margin-top:80px;padding:64px 24px;border:1px solid var(--line2);text-align:center;color:var(--muted)}
+.soon b{display:block;color:var(--ink);font-family:var(--serif);font-weight:300;font-size:30px;margin-bottom:8px}
+
+/* ── ท้ายหน้า ── */
+footer{margin-top:140px;border-top:1px solid var(--line);font-size:14px;color:var(--muted);padding:72px 0 44px;background:linear-gradient(180deg,transparent,rgba(239,233,221,.025))}
+footer .brand{height:38px;width:max-content;margin:0 auto}
+.f-top{text-align:center;padding-bottom:40px}
+.f-kick{font-size:13px;letter-spacing:.06em;margin-top:14px}
+.f-cols{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:32px;padding:36px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.f-cols small{display:block;font-size:12px;letter-spacing:.04em;color:var(--muted);margin-bottom:10px}
+.f-cols b{display:block;color:var(--ink);font-weight:500}
+.f-cols a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line2)}
+.f-cols p+p{margin-top:2px}
+.f-note{font-size:12px;padding-top:24px;text-align:center}
+@media (max-width:760px){.f-cols{grid-template-columns:1fr 1fr}.f-cols>:first-child{grid-column:1/-1}}
+
+@media (max-height:780px) and (min-width:641px){ .gate .logo3d{height:44px;margin-bottom:10px}.gate h1{margin:6px 0 20px}.who>div{padding:20px 22px 16px}.who ul{display:none}.who .go{margin-top:10px}.skip{margin-top:16px} }
+@media (max-width:640px){
+  :root{--head:60px}
+  .wrap{padding:0 16px}
+  .top .wrap{display:flex;justify-content:space-between}
+  .top nav.l{display:none}.top nav.r a.m{display:inline}.top nav{gap:18px;font-size:13px;letter-spacing:.02em}.top nav a.c{display:none}
+  .brand{height:22px}
+  .map{height:80vh;height:80svh}
+  .chipg{left:auto;right:12px;transform:none;font-size:12px;padding:7px 12px}
+  .gate h1{margin-bottom:20px}.gate .logo3d{margin-bottom:10px}
+  .who{grid-template-columns:1fr;gap:10px}.who ul{display:none}.who>div{padding:18px 20px}.who b{font-size:22px}.who .go{margin-top:8px}
+  .sec{padding-top:72px}.card{padding:22px}
+  th,td{padding:10px 8px}td.big{font-size:26px}
+  footer{margin-top:90px;padding-top:52px}
+}
+
+/* ── เลื่อนแล้วค่อยๆ โผล่ ── */
+@supports (animation-timeline: view()){
+  @media (prefers-reduced-motion:no-preference){
+    .sec>h2,.sec>.sub,.kind,.steps li,.two>.card,.q{animation:rise linear both;animation-timeline:view();animation-range:entry 0% entry 45%}
+  }
+}
+@keyframes rise{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+
+/* ── โหมดแก้ (admin) ── */
+body.edit [data-p]{outline:1px dashed rgba(95,179,255,.6);outline-offset:2px;border-radius:2px;min-width:2em;cursor:text}
+body.edit span[data-p],body.edit b[data-p],body.edit small[data-p]{display:inline-block}
+body.edit [data-p]:focus{outline:2px solid var(--ed);background:rgba(95,179,255,.1)}
+body.edit [data-p].empty{min-width:5em;background:rgba(255,207,107,.1)}
+body.edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:var(--warn);opacity:.8;font-weight:400}
+.ed-del{position:absolute;top:-8px;right:-8px;z-index:2;width:22px;height:22px;border-radius:50%;border:0;background:#d9534f;color:#fff;font-weight:700;cursor:pointer;line-height:1}
+.ed-add{margin-top:8px;padding:6px 12px;border:1px dashed var(--ed);background:none;color:var(--ed);font-weight:600;cursor:pointer}
+.edbar{position:fixed;z-index:50;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);padding:10px 12px;background:#0d0b1d;color:#f6f1e7;border:1px solid #5fb3ff;box-shadow:0 10px 40px rgba(0,0,0,.5);font-size:14px}
+.edbar b{color:#5fb3ff}
+.edbar button{padding:8px 14px;border:1px solid rgba(246,241,231,.2);background:#252050;color:#f6f1e7;font-weight:600;cursor:pointer}
+.edbar button.pri{background:#5fb3ff;border-color:#5fb3ff;color:#0d0b1d}
+.edbar .st{color:#b3aec6}.edbar .st.dirty{color:#ffcf6b}
+.edpanel{display:none}
+body.edit .edpanel{display:block}
+.edpanel label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.edpanel input{width:100%;padding:8px 10px;border:1px solid var(--line2);background:var(--surface);color:var(--ink);font:inherit;font-size:14px;outline:0}
+.edpanel input:focus{border-color:var(--ed)}
+.edgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px}
+body.edit{padding-bottom:90px}
+
+/* ซ่อนแถบเลื่อน (ยังเลื่อนได้) */
+*{scrollbar-width:none}
+*::-webkit-scrollbar{display:none}
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <nav class="l" id="navL"></nav>
+  <a class="brand" data-wm href="#" aria-label="ตลาดเซฟวัน GO"></a>
+  <nav class="r" id="nav"></nav>
+</div></header>
+<div class="map" id="map">
+  <iframe id="mapFrame" title="ผังตลาด 3D"></iframe>
+  <div class="gate" id="gate"><div class="gate-in" id="gateIn"></div></div>
+  <button class="chipg" id="chip" hidden></button>
+</div>
+
+<div class="wrap edpanel" id="edpanel"></div>
+<main class="grp" id="g-cus"></main>
+<main class="grp" id="g-ven"></main>
+<footer id="foot"></footer>
+
+<script src="content/cms.js?v=20261028i"></script>
+<script>
+const { EDIT, esc, get, T, del, add } = CMS;
+const $ = id => document.getElementById(id);
+// ── ไอคอนวาดเอง (เส้น 24×24 ตามสีตัวหนังสือ) · ไม่ใช้อีโมจิ ──
+const ICON = {
+  bag: '<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  store: '<path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9a3 3 0 0 0 6 0a3 3 0 0 0 6 0a3 3 0 0 0 6 0"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M16.5 16.5L21 21"/>',
+  parking: '<rect x="4" y="3" width="16" height="18" rx="3"/><path d="M10 17V7h3.5a3 3 0 0 1 0 6H10"/>',
+  cam: '<rect x="3" y="7" width="13" height="10" rx="2"/><path d="M16 10.5l5-3v9l-5-3"/>',
+  chat: '<path d="M4 5h16v11H10l-6 4z"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  pin: '<path d="M12 21s-7-6.5-7-12a7 7 0 0 1 14 0c0 5.5-7 12-7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  food: '<path d="M4 20L20 4"/><circle cx="9" cy="15" r="2.4"/><circle cx="12.5" cy="11.5" r="2.4"/><circle cx="16" cy="8" r="2.4"/>',
+  car: '<path d="M3 16v-4l2.5-5h13l2.5 5v4z"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+  leave: '<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>',
+  rain: '<path d="M7 14a4 4 0 0 1 .5-8 5 5 0 0 1 9.5 1.5A3.3 3.3 0 0 1 17 14z"/><path d="M8 17.5l-1 3M12 17.5l-1 3M16 17.5l-1 3"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  size: '<path d="M3 17L17 3l4 4L7 21z"/><path d="M7 13l2 2M10 10l2 2M13 7l2 2"/>',
+  bolt: '<path d="M13 3L5 14h6l-1 7 8-11h-6z"/>',
+  online: '<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+  walk: '<path d="M4 21V5l8-2v18"/><path d="M12 9h8v12"/><path d="M3 21h18"/>',
+  box: '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10"/>',
+  shirt: '<path d="M8 3L3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z"/>',
+  shield: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/>',
+  tag: '<path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  drop: '<path d="M12 3s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/>',
+  smoke: '<path d="M8 21c-2-3 2-5 0-8s2-5 0-8M15 21c-2-3 2-5 0-8s2-5 0-8"/>',
+  heart: '<path d="M12 20s-8-5-8-11a4.5 4.5 0 0 1 8-3 4.5 4.5 0 0 1 8 3c0 6-8 11-8 11z"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/>',
+  area: '<path d="M4 4h16v16H4z" stroke-dasharray="3 3"/><circle cx="12" cy="12" r="2"/>',
+  arrow: '<path d="M7 17L17 7M9 7h8v8"/>',
+  next: '<path d="M4 12h16M14 6l6 6-6 6"/>',
+};
+const ic = k => `<i class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k] || ''}</svg></i>`;
+
+let C;   // เนื้อหาทั้งหน้า: content/site.json + content/<สาขา>/data.json (C.sg, C.korat)
+let BR = 'sg';   // สาขาที่ผังด้านบนโชว์อยู่ (ผังบอกมาทาง postMessage) · เนื้อหาข้างล่างเปลี่ยนตาม
+const digits = s => String(s || '').replace(/[^\d+]/g, '');
+const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
+// ปุ่มลิงก์: tel/line/link = ชี้ไปค่าใน contact/links ของสาขานั้น (ไม่มี → ของส่วนกลาง) · href = ลิงก์ในหน้า · ว่าง = ปุ่มจาง "รอลิงก์"
+const brVal = (kind, key) => get(C, `${BR}.${kind}.${key}`) || get(C, `${kind}.${key}`) || '';
+const qHref = q => q.tel ? (brVal('contact', q.tel) && 'tel:' + digits(brVal('contact', q.tel))) : q.line ? (brVal('contact', q.line) && lineUrl(brVal('contact', q.line))) : q.link ? brVal('links', q.link) : q.href || '#';
+const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
+const dots = p => `<ul class="dots">${get(C, p).map((_, i) => `<li>${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</li>`).join('')}</ul>${add(p)}`;
+const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q), off = !h && !EDIT;
+  return `<a class="q${q.main ? ' main' : ''}${off ? ' off' : ''}" href="${esc(h || '#')}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}${off ? ' aria-disabled="true"' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}${off ? '<small>· รอลิงก์</small>' : ''}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
+// รูปจริง [[ไฟล์, คำบรรยาย], …] · ไฟล์อยู่ content/<สาขา>/img/ · หน้าจริงข้ามรูปที่ยังว่าง · โหมดแก้: พิมพ์ชื่อไฟล์/คำบรรยาย + เพิ่ม/ลบ
+const pics = p => { const a = get(C, p) || [], on = a.map((x, i) => [x, i]).filter(([[src]]) => EDIT || src);
+  return on.length || EDIT ? `<div class="pics">${on.map(([[src, alt], i]) => `<figure style="position:relative">${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">` : ''}<figcaption>${EDIT ? `ไฟล์: ${T(C, `${p}.${i}.0`)}<br>` : ''}${T(C, `${p}.${i}.1`)}</figcaption>${del(`${p}.${i}`)}</figure>`).join('')}</div>${add(p, '+ เพิ่มรูป')}` : ''; };
+const brName = () => C[BR] ? ` <span class="brn">· ${esc(C[BR].name)}</span>` : '';
+// ปุ่มไปสาขาอื่น → สั่งผังด้านบนพลิก แล้วเลื่อนขึ้นไปดู
+const otherBranches = () => C.branchKeys.filter(k => k !== BR).map(k => `<button type="button" class="brgo" data-go="${k}">${ic('pin')}ดูสาขา${esc(C[k].name)} →</button>`).join('');
+const soon = () => `<div class="wrap"><div class="soon"><b>สาขาบางนา · เร็วๆ นี้</b>ยังไม่มีรายละเอียดของสาขานี้<br>${otherBranches()}</div></div>`;
+
+// ── ม่าน ──
+function renderGate() {
+  const who = g => `<div data-g="${g}" tabindex="0" role="button"><b>${T(C, `gate.${g}.title`)}</b><ul>${C.gate[g].items.map((_, i) => `<li>${T(C, `gate.${g}.items.${i}`)}</li>`).join('')}</ul><span class="go">เลือก ${ic('next')}</span></div>`;
+  $('gateIn').innerHTML = `<img class="logo3d" src="img/logo-3d-night.webp" alt="${esc(C.gate.kicker)}">${T(C, 'gate.kicker', 'p', 'kick')}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button>`;
+}
+
+// ── ลูกค้า ──
+function renderCus() {
+  const b = C[BR], P = BR;
+  if (!b) { $('g-cus').innerHTML = soon(); return; }
+  $('g-cus').innerHTML = `<div class="wrap">
+    <section class="sec"><h2>${T(C, 'customer.title')}${brName()}</h2>${T(C, `${P}.customer.sub`, 'p', 'sub')}${quick(`${P}.customer.quick`)}${pics(`${P}.customer.photos`)}</section>
+    <section class="sec"><div class="card"><h3>${ic('pin')}${T(C, `${P}.name`)}</h3>${T(C, `${P}.where`, 'p', 'sub')}
+      <div class="facts" style="margin-top:10px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${j}.1`)}</small>${T(C, `${P}.facts.${j}.2`, 'b')}</div>`).join('')}</div></div>
+      ${T(C, `${P}.customer.note`, 'p', 'note')}<div>${otherBranches()}</div></section></div>`;
+}
+
+// ── ผู้ค้า ──
+// ทุกสาขาโครงเดียวกัน (content/<สาขา>/data.json) วาดด้วยโค้ดชุดนี้ชุดเดียว
+// หน้าจริง: ส่วนที่ยังว่างทั้งส่วน (เช่น สาขาไม่มีศูนย์อาหาร) ไม่โชว์ · ช่องว่างในส่วนที่มีข้อมูล = "รอข้อมูล" · โหมดแก้: โชว์ทุกส่วนให้กรอก
+const ZONES = ['food', 'boot', 'court'];
+const filled = v => Array.isArray(v) ? v.some(filled) : v && typeof v === 'object' ? Object.values(v).some(filled) : typeof v === 'string' && v.trim() !== '';
+const penHas = g => g.some(x => filled(x.title) || filled(x.rows));   // ไม่นับรหัสไอคอน
+const zoneHas = Z => Z.rows.some(r => (r.online || '').trim() || (r.walkin || '').trim());
+const show = ok => EDIT || ok;
+const chipList = (p, cls) => `<div class="chips">${get(C, p).map((_, i) => `<span class="chip ${cls}">${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</span>`).join('')}${add(p, '+')}</div>`;
+let zoneNow = 'food';
+function renderVen() {
+  if (!C[BR]) { $('g-ven').innerHTML = soon(); return; }
+  const P = `${BR}.vendor`, V = get(C, P), R = C.vendor.rules, E = V.event;
+  const zs = ZONES.filter(z => show(zoneHas(V.zones[z])));
+  if (!zs.includes(zoneNow)) zoneNow = zs[0] || 'food';
+  // ขายอะไรได้บ้าง: กติกาส่วนกลาง (ทุกสาขาเหมือนกัน) + รูปของสาขา
+  const kinds = zs.map(z => { const Z = V.zones[z];
+    const cover = Z.photos.find(([src]) => src);   // รูปแรกของโซน = ภาพปก
+    return `<div class="kind">${cover ? `<img src="${esc(cover[0])}" alt="${esc(cover[1])}" loading="lazy">` : ''}<div><b>${ic(R[z].ic)}${T(C, `vendor.rules.${z}.name`)}</b>${T(C, `vendor.rules.${z}.sub`, 'small')}
+      <small style="margin-top:8px">ขายได้</small>${chipList(`vendor.rules.${z}.ok`, 'ok')}${show(filled(R[z].no)) ? `<small style="margin-top:6px">ห้ามขาย</small>${chipList(`vendor.rules.${z}.no`, 'no')}` : ''}</div></div>`; }).join('');
+  const rights = V.rights.map((r, i) => `<div class="card"><h3>${ic(r.ic)}${T(C, `${P}.rights.${i}.title`)}</h3>${dots(`${P}.rights.${i}.items`)}</div>`).join('');
+  const faq = V.faq.map((_, i) => `<details${EDIT ? ' open' : ''}><summary>${T(C, `${P}.faq.${i}.0`)}${del(`${P}.faq.${i}`)}</summary><div>${T(C, `${P}.faq.${i}.1`)}</div></details>`).join('');
+  const phones = get(C, `${BR}.contact.phones`);
+  const dayOn = filled(V.day.rows.map(r => r.slice(1))), lateOn = filled(V.late.items), leaveOn = filled(V.leave.items);
+  $('g-ven').innerHTML = `<div class="wrap">
+    <section class="sec"><h2>${T(C, 'vendor.title')}${brName()}</h2>${T(C, `${P}.sub`, 'p', 'sub')}${T(C, `${P}.scope`, 'span', 'scope')}${quick(`${P}.quick`)}<div>${otherBranches()}</div></section>
+    ${zs.length ? `<section class="sec">${T(C, 'vendor.kindsTitle', 'h2')}<div class="kinds">${kinds}</div></section>
+    <section class="sec">${T(C, `${P}.priceTitle`, 'h2')}
+      <div class="seg" id="zone">${zs.map(z => `<button data-z="${z}">${ic(V.zones[z].ic)}${esc(V.zones[z].name)}</button>`).join('')}</div>
+      <div class="card" id="zoneCard"></div></section>` : ''}
+    ${show(filled(V.steps.items)) ? `<section class="sec">${T(C, `${P}.steps.title`, 'h2')}
+      <ol class="steps">${V.steps.items.map((_, i) => `<li>${T(C, `${P}.steps.items.${i}.0`, 'b')}${T(C, `${P}.steps.items.${i}.1`)}${del(`${P}.steps.items.${i}`)}</li>`).join('')}</ol>${add(`${P}.steps.items`, '+ เพิ่มขั้น')}
+      ${T(C, `${P}.steps.note`, 'p', 'note')}
+      <div class="quick">${phones.map((_, i) => `<a class="q" href="tel:${digits(phones[i][0])}">${ic('phone')}<div>${T(C, `${BR}.contact.phones.${i}.0`, 'b')}${T(C, `${BR}.contact.phones.${i}.1`, 'small')}</div>${del(`${BR}.contact.phones.${i}`)}</a>`).join('')}</div>${add(`${BR}.contact.phones`, '+ เพิ่มเบอร์')}</section>` : ''}
+    ${show(dayOn || lateOn || leaveOn) ? `<section class="sec">${T(C, `${P}.day.title`, 'h2')}
+      ${show(dayOn) ? `<div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
+        <tbody>${V.day.rows.map((r, i) => `<tr>${r.map((_, j) => `<td>${T(C, `${P}.day.rows.${i}.${j}`)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+        ${T(C, `${P}.day.note`, 'p', 'note')}</div>` : ''}
+      <div class="two">
+        ${show(lateOn) ? `<div class="card"><h3>${ic('clock')}${T(C, `${P}.late.title`)}</h3>${dots(`${P}.late.items`)}</div>` : ''}
+        ${show(leaveOn) ? `<div class="card"><h3>${ic('leave')}${T(C, `${P}.leave.title`)}</h3>${dots(`${P}.leave.items`)}</div>` : ''}
+      </div></section>` : ''}
+    ${show(filled(V.points.chips) || filled(V.points.text) || zs.some(z => penHas(V.penalties[z]))) ? `<section class="sec">${T(C, `${P}.points.title`, 'h2')}
+      ${show(filled(V.points.chips) || filled(V.points.text)) ? `<div class="card"><div class="pts">${V.points.chips.map((_, i) => `<span class="pt">${T(C, `${P}.points.chips.${i}`)}${del(`${P}.points.chips.${i}`)}</span>`).join('')}</div>${add(`${P}.points.chips`)}
+        ${T(C, `${P}.points.text`, 'p')}${T(C, `${P}.points.note`, 'p', 'note')}</div>` : ''}
+      <div class="card" id="penCard"><h3>${T(C, `${P}.points.penTitle`)} <span class="sub" id="penZone"></span></h3><div id="pen"></div></div></section>` : ''}
+    ${show(V.rights.some(r => filled(r.title) || filled(r.items))) ? `<section class="sec">${T(C, `${P}.rightsTitle`, 'h2')}<div class="two">${rights}</div>${add(`${P}.rights`, '+ เพิ่มสิทธิ์')}</section>` : ''}
+    ${show(filled(E.rows) || filled(E.sub)) ? `<section class="sec">${T(C, `${P}.event.title`, 'h2')}${T(C, `${P}.event.sub`, 'p', 'sub')}${pics(`${P}.event.photos`)}
+      <div class="card"><div class="tbl"><table><thead><tr><th>พื้นที่</th><th>ค่าเช่า (บาท)</th></tr></thead><tbody>${E.rows.map((_, i) => `<tr><td style="position:relative">${T(C, `${P}.event.rows.${i}.0`)}${del(`${P}.event.rows.${i}`)}</td><td class="big">${T(C, `${P}.event.rows.${i}.1`)}</td></tr>`).join('')}</tbody></table></div>${add(`${P}.event.rows`, '+ เพิ่มแถว')}
+      <p class="sub" style="margin-top:8px">ลาน: ${T(C, `${P}.event.areas`)}</p>${T(C, `${P}.event.note`, 'p', 'note')}
+      <div class="quick"><a class="q" href="tel:${digits(E.tel)}">${ic('phone')}<div><b>สอบถามเช่าลาน</b>${T(C, `${P}.event.tel`, 'small')}</div></a></div></div></section>` : ''}
+    ${show(filled(V.faq)) ? `<section class="sec">${T(C, `${P}.faqTitle`, 'h2')}<div class="card">${faq}${add(`${P}.faq`, '+ เพิ่มคำถาม')}</div></section>` : ''}
+  </div>`;
+  if (!zs.length) return;
+  $('zone').querySelectorAll('button').forEach(b => b.onclick = () => zone(b.dataset.z));
+  zone(zoneNow);
+}
+function zone(z) {
+  zoneNow = z;
+  const VP = `${BR}.vendor`, V = get(C, VP), Z = V.zones[z], P = `${VP}.zones.${z}`, now = CMS.seasonNow(V.seasons);
+  $('zone').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.z === z));
+  const seasonal = Z.rows.some(r => r.season);
+  const row = (r, i) => { const on = r.season && r.season === now;
+    return `<tr${on ? ' class="now"' : ''}><td>${r.season ? esc(get(V.seasons, r.season + '.label') || '') + ' · ' : ''}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}</td></tr>`; };
+  $('zoneCard').innerHTML =
+    `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จองหน้างาน</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
+    + T(C, `${P}.note`, 'p', 'note')
+    + `<div class="lot">${Z.photos.some(([src]) => src) || EDIT ? `<div>${pics(`${P}.photos`)}</div>` : ''}<div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
+  const PP = `${VP}.penalties.${z}`;
+  if (!$('pen')) return;
+  const penOn = show(penHas(get(C, PP)));
+  $('penCard').hidden = !penOn;
+  $('penZone').textContent = '· ' + Z.name;
+  $('pen').innerHTML = get(C, PP).map((g, i) =>
+    `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
+      `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
+}
+function renderFoot() {
+  const ln = k => get(C, `sg.contact.${k}`);
+  $('foot').innerHTML = `<div class="wrap"><div class="f-top"><span class="brand" data-wm></span><p class="f-kick">${esc(C.gate.kicker)}</p></div>
+    <div class="f-cols">
+      <div><small>บริษัท</small>${T(C, 'contact.company', 'b')}<p>${T(C, 'contact.address')}</p></div>
+      <div><small>โทร</small><p><a href="tel:${digits(ln('phone'))}">${T(C, 'sg.contact.phone')}</a></p><p>${T(C, 'sg.contact.phoneHours')}</p></div>
+      <div><small>LINE</small><p>ผู้ค้า <a href="${esc(lineUrl(ln('lineVendor')))}" target="_blank" rel="noopener">${T(C, 'sg.contact.lineVendor')}</a></p><p>ลูกค้า <a href="${esc(lineUrl(ln('lineCustomer')))}" target="_blank" rel="noopener">${T(C, 'sg.contact.lineCustomer')}</a></p></div>
+      <div><small>สาขา</small>${C.branchKeys.map(k => `<p>${esc(C[k].name)}</p>`).join('')}</div>
+    </div>
+    ${T(C, 'contact.footnote', 'p', 'f-note')}</div>`;
+  fillWordmarks();
+}
+// โลโก้ตัวอักษร (SVG ต้นฉบับ brand/ref-logos) ใส่ลงหน้าตรงๆ ให้สีตามธีมได้ (--wm-ink / --wm-go)
+let WM = null;
+async function fillWordmarks() {
+  try { WM = WM || await (await fetch('img/wordmark.svg')).text(); } catch { return; }
+  document.querySelectorAll('[data-wm]').forEach(el => { if (!el.firstChild) el.innerHTML = WM; });
+}
+// แถบบน: ไปส่วนลูกค้า/ผู้ค้า (ชื่อเมนูมาจากม่านเลือกกลุ่ม)
+function renderHead() {
+  $('navL').innerHTML = `<a data-nav="cus">${esc(C.gate.cus.title)}</a><a data-nav="ven">${esc(C.gate.ven.title)}</a>`;
+  $('nav').innerHTML = `<a class="m" data-nav="cus">${esc(C.gate.cus.title)}</a><a class="m" data-nav="ven">${esc(C.gate.ven.title)}</a><a class="c" href="#foot">ติดต่อ</a><a class="c" href="${esc(lineUrl(get(C, 'sg.contact.lineCustomer')))}" target="_blank" rel="noopener">LINE</a>`;
+  document.querySelectorAll('[data-nav]').forEach(a => a.onclick = e => { e.preventDefault(); pick(a.dataset.nav); $('g-' + a.dataset.nav).scrollIntoView({ behavior: 'smooth' }); });
+  document.querySelector('.top .brand').onclick = e => { e.preventDefault(); scrollTo({ top: 0, behavior: 'smooth' }); };
+}
+// แผงลิงก์/เบอร์ (เฉพาะโหมดแก้ · ค่าที่ปุ่มบนหน้าใช้ แต่ไม่ได้โชว์เป็นตัวหนังสือ)
+function renderPanel() {
+  if (!EDIT) return;
+  const inp = (p, label) => `<label>${esc(label)}<input data-p="${esc(p)}" value="${esc(get(C, p))}"></label>`;
+  $('edpanel').innerHTML = `<section class="sec"><h2>ลิงก์และเบอร์ติดต่อ</h2><p class="sub">ปุ่มบนหน้าเว็บใช้ค่าพวกนี้ · แก้ตรงนี้ที่เดียว ทุกปุ่มเปลี่ยนตาม</p>
+    <div class="card edgrid">${inp('links.findShop', 'ลิงก์ตามหาร้าน (LINE LIFF · ทุกสาขา)')}</div>
+    ${C.branchKeys.map(k => `<div class="card"><h3>${ic('pin')}${esc(C[k].name)}</h3><div class="edgrid">${inp(`${k}.links.booking`, 'ลิงก์จองล็อก')}${inp(`${k}.links.cctv`, 'ลิงก์ดูกล้อง')}
+      ${inp(`${k}.contact.lineVendor`, 'LINE ผู้ค้า')}${inp(`${k}.contact.lineCustomer`, 'LINE ลูกค้า')}${inp(`${k}.contact.phone`, 'เบอร์โทร')}${inp(`${k}.contact.phoneHours`, 'เวลาโทร')}</div></div>`).join('')}</section>`;
+}
+function renderBranch() { renderCus(); renderVen(); wireGo(); document.querySelectorAll('.grp [data-close]').forEach(a => a.addEventListener('click', () => gate.classList.add('off'))); }
+function renderAll() { renderHead(); renderGate(); renderCus(); renderVen(); renderFoot(); renderPanel(); wireGate(); wireGo(); }
+// ปุ่ม "ดูสาขา…" → ผังพลิกไปสาขานั้น (ผังบอกกลับมาว่าเปลี่ยนแล้ว → วาดเนื้อหาใหม่)
+function wireGo() {
+  document.querySelectorAll('[data-go]').forEach(b => b.onclick = () => {
+    try { frame.contentWindow.postMessage({ goBranch: b.dataset.go }, location.origin); } catch {}
+    $('map').scrollIntoView({ behavior: 'smooth' });
+  });
+}
+
+// ── ม่านเลือกกลุ่ม · ส่งกลุ่ม (+ เนื้อหา) ไปผัง 3D ──
+const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
+let group = null;
+const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
+frame.addEventListener('load', tellMap);
+// มือถือ: แถบที่อยู่เบราว์เซอร์หด/โผล่ตอนเลื่อนจอ → ความสูงจอเปลี่ยน → ผังเคยยืดหด (ดูเหมือนซูมเข้าออก)
+// ล็อกความสูงกรอบผังเป็นพิกเซล เปลี่ยนเฉพาะตอนความกว้างเปลี่ยน (หมุนจอ) · จอคอมใช้ค่าใน CSS ตามเดิม
+let mapW = 0;
+function lockMapHeight() {
+  if (innerWidth === mapW) return;
+  mapW = innerWidth;
+  $('map').style.height = innerWidth <= 640 ? Math.round(innerHeight * .8) + 'px' : '';
+}
+lockMapHeight(); addEventListener('resize', lockMapHeight);
+// ผังบอกว่าเปิด/ปิดการ์ด → มือถือขยายผังเต็มจอ
+addEventListener('message', e => {
+  if (e.origin !== location.origin || !e.data) return;
+  if ('cardOpen' in e.data) document.documentElement.classList.toggle('mapfull', !!e.data.cardOpen && innerWidth <= 720);
+  if (e.data.branch && e.data.branch !== BR && C) { BR = e.data.branch; renderBranch(); }   // ผังพลิกสาขา → เนื้อหาข้างล่างเปลี่ยนตาม
+});
+function pick(g) {
+  group = g; tellMap();
+  gate.classList.add('off'); chip.hidden = false; chip.textContent = (g ? C.gate[g].title : 'ดูผังทั้งหมด') + ' · เปลี่ยน';
+  document.querySelectorAll('.grp').forEach(m => m.classList.toggle('on', m.id === 'g-' + g));
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === g));
+}
+function wireGate() {
+  gate.querySelectorAll('[data-g]').forEach(b => {
+    b.onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(b.dataset.g); };
+    b.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === b) { e.preventDefault(); pick(b.dataset.g); } };
+  });
+  $('skip').onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(null); };
+  document.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => gate.classList.add('off')));
+}
+chip.onclick = () => { gate.classList.remove('off'); chip.hidden = true; scrollTo({ top: 0 }); };
+
+// ── โหมดแก้: แถบล่าง (บันทึก/ฉบับร่าง) ──
+// ตอนนี้ (ทดลองในเครื่อง) บันทึก = เลือกโฟลเดอร์ prototypes/content ครั้งแรก แล้วเขียนทับ site.json + <สาขา>/data.json ด้วย Chrome
+// ขึ้นเว็บจริงค่อยเปลี่ยนเป็นส่งไปเซิร์ฟเวอร์ที่ต้องล็อกอิน
+const DRAFT = 'site-draft-v2';   // v2: เนื้อหาแยกไฟล์รายสาขาแล้ว (ฉบับร่างแบบเก่าใช้ไม่ได้)
+let dirHandle = null;
+function setSt(t, dirty) { const s = $('edSt'); if (s) { s.textContent = t; s.classList.toggle('dirty', dirty); } }
+function keepDraft() { try { localStorage.setItem(DRAFT, JSON.stringify(C)); } catch {} setSt('ยังไม่บันทึก', true); }
+function changed() { keepDraft(); tellMap(); }
+async function save() {
+  C.meta.updated = new Date().toISOString().slice(0, 10);
+  const files = CMS.files(C).map(([p, d]) => [p, JSON.stringify(d, null, 2) + '\n']);
+  try {
+    if (window.showDirectoryPicker) {   // ครั้งแรกให้เลือกโฟลเดอร์ prototypes/content · ครั้งต่อไปเขียนทับที่เดิม
+      dirHandle = dirHandle || await showDirectoryPicker({ id: 'site-content', mode: 'readwrite' });
+      for (const [p, text] of files) {
+        const parts = p.split('/'); let d = dirHandle;
+        for (const s of parts.slice(0, -1)) d = await d.getDirectoryHandle(s, { create: true });
+        const w = await (await d.getFileHandle(parts.at(-1), { create: true })).createWritable(); await w.write(text); await w.close();
+      }
+    } else {   // เบราว์เซอร์อื่น: ดาวน์โหลดทีละไฟล์ (sg-data.json = content/sg/data.json)
+      for (const [p, text] of files) {
+        const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([text], { type: 'application/json' })), download: p.replace('/', '-') });
+        a.click(); URL.revokeObjectURL(a.href);
+      }
+    }
+    try { localStorage.removeItem(DRAFT); } catch {}
+    setSt('บันทึกแล้ว ' + new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }), false);
+  } catch (e) { if (e.name !== 'AbortError') setSt('บันทึกไม่ได้: ' + e.message, true); }
+}
+function editBar(hasDraft) {
+  const bar = document.createElement('div'); bar.className = 'edbar';
+  bar.innerHTML = `<b>โหมดแก้เนื้อหา</b><span class="st" id="edSt">แตะตัวหนังสือที่มีเส้นประเพื่อแก้</span>`
+    + (hasDraft ? `<button id="edDraftOff">ทิ้งที่แก้ค้างไว้</button>` : '')
+    + `<button id="edView">ดูหน้าจริง ↗</button><button class="pri" id="edSave">บันทึก</button>`;
+  document.body.appendChild(bar);
+  $('edSave').onclick = save;
+  $('edView').onclick = () => open(location.pathname.replace(/admin\/?$/, 'home.html'), '_blank');
+  if (hasDraft) {
+    $('edDraftOff').onclick = () => { try { localStorage.removeItem(DRAFT); } catch {} location.reload(); };
+    setSt('มีที่แก้ค้างไว้ (ยังไม่บันทึก)', true);
+  }
+}
+
+(async () => {
+  C = await CMS.load();
+  let hasDraft = false;
+  if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
+  document.body.classList.toggle('edit', EDIT);
+  frame.src = 'branch-flip.html?v=20261029a&theme=v2' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  renderAll();
+  if (!EDIT) return;
+  editBar(hasDraft);
+  CMS.bind(document.body, C, changed, () => { changed(); renderAll(); pick(group); });
+  // แก้ในการ์ดบนผัง → ผังส่งกลับมา
+  addEventListener('message', e => {
+    if (e.origin !== location.origin || !e.data || !e.data.patch) return;
+    const { p, v } = e.data.patch; CMS.set(C, p, v); CMS.sync(document.body, p, v); keepDraft();
+  });
+  pick('ven');
+})();
+</script>
+</body>
+</html>

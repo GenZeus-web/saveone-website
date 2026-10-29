@@ -133,7 +133,41 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 /* ซ่อนแถบเลื่อน (ยังเลื่อนได้) — แถบกินที่ทำให้หน้าไม่สมส่วน */
 *{scrollbar-width:none}
 *::-webkit-scrollbar{display:none}
+
+/* ── ธีมรีดีไซน์ (ทดลอง 29 ต.ค. 69) · เปิดด้วย ?theme=v1 | v2 จาก home-v1/home-v2 · ไม่ใส่ = หน้าตาเดิม ── */
+html[data-theme] .wm{display:none}   /* หน้าแม่มีแถบโลโก้ของตัวเองแล้ว */
+html[data-theme] .label,html[data-theme] .card,html[data-theme] .seg,html[data-theme] .angle{border-radius:2px}
+html[data-theme] .label small{letter-spacing:.12em;font-size:11px}
+html[data-theme] .label h2,html[data-theme] .card h2{font-family:var(--serif);font-weight:500;letter-spacing:.01em}
+html[data-theme] .today b{font-family:var(--num);font-weight:500}
+html[data-theme] .today{border-radius:2px}
+html[data-theme] .fact,html[data-theme] .ph,html[data-theme] .ph img,html[data-theme] .lotimg{border-radius:2px}
+html[data-theme] .btn{border-radius:2px;letter-spacing:.04em}
+html[data-theme] .dots i{width:14px;height:1.5px;border-radius:0}
+/* v1 งาช้าง: แผงขาวงาช้าง ตัวหนังสือหมึกคราม */
+html[data-theme="v1"]{--serif:"Noto Serif Thai",serif;--num:"Cormorant Garamond","Noto Serif Thai",serif;
+  --ink:#1b1834;--muted:#6e6880;--panel:rgba(250,247,241,.9);--panel-solid:rgba(250,247,241,.97);--line:rgba(27,24,52,.14);--go:#2f6b12;--bg:#f6f2ea}
+html[data-theme="v1"] .card{box-shadow:0 24px 60px rgba(13,11,29,.35)}
+html[data-theme="v1"] .tag{color:#15122b}
+html[data-theme="v1"] .today,html[data-theme="v1"] .fact{background:rgba(27,24,52,.04)}
+html[data-theme="v1"] .chip{background:rgba(47,107,18,.08);border-color:rgba(47,107,18,.3)}
+html[data-theme="v1"] .chip.no{background:rgba(160,40,40,.06);border-color:rgba(160,40,40,.3)}
+html[data-theme="v1"] .warn{color:#9a5b00}
+html[data-theme="v1"] .pin:hover span,html[data-theme="v1"] .pin.on span{color:var(--ink)}
+/* v2 ราตรี: ดำคราม เส้นบาง */
+html[data-theme="v2"]{--serif:"Trirong",serif;--num:"Cormorant Garamond","Trirong",serif;
+  --ink:#efe9dd;--muted:#9a94a8;--panel:rgba(12,11,22,.72);--panel-solid:rgba(14,13,26,.96);--line:rgba(239,233,221,.16);--bg:#0c0b16}
+html[data-theme="v2"] .label h2,html[data-theme="v2"] .card h2{font-weight:400}
+html[data-theme="v2"] .card{box-shadow:0 30px 80px rgba(0,0,0,.6)}
+html[data-theme="v2"] .today,html[data-theme="v2"] .fact{background:rgba(239,233,221,.04)}
 </style>
+<script>   // ธีมต้องตั้งก่อนวาด (สีฟ้าในฉาก 3D อ่านค่านี้ด้วย)
+{ const t = new URLSearchParams(location.search).get('theme');
+  if (t === 'v1' || t === 'v2') {
+    document.documentElement.dataset.theme = t;
+    document.write('<link href="https://fonts.googleapis.com/css2?family=' + (t === 'v1' ? 'Noto+Serif+Thai:wght@400;500;600' : 'Trirong:wght@300;400;500') + '&family=Cormorant+Garamond:wght@400;500;600&display=swap" rel="stylesheet">');
+  } }
+</script>
 </head>
 <body>
 <p class="loading" id="loading">กำลังโหลด…</p>
@@ -229,7 +263,9 @@ const scene = new THREE.Scene();
 scene.background = (() => {           // ฟ้าเย็นย่ำ: ครามเข้มด้านบน → ส้มอิฐที่ขอบฟ้า
   const c = document.createElement('canvas'); c.width = 2; c.height = 256;
   const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, 256);
-  gr.addColorStop(0, '#17133a'); gr.addColorStop(.5, '#2b2160'); gr.addColorStop(.8, '#5e3a73'); gr.addColorStop(1, '#b8604d');
+  const sky = document.documentElement.dataset.theme === 'v2'   // ธีม v2: ฟ้าดึกกว่า ขอบฟ้าอุ่นจางๆ
+    ? ['#0c0b16', '#1a173a', '#3a2a55', '#7a4a48'] : ['#17133a', '#2b2160', '#5e3a73', '#b8604d'];
+  gr.addColorStop(0, sky[0]); gr.addColorStop(.5, sky[1]); gr.addColorStop(.8, sky[2]); gr.addColorStop(1, sky[3]);
   g.fillStyle = gr; g.fillRect(0, 0, 2, 256);
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
 })();
