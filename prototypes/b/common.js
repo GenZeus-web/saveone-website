@@ -46,6 +46,8 @@ const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id |
 const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const nums = s => String(s || '').match(/\d[\d,]*/g)?.map(n => +n.replace(/,/g, '')) || [];
 const filled = v => Array.isArray(v) ? v.some(filled) : typeof v === 'string' && v.trim() !== '';
+// "ขายพรุ่งนี้ / ขายวันนี้" ในเวลาจอง → ป้ายสี (เจ้าของ: ต้องบอกชัด อย่าให้เดา)
+const dayTag = s => esc(s).replace(/ขาย(พรุ่งนี้|วันนี้)/g, (m, d) => `<span class="sell${d === 'วันนี้' ? ' td' : ''}">${m}</span>`);
 const photos = (C, k) => (C[k].customer.photos || []).filter(([s]) => s);
 const zonesOf = (C, k) => Object.entries(C[k].vendor.zones).filter(([, Z]) => Z.rows.some(r => nums(r.online).length));
 const here = location.pathname.split('/').pop() || 'home-b.html';

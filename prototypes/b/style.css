@@ -260,3 +260,7 @@ footer .fine{flex-basis:100%;font-size:13px}
 .ver a{padding:7px 14px;border-radius:999px;color:#fff}
 .ver a.on{background:#84e62d;color:#15122b}
 html.mapfull .ver,body.edit .ver{display:none}
+
+/* ป้ายวันขายในเวลาจอง: ขายพรุ่งนี้ = ส้มอำพัน · ขายวันนี้ = เขียว */
+.sell{display:inline-block;margin-left:2px;padding:1px 10px;border-radius:999px;font-weight:700;white-space:nowrap;background:var(--kick-bg);color:var(--kick)}
+.sell.td{background:var(--ok-bg);color:var(--ok)}
