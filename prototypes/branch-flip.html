@@ -93,6 +93,16 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 .today b{font-size:30px;line-height:1.2}
 .today .u{font-size:13px;color:var(--muted)}
 .today .sub{margin-top:4px}
+.ptbl{width:100%;border-collapse:collapse;margin-top:6px;font-size:14px}
+.ptbl th{font-size:11px;font-weight:600;color:var(--muted);text-align:right;padding:4px 6px}
+.ptbl td{padding:7px 6px;border-top:1px solid rgba(246,241,231,.1);text-align:right;white-space:nowrap}
+.ptbl td:first-child{text-align:left;font-weight:600}
+.ptbl b{font-size:22px;line-height:1.1}
+.ptbl tr.on td{background:rgba(132,230,45,.12)}
+.ptbl .now{display:inline-block;font-size:11px;font-weight:700;padding:0 7px;border-radius:999px;background:#84e62d;color:#15122b;vertical-align:middle}
+.spt{margin-top:12px;font-weight:700;font-size:15px}
+.spt small{display:block;font-weight:400;font-size:11px;color:var(--muted)}
+.wait{display:inline-block;font-size:11px;font-weight:700;padding:0 8px;border-radius:999px;background:rgba(255,211,107,.18);color:var(--warn)}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .fact{padding:8px 10px;border-radius:12px;background:rgba(246,241,231,.05)}
 .fact.w{grid-column:span 2}
@@ -1093,9 +1103,17 @@ function rulesHtml(rk) {
 function lotCard(b, kind) {
   const V = SITE[b].vendor, Z = V.zones[kind], P = `${b}.vendor.zones.${kind}`;
   const season = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
-  const i = Z.rows.findIndex(r => (!r.season || r.season === season) && r.dow === dow), r = Z.rows[i];
-  const today = r ? `<div class="today ${kind === 'court' ? 'food' : kind}"><small>ราคาวันนี้ · ${dow === 'weekday' ? 'จันทร์–พฤหัส' : 'ศุกร์–อาทิตย์'}${r.season ? ' · ' + esc(V.seasons[r.season].label) : ''} · จองออนไลน์</small>`
-    + `<b>${CMS.T(SITE, `${P}.rows.${i}.online`)}</b> <span class="u">บาท/ล็อก/วัน · จองหน้างาน ${CMS.T(SITE, `${P}.rows.${i}.walkin`)}</span>${Z.note ? `<small class="sub">${CMS.T(SITE, `${P}.note`)}</small>` : ''}</div>` : '';
+  // ตารางราคาช่วงนี้ (เจ้าของ: "ราคาใน card ที่กดหมุด แก้เป็นแบบตาราง") · แถววันนี้ไฮไลต์ · โคราชแยกตารางตามฝั่ง/โซน (Z.spots)
+  const SEA = { high: 'High Season', low: 'Low Season' }, wait = t => t ? ` <span class="wait">${esc(t)}</span>` : '';
+  const tbl = (rows, base) => { const cur = rows.map((r, i) => [r, i]).filter(([r]) => (!r.season || r.season === season) && (r.online || CMS.EDIT));
+    return cur.length ? `<table class="ptbl"><thead><tr><th></th><th>จองออนไลน์</th><th>Walk-in</th></tr></thead><tbody>${cur.map(([r, i]) => { const on = r.dow === dow;
+      return `<tr${on ? ' class="on"' : ''}><td>${esc(r.days)}${on ? ' <span class="now">วันนี้</span>' : ''}</td><td><b>${base ? CMS.T(SITE, `${base}.${i}.online`) : esc(r.online)}</b></td><td>${base ? CMS.T(SITE, `${base}.${i}.walkin`) : esc(r.walkin)}</td></tr>`; }).join('')}</tbody></table>` : ''; };
+  const seaTxt = Z.rows.some(r => r.season) && V.seasons[season] ? `${SEA[season] || ''} ${esc(V.seasons[season].label)}` : 'ราคาเดียวทั้งปี';
+  const body = Z.spots && !CMS.EDIT
+    ? Z.spots.map(sp => `<p class="spt">📍 ${esc(sp.name)}${wait(sp.pending)}${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${tbl(sp.rows)}`).join('')
+    : tbl(Z.rows, `${P}.rows`);
+  const today = body ? `<div class="today ${kind === 'court' ? 'food' : kind}"><small>ราคาต่อล็อก/วัน (บาท) · ${seaTxt}${wait(Z.pending)}</small>${body}`
+    + `${Z.note ? `<small class="sub">${CMS.T(SITE, `${P}.note`)}</small>` : ''}</div>` : '';
   const book = S(`${b}.links.booking`), line = S(`${b}.contact.lineVendor`), ph = Z.photos.filter(([src]) => src);
   return today
     + (ph.length ? `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><div class="ph">${ph.map(([src, alt]) => `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`).join('')}</div></div>` : '')   // หลายรูป = เลื่อนซ้าย-ขวา

@@ -419,7 +419,7 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261028l' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261029a' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
   if (!EDIT) return;
   editBar(hasDraft);
