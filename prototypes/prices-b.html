@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ราคาค่าล็อก · ตลาดเซฟวัน โก</title>
+<script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="b/style.css?v=20261029c">
+</head>
+<body>
+<main id="main"></main>
+<script src="content/cms.js?v=20261028i"></script>
+<script src="b/common.js?v=20261029b"></script>
+<script>
+// ราคาทุกโซนของสาขาที่เลือก (?b=) · ราคาแยกฤดู ฤดูปัจจุบันขึ้นก่อน + ป้าย "ช่วงนี้" · แถววันนี้มีป้าย "วันนี้"
+page((C, k) => {
+  const b = C[k], V = b.vendor, now = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
+  const zone = ([z, Z]) => { const R = C.vendor.rules[z] || {};
+    const groups = [...new Set(Z.rows.map(r => r.season))].sort((x, y) => (y === now) - (x === now));   // '' = ราคาเดียวทั้งปี
+    const rows = s => Z.rows.filter(r => r.season === s && r.online).map(r => { const today = (!s || s === now) && r.dow === dow;
+      return `<div class="pr"><span>${esc(r.days)}${today ? '<span class="today">วันนี้</span>' : ''}</span><div><b>${esc(r.online)}<small>บาท</small></b>${r.walkin ? `<em>Walk-in ${esc(r.walkin)}</em>` : ''}</div></div>`; }).join('');
+    const prices = groups.map(s => `<div class="sea${s && s !== now ? ' dim' : ''}"><p class="season">${s ? esc(get(V.seasons, s + '.label') || s) + (s === now ? ' <span class="now">ช่วงนี้</span>' : '') : 'ราคาเดียวทั้งปี'}</p>${rows(s)}</div>`).join('');
+    const facts = Z.facts.filter(f => f[0] && f[0] !== 'size' && filled(f[2]));
+    return `<div class="zone z-${z} rv"><div class="zt">${ic(R.ic || Z.ic)} ${esc(Z.name)}<small>${esc(Z.facts.find(f => f[0] === 'size')?.[2]?.split(' · ')[0] || '')}</small></div><div class="zb">
+      <p class="rule">${phr(R.sub || '')}</p>
+      ${filled(R.ok) ? `<span class="lbl">ขายได้</span><div class="chips">${R.ok.filter(Boolean).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
+      ${filled(R.no) ? `<span class="lbl">ห้ามขาย</span><div class="chips">${R.no.filter(Boolean).map(t => `<span class="chip no">${esc(t)}</span>`).join('')}</div>` : ''}
+      ${prices}
+      <div class="facts">${facts.map(f => `<div class="fact"><small>${esc(f[1])}</small><b>${phr(f[2])}</b></div>`).join('')}</div></div></div>`; };
+  return `${pageHead(C.gate.ven.title, 'tag', `ราคาค่าล็อก <span class="br">· ${esc(b.name)}</span>`, phr(V.sub))}
+  <section class="sec" style="padding-top:28px"><div class="wrap">
+    ${branchTabs(C, k)}
+    <div class="zones">${zonesOf(C, k).map(zone).join('')}</div>
+    <p class="note">ราคาจองออนไลน์ บาท/ล็อก/วัน · ${phr(V.scope)}</p>
+    <div class="cta"><a class="btn pri" href="booking-b.html?b=${k}">${ic('online')} วิธีจอง</a><a class="btn alt" href="rules-b.html?b=${k}">${ic('list')} ระเบียบตลาด</a></div>
+  </div></section>`;
+});
+</script>
+</body>
+</html>

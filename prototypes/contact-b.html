@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ติดต่อ · ตลาดเซฟวัน โก</title>
+<script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="b/style.css?v=20261029c">
+</head>
+<body>
+<main id="main"></main>
+<script src="content/cms.js?v=20261028i"></script>
+<script src="b/common.js?v=20261029b"></script>
+<script>
+// เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
+page((C) => {
+  const box = k => { const b = C[k], c = b.contact, same = c.lineCustomer === c.lineVendor, map = get(C, `${k}.links.map`);
+    return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note" style="margin-top:4px">${phr(b.where)}</p>
+      <a href="tel:${digits(c.phone)}" style="display:block;font-size:32px;font-weight:700;color:var(--price);margin-top:14px;line-height:1.2">${esc(c.phone)}</a>
+      <p class="note" style="margin-top:2px">โทรได้ ${esc(c.phoneHours)}</p>
+      <div class="cta" style="margin-top:16px">
+        <a class="btn pri sm" href="${esc(lineUrl(c.lineCustomer))}" target="_blank" rel="noopener">${ic('chat')} ${same ? 'LINE' : 'LINE ลูกค้า'} ${esc(c.lineCustomer)}</a>
+        ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('chat')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
+        ${map ? `<a class="btn alt sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}</div></div>`; };
+  return `${pageHead('ติดต่อ', 'phone', 'ติดต่อตลาด', 'โทรหรือทัก LINE ของสาขาที่ต้องการได้เลย')}
+  <section class="sec" style="padding-top:36px"><div class="wrap">
+    <div class="grid2" style="margin-top:0">${C.branchKeys.map(box).join('')}</div>
+    <div class="info rv" style="grid-template-columns:1fr"><div><h4>${esc(C.contact.company)}</h4><p style="margin-top:6px;font-size:15px">${phr(C.contact.address)}</p></div></div>
+  </div></section>`;
+});
+</script>
+</body>
+</html>
