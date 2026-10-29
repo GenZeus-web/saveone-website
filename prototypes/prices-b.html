@@ -6,37 +6,29 @@
 <title>ราคาค่าล็อก · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029i">
+<link rel="stylesheet" href="b/style.css?v=20261029k">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029f"></script>
+<script src="b/common.js?v=20261029g"></script>
 <script>
 // ราคาทุกโซนของสาขาที่เลือก (?b=) · ราคาแยกฤดู ฤดูปัจจุบันขึ้นก่อน + ป้าย "ช่วงนี้" · แถววันนี้มีป้าย "วันนี้"
 page((C, k) => {
   const b = C[k], V = b.vendor, now = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
   const zone = ([z, Z]) => { const R = C.vendor.rules[z] || {};
-    const groups = [...new Set(Z.rows.map(r => r.season))].sort((x, y) => (y === now) - (x === now));   // '' = ราคาเดียวทั้งปี
-    // ราคาเป็นช่วง (55–110) = ขึ้นกับตำแหน่งล็อก → แยกเป็น "ถูกสุด / แพงสุด" ให้อ่านออกทันที (เจ้าของ: "10–100 ไม่ชัดเจน")
-    const lohi = v => { const n = nums(v); return n.length > 1 ? [n[0], n[n.length - 1]] : null; };
-    const ranged = Z.rows.some(r => lohi(r.online));
-    const tierNote = ranged ? `<p class="tier">${ic('pin')}<span>ราคาขึ้นกับตำแหน่งล็อก${Z.tiers?.[0] ? ` · <b>ถูกสุด</b> ${esc(Z.tiers[0])} · <b>แพงสุด</b> ${esc(Z.tiers[1] || '')}` : ''}</span></p>` : '';
     const isToday = (s, r) => (!s || s === now) && r.dow === dow;
-    const dayCell = (s, r) => `${esc(r.days)}${isToday(s, r) ? '<span class="today">วันนี้</span>' : ''}`;
-    // โซนราคาช่วง: ตารางคอลัมน์ "ถูกสุด | แพงสุด" ตายตัว · แถว Walk-in อยู่ใต้วันนั้น
-    const rangeRows = s => `<table class="rt"><thead><tr><th></th><th>ถูกสุด</th><th>แพงสุด</th></tr></thead><tbody>${Z.rows.filter(r => r.season === s && r.online).map(r => {
-      const o = lohi(r.online) || [r.online, r.online], w = lohi(r.walkin);
-      return `<tr><td>${dayCell(s, r)}</td><td><b>${o[0]}</b></td><td><b>${o[1]}</b></td></tr>${w ? `<tr class="wk"><td>Walk-in</td><td>${w[0]}</td><td>${w[1]}</td></tr>` : ''}`; }).join('')}</tbody></table><p class="unit">บาท/ล็อก/วัน</p>`;
-    const rows = s => ranged ? rangeRows(s) : Z.rows.filter(r => r.season === s && r.online).map(r =>
-      `<div class="pr"><span>${dayCell(s, r)}</span><div><b>${esc(r.online)}<small>บาท/ล็อก</small></b>${r.walkin ? `<em>Walk-in ${esc(r.walkin)} บาท/ล็อก</em>` : ''}</div></div>`).join('');
-    const prices = groups.map(s => `<div class="sea${s && s !== now ? ' dim' : ''}"><p class="season">${s ? esc(get(V.seasons, s + '.label') || s) + (s === now ? ' <span class="now">ช่วงนี้</span>' : '') : 'ราคาเดียวทั้งปี'}</p>${rows(s)}</div>`).join('');
+    const list = (rs, s) => rs.filter(r => r.season === s && r.online).map(r =>
+      `<div class="pr"><span>${esc(r.days)}${isToday(s, r) ? '<span class="today">วันนี้</span>' : ''}</span><div><b>${esc(r.online)}<small>บาท/ล็อก</small></b>${r.walkin ? `<em>Walk-in ${esc(r.walkin)} บาท/ล็อก</em>` : ''}</div></div>`).join('');
+    const seasons = rs => [...new Set(rs.map(r => r.season))].sort((x, y) => (y === now) - (x === now))   // '' = ราคาเดียวทั้งปี · ฤดูปัจจุบันขึ้นก่อน
+      .map(s => `<div class="sea${s && s !== now ? ' dim' : ''}"><p class="season">${s ? (SEASON[s] ? `<span class="sn">${SEASON[s]}</span>` : '') + esc(get(V.seasons, s + '.label') || s) + (s === now ? ' <span class="now">ช่วงนี้</span>' : '') : 'ราคาเดียวทั้งปี'}</p>${list(rs, s)}</div>`).join('');
+    // ราคาแยกตามฝั่ง/โซนย่อย (โคราช: Z.spots) → กล่องละตำแหน่ง ไม่รวมเป็นช่วง 55–110 (เจ้าของ: "แยก อย่ารวมกัน งง")
+    const prices = Z.spots ? Z.spots.map(sp => `<div class="spot"><p class="sp">${ic('pin')}<b>${esc(sp.name)}</b>${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${seasons(sp.rows)}</div>`).join('') : seasons(Z.rows);
     const facts = Z.facts.filter(f => f[0] && f[0] !== 'size' && filled(f[2]));
     return `<div class="zone z-${z} rv"><div class="zt">${ic(R.ic || Z.ic)} ${esc(Z.name)}<small>${esc(Z.facts.find(f => f[0] === 'size')?.[2]?.split(' · ')[0] || '')}</small></div><div class="zb">
       <div class="za"><p class="rule">${phr(R.sub || '')}</p>
       ${filled(R.ok) ? `<span class="lbl">ขายได้</span><div class="chips">${R.ok.filter(Boolean).map(t => `<span class="chip">${esc(t)}</span>`).join('')}</div>` : ''}
       ${filled(R.no) ? `<span class="lbl">ห้ามขาย</span><div class="chips">${R.no.filter(Boolean).map(t => `<span class="chip no">${esc(t)}</span>`).join('')}</div>` : ''}
-      ${tierNote}
       <div class="facts">${facts.map(f => `<div class="fact"><small>${esc(f[1])}</small><b>${f[0] === 'online' || f[0] === 'walk' ? dayTag(f[2]) : phr(f[2])}</b></div>`).join('')}</div></div>
       <div class="zp">${prices}</div></div></div>`; };
   return `${pageHead(C.gate.ven.title, 'tag', `ราคาค่าล็อก <span class="br">· ${esc(b.name)}</span>`, phr(V.sub))}

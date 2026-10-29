@@ -45,6 +45,8 @@ const digits = s => String(s || '').replace(/[^\d+]/g, '');
 const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
 const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const nums = s => String(s || '').match(/\d[\d,]*/g)?.map(n => +n.replace(/,/g, '')) || [];
+// ชื่อฤดูราคา (เจ้าของสั่งให้มีคำ High/Low Season) · key ตาม vendor.seasons
+const SEASON = { high: 'High Season', low: 'Low Season' };
 const filled = v => Array.isArray(v) ? v.some(filled) : typeof v === 'string' && v.trim() !== '';
 // "ขายพรุ่งนี้ / ขายวันนี้" ในเวลาจอง → ป้ายสี (เจ้าของ: ต้องบอกชัด อย่าให้เดา)
 const dayTag = s => esc(s).replace(/ขาย(พรุ่งนี้|วันนี้)/g, (m, d) => `<span class="sell${d === 'วันนี้' ? ' td' : ''}">${m}</span>`);

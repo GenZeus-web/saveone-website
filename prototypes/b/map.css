@@ -132,3 +132,7 @@ body.edit{padding-bottom:90px}
 *::-webkit-scrollbar{display:none}
 @media (max-width:520px){ th,td{padding:9px 8px} td.big{font-size:22px} }
 details table{min-width:0}
+.sph{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin:18px 0 8px;font-size:18px;color:var(--head)}
+.sph:first-child{margin-top:0}
+.sph .i{width:18px;height:18px;color:var(--link)}
+.sph small{font-size:13px;color:var(--sub)}

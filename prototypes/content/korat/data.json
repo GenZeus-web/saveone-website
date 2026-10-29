@@ -169,7 +169,7 @@
             "walkin": "100–170"
           }
         ],
-        "note": "บาท/ล็อก/วัน · ถูก = หน้าอาคารฝั่ง Lotus เดิม (TA47–71 · TB45–71) · แพง = ฝั่ง 7-11 / กลางถนน · รวมค่าส่วนกลาง 10 บาท (ห้องน้ำ รถรับส่ง เก็บขยะ ไฟส่องสว่าง รปภ.)",
+        "note": "บาท/ล็อก/วัน · TB45–71) · รวมค่าส่วนกลาง 10 บาท (ห้องน้ำ รถรับส่ง เก็บขยะ ไฟส่องสว่าง รปภ.)",
         "photos": [
           [
             "content/korat/img/food-stalls.jpg",
@@ -208,9 +208,75 @@
             ""
           ]
         ],
-        "tiers": [
-          "หน้าอาคารฝั่ง Lotus เดิม (TA47–71 · TB45–71)",
-          "ฝั่ง 7-11 / กลางถนน"
+        "spots": [
+          {
+            "name": "ฝั่ง 7-11 / กลางถนน",
+            "codes": "TA01–46 · TB01–43 · TD–TN · FA",
+            "rows": [
+              {
+                "season": "high",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "130",
+                "walkin": "160"
+              },
+              {
+                "season": "high",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "160",
+                "walkin": "190"
+              },
+              {
+                "season": "low",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "110",
+                "walkin": "140"
+              },
+              {
+                "season": "low",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "140",
+                "walkin": "170"
+              }
+            ]
+          },
+          {
+            "name": "หน้าอาคาร ฝั่ง Lotus",
+            "codes": "TA47–71 · TB45–71 · ครึ่งราคา",
+            "rows": [
+              {
+                "season": "high",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "65",
+                "walkin": "95"
+              },
+              {
+                "season": "high",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "80",
+                "walkin": "110"
+              },
+              {
+                "season": "low",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "55",
+                "walkin": "85"
+              },
+              {
+                "season": "low",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "70",
+                "walkin": "100"
+              }
+            ]
+          }
         ]
       },
       "boot": {
@@ -221,15 +287,15 @@
             "season": "high",
             "dow": "weekday",
             "days": "จ–พฤ",
-            "online": "200–260",
-            "walkin": "250–310"
+            "online": "210–260",
+            "walkin": "260–310"
           },
           {
             "season": "high",
             "dow": "weekend",
             "days": "ศ–อา",
-            "online": "250–310",
-            "walkin": "300–360"
+            "online": "260–310",
+            "walkin": "310–360"
           },
           {
             "season": "low",
@@ -242,11 +308,11 @@
             "season": "low",
             "dow": "weekend",
             "days": "ศ–อา",
-            "online": "200–260",
-            "walkin": "250–310"
+            "online": "210–260",
+            "walkin": "260–310"
           }
         ],
-        "note": "บาท/ล็อก/วัน · ถูก = โซน S · แพง = โซน U–Z · โซน R ราคาเดียวทั้งปี (รอยืนยัน) · รวมค่าส่วนกลาง 10 บาท (ห้องน้ำ รถรับส่ง เก็บขยะ ไฟส่องสว่าง รปภ.)",
+        "note": "บาท/ล็อก/วัน · รวมค่าส่วนกลาง 10 บาท (ห้องน้ำ รถรับส่ง เก็บขยะ ไฟส่องสว่าง รปภ.)",
         "photos": [
           [
             "content/korat/img/goods-stalls.jpg",
@@ -285,9 +351,75 @@
             ""
           ]
         ],
-        "tiers": [
-          "โซน S",
-          "โซน U–Z"
+        "spots": [
+          {
+            "name": "โซน U–Z",
+            "codes": "จองในแอป VIP 12:00 · ทั่วไป 13:00",
+            "rows": [
+              {
+                "season": "high",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "260",
+                "walkin": "310"
+              },
+              {
+                "season": "high",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "310",
+                "walkin": "360"
+              },
+              {
+                "season": "low",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "210",
+                "walkin": "260"
+              },
+              {
+                "season": "low",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "260",
+                "walkin": "310"
+              }
+            ]
+          },
+          {
+            "name": "โซน S",
+            "codes": "จองในแอป 13:00 · ไม่มี VIP",
+            "rows": [
+              {
+                "season": "high",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "210",
+                "walkin": "260"
+              },
+              {
+                "season": "high",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "260",
+                "walkin": "310"
+              },
+              {
+                "season": "low",
+                "dow": "weekday",
+                "days": "จ–พฤ",
+                "online": "160",
+                "walkin": "210"
+              },
+              {
+                "season": "low",
+                "dow": "weekend",
+                "days": "ศ–อา",
+                "online": "210",
+                "walkin": "260"
+              }
+            ]
+          }
         ]
       },
       "court": {

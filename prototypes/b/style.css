@@ -151,7 +151,7 @@ img{display:block;max-width:100%}
 .sea.dim .season{color:var(--sub);font-weight:500}
 .pr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .pr>span{font-size:16px;font-weight:500;color:var(--ink)}
-.pr .today,.rt .today{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
+.pr .today{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
 .pr b{font-size:32px;font-weight:700;line-height:1;color:var(--price)}
 .pr b small{font-size:14px;font-weight:500;color:var(--sub);margin-left:4px}
 .pr em{display:block;font-style:normal;font-size:13px;color:var(--sub);text-align:right;margin-top:4px}
@@ -265,21 +265,13 @@ html.mapfull .ver,body.edit .ver{display:none}
 .sell{display:inline-block;margin-left:2px;padding:1px 10px;border-radius:999px;font-weight:700;white-space:nowrap;background:var(--kick-bg);color:var(--kick)}
 .sell.td{background:var(--ok-bg);color:var(--ok)}
 
-/* ราคาเป็นช่วง → ตาราง ถูกสุด / แพงสุด + บอกตำแหน่งล็อก */
-.tier{display:flex;gap:8px;align-items:flex-start;margin-top:14px;padding:10px 12px;border-radius:12px;background:var(--card2);font-size:13px;color:var(--ink)}
-.tier .i{flex:none;width:16px;height:16px;margin-top:2px;color:var(--link)}
-.tier b{color:var(--head)}
-table.rt{min-width:0;margin-top:6px}
-.rt th,.rt td{padding:8px 0;background:none;font-size:15px}
-.rt th{font-size:12px;text-align:right;color:var(--sub)}
-.rt td{text-align:right}
-.rt td:first-child{text-align:left;font-weight:500;color:var(--ink)}
-.rt b{font-size:28px;font-weight:700;line-height:1;color:var(--price)}
-.rt th:not(:first-child),.rt td:not(:first-child){width:30%}
-.rt tr:has(+.wk) td{border-bottom:0;padding-bottom:2px}
-.rt .wk td{padding-top:0;font-size:13px;color:var(--sub);font-weight:500}
-.sea.dim .rt b{font-size:22px;opacity:.8}
-.unit{font-size:12px;color:var(--sub);text-align:right;margin-top:4px}
+/* ราคาแยกตามฝั่ง/โซนย่อย (โคราช) — กล่องละตำแหน่ง */
+.spot{margin-top:12px;padding:4px 16px 8px;border-radius:16px;border:1px solid var(--line);background:var(--card2)}
+.spot .pr:last-child{border-bottom:0}
+.sp{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:10px 0 2px;font-size:17px;color:var(--head)}
+.sp .i{width:18px;height:18px;color:var(--link)}
+.sp small{flex-basis:100%;font-size:12px;color:var(--sub)}
+.spot .season{margin-top:10px}
 
 /* หน้าราคา: โซนละแถวเต็มกว้าง · ซ้าย = ขายอะไร/เวลาจอง · ขวา = ราคา (มือถือเรียงลงมา) */
 .zones{grid-template-columns:1fr}
@@ -287,3 +279,5 @@ table.rt{min-width:0;margin-top:6px}
 .zp{padding-top:2px}
 .zp .sea:first-child .season{margin-top:12px}
 @media (max-width:760px){.zb{grid-template-columns:1fr}.zp{order:-1}}
+.sn{font-weight:700;color:var(--head);margin-right:2px}
+.sea.dim .sn{color:var(--sub)}
