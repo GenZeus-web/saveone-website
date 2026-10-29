@@ -302,7 +302,7 @@ function zone(z) {
   const row = (r, i) => { const on = r.season && r.season === now;
     return `<tr${on ? ' class="now"' : ''}><td>${r.season ? esc(get(V.seasons, r.season + '.label') || '') + ' · ' : ''}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}</td></tr>`; };
   $('zoneCard').innerHTML =
-    `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จองหน้างาน</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
+    `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จอง Walk-in</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
     + T(C, `${P}.note`, 'p', 'note')
     + `<div class="lot">${Z.photos.some(([src]) => src) || EDIT ? `<div>${pics(`${P}.photos`)}</div>` : ''}<div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
   const PP = `${VP}.penalties.${z}`;
