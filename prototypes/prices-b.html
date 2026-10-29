@@ -19,7 +19,7 @@ page((C, k) => {
   const zone = ([z, Z]) => { const R = C.vendor.rules[z] || {};
     const groups = [...new Set(Z.rows.map(r => r.season))].sort((x, y) => (y === now) - (x === now));   // '' = ราคาเดียวทั้งปี
     const rows = s => Z.rows.filter(r => r.season === s && r.online).map(r => { const today = (!s || s === now) && r.dow === dow;
-      return `<div class="pr"><span>${esc(r.days)}${today ? '<span class="today">วันนี้</span>' : ''}</span><div><b>${esc(r.online)}<small>บาท</small></b>${r.walkin ? `<em>Walk-in ${esc(r.walkin)}</em>` : ''}</div></div>`; }).join('');
+      return `<div class="pr"><span>${esc(r.days)}${today ? '<span class="today">วันนี้</span>' : ''}</span><div><b>${esc(r.online)}<small>บาท/ล็อก</small></b>${r.walkin ? `<em>Walk-in ${esc(r.walkin)} บาท/ล็อก</em>` : ''}</div></div>`; }).join('');
     const prices = groups.map(s => `<div class="sea${s && s !== now ? ' dim' : ''}"><p class="season">${s ? esc(get(V.seasons, s + '.label') || s) + (s === now ? ' <span class="now">ช่วงนี้</span>' : '') : 'ราคาเดียวทั้งปี'}</p>${rows(s)}</div>`).join('');
     const facts = Z.facts.filter(f => f[0] && f[0] !== 'size' && filled(f[2]));
     return `<div class="zone z-${z} rv"><div class="zt">${ic(R.ic || Z.ic)} ${esc(Z.name)}<small>${esc(Z.facts.find(f => f[0] === 'size')?.[2]?.split(' · ')[0] || '')}</small></div><div class="zb">

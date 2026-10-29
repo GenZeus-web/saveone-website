@@ -11,7 +11,7 @@
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="b/style.css?v=20261029f">
-<link rel="stylesheet" href="b/map.css?v=20261029a">
+<link rel="stylesheet" href="b/map.css?v=20261029b">
 </head>
 <body>
 
@@ -109,6 +109,7 @@ function renderCus() {
 const ZONES = ['food', 'boot', 'court'];
 const filled = v => Array.isArray(v) ? v.some(filled) : v && typeof v === 'object' ? Object.values(v).some(filled) : typeof v === 'string' && v.trim() !== '';
 const penHas = g => g.some(x => filled(x.title) || filled(x.rows));   // ไม่นับรหัสไอคอน
+const unit = v => (v || '').trim() ? '<small class="unit"> บาท/ล็อก</small>' : '';
 const zoneHas = Z => Z.rows.some(r => (r.online || '').trim() || (r.walkin || '').trim());
 const show = ok => EDIT || ok;
 const chipList = (p, cls) => `<div class="chips">${get(C, p).map((_, i) => `<span class="chip ${cls}">${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</span>`).join('')}${add(p, '+')}</div>`;
@@ -166,7 +167,7 @@ function zone(z) {
   $('zone').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.z === z));
   const seasonal = Z.rows.some(r => r.season);
   const row = (r, i) => { const on = r.season && r.season === now;
-    return `<tr${on ? ' class="now"' : ''}><td>${r.season ? esc(get(V.seasons, r.season + '.label') || '') + ' · ' : ''}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}</td></tr>`; };
+    return `<tr${on ? ' class="now"' : ''}><td>${r.season ? esc(get(V.seasons, r.season + '.label') || '') + ' · ' : ''}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}${unit(r.online)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}${unit(r.walkin)}</td></tr>`; };
   $('zoneCard').innerHTML =
     `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จอง Walk-in</th></tr></thead><tbody>${Z.rows.map(row).join('')}</tbody></table></div>`
     + T(C, `${P}.note`, 'p', 'note')
