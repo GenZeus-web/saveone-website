@@ -49,8 +49,9 @@ const filled = v => Array.isArray(v) ? v.some(filled) : typeof v === 'string' &&
 const photos = (C, k) => (C[k].customer.photos || []).filter(([s]) => s);
 const zonesOf = (C, k) => Object.entries(C[k].vendor.zones).filter(([, Z]) => Z.rows.some(r => nums(r.online).length));
 const here = location.pathname.split('/').pop() || 'home-b.html';
-// สาขาที่ใส่ข้อมูลแล้ว (มีเบอร์หรือมีราคา) · ยังไม่ใส่ = โชว์ชื่อ + "ยังไม่มีข้อมูล"
-const ready = (C, k) => filled(C[k].contact?.phone) || zonesOf(C, k).length > 0;
+// สาขาใส่ข้อมูลแล้วหรือยัง แยก 2 ส่วน (บางนา: มีกฎ/ราคาแล้ว แต่ยังไม่มีที่อยู่/เบอร์) · ยังไม่ใส่ = โชว์ชื่อ + "ยังไม่มีข้อมูล"
+const hasInfo = (C, k) => filled(C[k].contact?.phone);            // ที่อยู่ เบอร์ LINE → หน้าแรก สาขา ติดต่อ
+const hasVendor = (C, k) => zonesOf(C, k).length > 0;            // ราคา กฎ วิธีจอง → หน้าผู้ค้า
 const waitBox = (C, k, what = '') => `<div class="empty"><b style="color:var(--head)">สาขา${esc(C[k].name)}</b> · ยังไม่มีข้อมูล${what} · เร็วๆ นี้</div>`;
 
 // ตอนนี้ตลาดเปิดไหม (เวลาเครื่อง เทียบ "16:00–23:00")

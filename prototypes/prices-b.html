@@ -11,7 +11,7 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029c"></script>
+<script src="b/common.js?v=20261029d"></script>
 <script>
 // ราคาทุกโซนของสาขาที่เลือก (?b=) · ราคาแยกฤดู ฤดูปัจจุบันขึ้นก่อน + ป้าย "ช่วงนี้" · แถววันนี้มีป้าย "วันนี้"
 page((C, k) => {
@@ -31,7 +31,7 @@ page((C, k) => {
   return `${pageHead(C.gate.ven.title, 'tag', `ราคาค่าล็อก <span class="br">· ${esc(b.name)}</span>`, phr(V.sub))}
   <section class="sec" style="padding-top:28px"><div class="wrap">
     ${branchTabs(C, k)}
-    ${!ready(C, k) ? waitBox(C, k, 'ราคา') : `<div class="zones">${zonesOf(C, k).map(zone).join('')}</div>
+    ${!hasVendor(C, k) ? waitBox(C, k, 'ราคา') : `<div class="zones">${zonesOf(C, k).map(zone).join('')}</div>
     <p class="note">ราคาจองออนไลน์ บาท/ล็อก/วัน · ${phr(V.scope)}</p>
     <div class="cta"><a class="btn pri" href="booking-b.html?b=${k}">${ic('online')} วิธีจอง</a><a class="btn alt" href="rules-b.html?b=${k}">${ic('list')} ระเบียบตลาด</a></div>`}
   </div></section>`;

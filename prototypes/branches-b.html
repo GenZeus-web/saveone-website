@@ -11,13 +11,13 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029c"></script>
+<script src="b/common.js?v=20261029d"></script>
 <script>
 // ทุกสาขาเรียงในหน้าเดียว (ไม่มีแท็บ) · ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน
 page((C) => {
   const ko = C.korat, ev = ko.vendor.event, evPh = ev.photos.find(([s]) => s)?.[0];
   const branch = k => { const b = C[k], ph = photos(C, k)[0], map = get(C, `${k}.links.map`);
-    if (!ready(C, k)) return `<section class="sec" id="${k}"><div class="wrap"><span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>${waitBox(C, k)}</div></section>`;
+    if (!hasInfo(C, k)) return `<section class="sec" id="${k}"><div class="wrap"><span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>${waitBox(C, k, 'ที่อยู่/เบอร์')}${hasVendor(C, k) ? `<p class="note">ราคาและกฎของสาขานี้ดูได้ที่ <a href="prices-b.html?b=${k}" style="color:var(--link);font-weight:600">หน้าราคา</a></p>` : ''}</div></section>`;
     return `<section class="sec" id="${k}"><div class="wrap">
       <span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>
       <div class="grid2">

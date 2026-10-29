@@ -11,7 +11,7 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029c"></script>
+<script src="b/common.js?v=20261029d"></script>
 <script>
 // ขั้นตอนเริ่มขาย + ช่วงเวลาจองออนไลน์/Walk-in ของแต่ละโซน + ลิงก์ผู้ค้า (จองล็อก · แจ้งปัญหา · ดูกล้อง)
 page((C, k) => {
@@ -21,7 +21,7 @@ page((C, k) => {
   return `${pageHead(C.gate.ven.title, 'online', `วิธีจอง <span class="br">· ${esc(b.name)}</span>`, `เริ่มขายใน ${steps.length} ขั้น`)}
   <section class="sec" style="padding-top:28px"><div class="wrap">
     ${branchTabs(C, k)}
-    ${!ready(C, k) ? waitBox(C, k, 'การจอง') : `<h2 class="h3" style="margin-top:32px">${esc(V.steps.title || 'เริ่มขายครั้งแรก')}</h2>
+    ${!hasVendor(C, k) ? waitBox(C, k, 'การจอง') : `<h2 class="h3" style="margin-top:32px">${esc(V.steps.title || 'เริ่มขายครั้งแรก')}</h2>
     <ol class="steps">${steps.map(([t, s]) => `<li class="rv"><b>${phr(t)}</b><span>${phr(s)}</span></li>`).join('')}</ol>
     ${V.steps.note ? `<p class="note">${phr(V.steps.note)}</p>` : ''}
 

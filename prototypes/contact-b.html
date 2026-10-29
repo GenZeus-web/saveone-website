@@ -11,12 +11,12 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029c"></script>
+<script src="b/common.js?v=20261029d"></script>
 <script>
 // เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
 page((C) => {
   const box = k => { const b = C[k], c = b.contact, same = c.lineCustomer === c.lineVendor, map = get(C, `${k}.links.map`);
-    if (!ready(C, k)) return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note">ยังไม่มีข้อมูลติดต่อ · เร็วๆ นี้</p></div>`;
+    if (!hasInfo(C, k)) return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note">ยังไม่มีข้อมูลติดต่อ · เร็วๆ นี้</p></div>`;
     return `<div class="card rv"><h3>${ic('pin')}สาขา${esc(b.name)}</h3><p class="note" style="margin-top:4px">${phr(b.where)}</p>
       <a href="tel:${digits(c.phone)}" style="display:block;font-size:32px;font-weight:700;color:var(--price);margin-top:14px;line-height:1.2">${esc(c.phone)}</a>
       <p class="note" style="margin-top:2px">โทรได้ ${esc(c.phoneHours)}</p>

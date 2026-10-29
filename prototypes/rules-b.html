@@ -11,7 +11,7 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261028i"></script>
-<script src="b/common.js?v=20261029c"></script>
+<script src="b/common.js?v=20261029d"></script>
 <script>
 // ระเบียบผู้ค้าของสาขาที่เลือก: วันขาย · มาสาย · แจ้งลา · คะแนน/ข้อที่ถูกหัก (แยกโซน ?z=) · สิทธิ์ · คำถาม
 // ส่วนที่สาขายังไม่มีข้อมูล = ไม่แสดง · ไม่มีเลยทั้งหน้า = บอกให้ถาม LINE ผู้ค้า
@@ -39,7 +39,7 @@ page((C, k) => {
   return `${pageHead(C.gate.ven.title, 'list', `ระเบียบตลาด <span class="br">· ${esc(b.name)}</span>`, 'สำหรับผู้ค้า · อ่านก่อนเริ่มขาย')}
   <section class="sec" style="padding-top:28px"><div class="wrap">
     ${branchTabs(C, k)}
-    ${!ready(C, k) ? waitBox(C, k, 'ระเบียบ') : body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
+    ${!hasVendor(C, k) ? waitBox(C, k, 'ระเบียบ') : body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
   </div></section>`;
 });
 </script>
