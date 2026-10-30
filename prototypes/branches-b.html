@@ -13,8 +13,11 @@
 <script src="content/cms.js?v=20261030a"></script>
 <script src="b/common.js?v=20261030d"></script>
 <script>
-// ทุกสาขาเรียงในหน้าเดียว (ไม่มีแท็บ) · ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน
+// ไม่ระบุสาขา = ทุกสาขาเรียงในหน้าเดียว · ?b=<สาขา> = เฉพาะสาขานั้น + แท็บสลับ + ผัง 3D เปิดที่สาขานั้น (เจ้าของ 30 ต.ค. 69)
+// ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน (โคราช)
+const only = new URLSearchParams(location.search).get('b');
 page((C) => {
+  const keys = C.keys.includes(only) ? [only] : C.keys;
   const ko = C.korat, ev = ko.vendor.event, evPh = ev.photos.find(([s]) => s)?.[0];
   const branch = k => { const b = C[k], ph = photos(C, k)[0], map = get(C, `${k}.links.map`);
     if (!hasInfo(C, k)) return `<section class="sec" id="${k}"><div class="wrap"><span class="kick">${ic('pin')} ${esc(b.tag)}</span><h2 class="h2">สาขา<span class="br">${esc(b.name)}</span></h2>${waitBox(C, k, 'ที่อยู่/เบอร์')}${hasVendor(C, k) ? `<p class="note">ราคาและกฎของสาขานี้ดูได้ที่ <a href="prices-b.html?b=${k}" style="color:var(--link);font-weight:600">หน้าราคา</a></p>` : ''}</div></section>`;
@@ -27,15 +30,16 @@ page((C) => {
           <div class="acts">${map ? `<a class="btn pri sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}<a class="btn alt sm" href="tel:${digits(b.contact.phone)}">${ic('phone')} ${esc(b.contact.phone)}</a><a class="btn alt sm" href="${esc(lineUrl(b.contact.lineCustomer))}" target="_blank" rel="noopener">LINE ${esc(b.contact.lineCustomer)}</a></div></div></article>
         <div><p class="lead" style="margin-top:0">${phr(b.customer.sub)}</p>${quickCards(C, k, b.customer.quick)}${b.customer.note ? `<p class="note">${phr(b.customer.note)}</p>` : ''}</div>
       </div></div></section>`; };
-  return `${pageHead('สาขา', 'pin', 'สาขาและเวลาเปิด', `${C.keys.length} สาขา · เปิดทุกวัน`)}
-  ${C.keys.map(branch).join('')}
+  return `${pageHead('สาขา', 'pin', 'สาขาและเวลาเปิด', keys.length > 1 ? `${C.keys.length} สาขา · เปิดทุกวัน` : '')}
+  ${keys.length > 1 ? '' : `<div class="wrap">${branchTabs(C, only)}</div>`}
+  ${keys.map(branch).join('')}
 
   <section class="sec" id="map"><div class="wrap">
-    <span class="kick">${ic('map')} ผังตลาด</span><h2 class="h2">ผังตลาด 3D</h2><p class="lead">แตะหมุดเพื่อดูโซน ที่จอดรถ และจุดบริการ · เปลี่ยนสาขาได้ที่ลูกศรด้านล่างผัง</p>
+    <span class="kick">${ic('map')} ผังตลาด</span><h2 class="h2">ผังตลาด 3D</h2><p class="lead">แตะหมุดเพื่อดูโซน ที่จอดรถ และจุดบริการ${keys.length > 1 ? ' · เปลี่ยนสาขาได้ที่ลูกศรด้านล่างผัง' : ''}</p>
     <div class="mapbox" id="mapbox"${photos(C, 'korat')[1] ? ` style="background-image:url('${esc(photos(C, 'korat')[1][0])}')"` : ''}><button class="cover" id="mapCover"><span>${ic('map')} แตะเพื่อเปิด ผัง 3D</span></button></div>
   </div></section>
 
-  ${evPh ? `<section class="sec" id="event"><div class="wrap"><span class="kick">${ic('area')} ${esc(ev.title)}</span><h2 class="h2">${esc(ev.title)} <span class="br">· ${esc(ko.name)}</span></h2>
+  ${evPh && keys.includes('korat') ? `<section class="sec" id="event"><div class="wrap"><span class="kick">${ic('area')} ${esc(ev.title)}</span><h2 class="h2">${esc(ev.title)} <span class="br">· ${esc(ko.name)}</span></h2>
     <div class="event rv"><div class="ph" style="background-image:url('${esc(evPh)}')"></div><div class="bd">
       <p class="lead" style="margin-top:0;color:var(--ink)">${phr(ev.sub)}</p>
       ${ev.rows.filter(([a]) => a).map(([a, p]) => `<div class="pr"><span>${esc(a)}</span><b>${esc(p)}<small>บาท</small></b></div>`).join('')}
@@ -44,7 +48,13 @@ page((C) => {
 }, (C) => {
   $('mapCover').onclick = () => {
     const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261029a';
-    f.onload = () => { try { f.contentWindow.postMessage({ pinGroup: null, content: C }, location.origin); } catch {} };
+    f.onload = () => {
+      try { f.contentWindow.postMessage({ pinGroup: null, content: C }, location.origin); } catch {}
+      // เลือกสาขามา → พลิกผังไปสาขานั้น (ผังยังโหลดไม่เสร็จจะไม่รับ → ส่งซ้ำจนผังตอบว่าอยู่สาขานั้นแล้ว)
+      if (!C.keys.includes(only) || only === C.keys[0]) return;
+      let n = 0; const t = setInterval(() => { if (++n > 40) return clearInterval(t); f.contentWindow.postMessage({ goBranch: only }, location.origin); }, 800);
+      addEventListener('message', e => { if (e.source === f.contentWindow && e.data?.branch === only) clearInterval(t); });
+    };
     $('mapbox').prepend(f); $('mapbox').classList.add('live');
   };
   if (location.hash) document.querySelector(location.hash)?.scrollIntoView();

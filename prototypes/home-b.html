@@ -22,7 +22,7 @@ page((C) => {
   const names = C.keys.map(k => esc(C[k].name)).join(' · ');
   const door = (h, icon, t, s) => `<a class="door rv" href="${h}">${ic(icon)}<b>${t}</b><small>${s}</small><span class="go">ดูต่อ →</span></a>`;
   const brCard = k => { const b = C[k], ph = photos(C, k)[0];
-    return `<a class="br-card rv" href="branches-b.html#${k}"><div class="ph${ph ? '' : ' none'}"${ph ? ` style="background-image:url('${esc(ph[0])}')"` : ''}>${ph ? '' : '<span>รอรูปสาขา</span>'}</div>
+    return `<a class="br-card rv" href="branches-b.html?b=${k}"><div class="ph${ph ? '' : ' none'}"${ph ? ` style="background-image:url('${esc(ph[0])}')"` : ''}>${ph ? '' : '<span>รอรูปสาขา</span>'}</div>
       <div class="bd"><span class="tag">${esc(b.tag)}</span><h3>${esc(b.name)}</h3><p class="where">${phr(b.where)}</p>
       <div class="hours">${hasInfo(C, k) ? b.facts.filter(f => f[2]).map(f => `<span>${esc(f[1])} <b>${esc(f[2])}</b></span>`).join('') : '<span>ยังไม่มีข้อมูล · เร็วๆ นี้</span>'}</div></div></a>`; };
   return `
