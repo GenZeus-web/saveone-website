@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เลือกแบบที่ 3</title>
+<!-- แบบที่ 3 ของเว็บ (เจ้าของ 30 ต.ค. 69: "ทำอีกแบบ ต่างจาก 2 แบบตอนนี้") · ทุกแบบใช้สไตล์ B (สี + Prompt) ต่างกันที่โครงหน้าและท่าตอนเลื่อน
+     ลองเลื่อนในกรอบได้จริง · ข้อมูลในตัวอย่างใช้ของจริงเท่าที่มี (ชื่อสาขา เวลา ราคาเริ่มต้น รูปโคราช) -->
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#15122b;--bg2:#100d22;--card:#211c45;--card2:#2a2456;--line:rgba(255,255,255,.12);--head:#fff;--ink:#f1eef8;--sub:#c9c3df;
+  --acc:#84e62d;--acc-ink:#15122b;--link:#a6f06a;--price:#ffcf6b;--kick-bg:rgba(255,207,107,.16);--food:#ff8a3d;--boot:#b48cf0;--court:#2cc9b5}
+*{box-sizing:border-box;margin:0}
+body{background:#0c0a1c;color:var(--ink);font-family:"Prompt",sans-serif;line-height:1.6}
+img{display:block;max-width:100%}
+.i{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.22em;flex:none}.i svg{width:100%;height:100%;display:block}
+
+/* ── หน้าเลือก ── */
+.top{position:sticky;top:0;z-index:20;background:rgba(12,10,28,.9);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .in{max-width:1180px;margin:0 auto;padding:12px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.top h1{font-size:18px;font-weight:700;color:var(--head);margin-right:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips a,.dev button{padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--head);font:600 14px "Prompt";text-decoration:none;cursor:pointer}
+.dev{display:flex;gap:4px;padding:3px;border-radius:999px;background:var(--card)}
+.dev button{border:0;background:none;color:var(--sub)}.dev button.on{background:var(--acc);color:var(--acc-ink)}
+.opt{max-width:1180px;margin:0 auto;padding:56px 20px 0;scroll-margin-top:70px}
+.opt .lbl.mix{background:rgba(132,230,45,.16);color:var(--link)}
+.opt .lbl{display:inline-block;padding:4px 14px;border-radius:999px;background:var(--kick-bg);color:var(--price);font-weight:600;font-size:14px}
+.opt h2{font-size:clamp(26px,3.4vw,36px);font-weight:700;color:var(--head);margin-top:10px;line-height:1.25}
+.opt .why{color:var(--sub);margin-top:6px;max-width:70ch}
+.opt .fit{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.opt .fit span{font-size:13px;padding:3px 11px;border-radius:999px;background:rgba(132,230,45,.14);color:#c8f5a0}
+.frame{--fh:640px;margin:20px auto 0;height:var(--fh);border-radius:24px;border:1px solid var(--line);overflow:auto;position:relative;background:var(--bg);
+  scrollbar-width:thin;transition:width .3s;width:100%;overscroll-behavior:contain}
+.phone .frame{--fh:760px;width:390px;max-width:100%}
+.hint{text-align:center;font-size:13px;color:var(--sub);margin-top:8px}
+.end{max-width:1180px;margin:56px auto 80px;padding:0 20px;color:var(--sub);font-size:14px}
+
+/* ส่วนที่ใช้ร่วมในตัวอย่าง */
+.wm{height:24px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:999px;font-weight:600;font-size:15px;border:0;cursor:pointer;text-decoration:none}
+.btn.pri{background:var(--acc);color:var(--acc-ink)}.btn.alt{background:var(--card);color:var(--head);border:1px solid var(--line)}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 12px;border-radius:999px}
+.price{color:var(--price);font-weight:700}.nb{white-space:nowrap}
+
+/* ── A ภาพค้างจอ ── */
+.A{height:calc(var(--fh) * var(--n));position:relative}
+.A .stage{position:sticky;top:0;height:var(--fh);overflow:hidden}
+.A .ph{position:absolute;inset:0;background:center/cover no-repeat;opacity:0;transform:scale(1.12);transition:opacity .7s,transform 1.4s cubic-bezier(.2,.7,.2,1)}
+.A .ph.on{opacity:1;transform:scale(1)}
+.A .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(21,18,43,.92) 0%,rgba(21,18,43,.55) 45%,rgba(21,18,43,0) 75%)}
+.phone .A .shade{background:linear-gradient(0deg,rgba(21,18,43,.95) 0%,rgba(21,18,43,.6) 50%,rgba(21,18,43,.1) 100%)}
+.A .bar{position:absolute;left:28px;right:28px;top:22px;display:flex;align-items:center;gap:10px;z-index:3}
+.A .dots{display:flex;gap:6px;margin-left:auto}.A .dots i{width:26px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);transition:background .3s}.A .dots i.on{background:var(--acc)}
+.A .txt{position:absolute;left:44px;bottom:70px;width:min(460px,calc(100% - 88px));z-index:3}
+.phone .A .txt{left:22px;width:calc(100% - 44px);bottom:40px}
+.A .step{position:absolute;bottom:0;left:0;right:0;opacity:0;transform:translateY(30px);transition:opacity .5s,transform .6s cubic-bezier(.2,.7,.2,1)}
+.A .step.on{opacity:1;transform:none}
+.A .step .k{color:var(--price);font-weight:600;font-size:15px}
+.A .step h3{font-size:clamp(34px,5vw,54px);line-height:1.12;font-weight:700;color:var(--head);margin-top:6px}
+.A .step p{color:var(--sub);font-size:17px;margin-top:10px}
+.A .step .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+
+/* ── B เย็น→ค่ำ ── */
+.B{height:calc(var(--fh) * 4);position:relative}
+.B .stage{position:sticky;top:0;height:var(--fh);overflow:hidden}
+.B .sky{position:absolute;inset:0}
+.B .sun{position:absolute;width:120px;height:120px;border-radius:50%;left:62%;background:radial-gradient(circle,#fff3c4 0%,#ffb35c 55%,rgba(255,140,60,0) 72%)}
+.B .stars{position:absolute;inset:0 0 40% 0}
+.B .stars i{position:absolute;width:2px;height:2px;border-radius:50%;background:#fff}
+.B svg.town{position:absolute;left:0;right:0;bottom:0;width:100%;height:46%}
+.B .clock{position:absolute;left:32px;top:26px;z-index:3}
+.B .clock b{display:block;font-size:clamp(46px,7vw,78px);line-height:1;font-weight:700;color:var(--head);font-variant-numeric:tabular-nums}
+.B .clock span{display:block;color:var(--head);opacity:.85;font-size:17px;margin-top:8px;max-width:30ch}
+.B .wmk{position:absolute;right:28px;top:28px;z-index:3}
+.B .after{position:relative;background:var(--bg);padding:36px 28px 60px}
+.B .after h3{font-size:28px;color:var(--head);font-weight:700}
+.B .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:16px}
+.B .cards div{padding:18px;border-radius:20px;background:var(--card);border:1px solid var(--line)}
+.B .cards b{display:block;font-size:20px;color:var(--head)}
+.B .cards small{color:var(--sub);font-size:14px}
+
+/* ── C เลื่อนข้าง ── */
+.C{height:calc(var(--fh) * 5);position:relative}
+.C .stage{position:sticky;top:0;height:var(--fh);overflow:hidden}
+.C .track{display:flex;height:100%;will-change:transform}
+.C .pan{flex:none;width:min(820px,86%);height:100%;padding:28px 14px 28px 28px;display:flex}
+.phone .C .pan{width:88%;padding:22px 8px 22px 18px}
+.C .card{flex:1;border-radius:26px;overflow:hidden;background:var(--card);border:1px solid var(--line);display:flex;flex-direction:column;transition:transform .4s,opacity .4s}
+.C .card .pic{flex:1;min-height:0;background:center/cover no-repeat;position:relative}
+.C .card .pic.none{background:radial-gradient(100% 120% at 80% 0%,#4a2f8a,#211c45);display:grid;place-items:center;color:#d8d2ee}
+.C .card .bd{padding:22px 24px 24px}
+.C .card .no{font-size:13px;font-weight:600;color:var(--link)}
+.C .card h3{font-size:clamp(30px,4vw,44px);font-weight:700;color:var(--head);line-height:1.15}
+.C .card p{color:var(--sub);font-size:15px;margin-top:4px}
+.C .hrs{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.C .hrs span{font-size:14px;padding:5px 12px;border-radius:12px;background:var(--card2);color:var(--sub)}.C .hrs b{color:var(--head)}
+.C .intro{flex:none;width:min(520px,80%);padding:40px 10px 40px 40px;display:flex;flex-direction:column;justify-content:center}
+.phone .C .intro{width:86%;padding:30px 10px 30px 22px}
+.C .intro h3{font-size:clamp(36px,5vw,58px);line-height:1.1;color:var(--head);font-weight:700}
+.C .intro p{color:var(--sub);margin-top:12px;font-size:17px}
+.C .prog{position:absolute;left:28px;right:28px;bottom:12px;height:4px;border-radius:2px;background:rgba(255,255,255,.12)}
+.C .prog i{display:block;height:100%;width:0;border-radius:2px;background:var(--acc)}
+
+/* ── D แบบแอป ── */
+.D{min-height:var(--fh);display:flex;flex-direction:column;background:radial-gradient(90% 60% at 90% 0%,#3d2878 0%,#15122b 60%)}
+.D .hd{padding:22px 22px 0;display:flex;align-items:center;gap:10px}
+.D .open{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:5px 12px;border-radius:999px;background:#fff;color:#15122b}
+.D .open i{width:8px;height:8px;border-radius:50%;background:#a19bb3}.D .open.on i{background:#3fbf1a}
+.D .hi{padding:22px 22px 0}
+.D .hi h3{font-size:30px;line-height:1.2;color:var(--head);font-weight:700}
+.D .seg{display:flex;gap:4px;margin:16px 22px 0;padding:4px;border-radius:999px;background:rgba(255,255,255,.08)}
+.D .seg button{flex:1;padding:9px 6px;border:0;border-radius:999px;background:none;color:var(--sub);font:600 14px "Prompt";cursor:pointer;transition:background .2s,color .2s}
+.D .seg button.on{background:var(--head);color:var(--bg)}
+.D .who{display:flex;gap:8px;margin:14px 22px 0}
+.D .who button{flex:1;padding:12px;border-radius:16px;border:2px solid var(--line);background:var(--card);color:var(--head);font:600 15px "Prompt";cursor:pointer}
+.D .who button.on{border-color:var(--acc);background:rgba(132,230,45,.12)}
+.D .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:16px 22px 110px}
+.D .tile{position:relative;display:flex;flex-direction:column;gap:10px;padding:18px;min-height:132px;border-radius:22px;background:var(--card);border:1px solid var(--line);color:var(--head);text-decoration:none;
+  opacity:0;transform:translateY(16px) scale(.97);transition:opacity .4s,transform .4s cubic-bezier(.2,.7,.2,1),border-color .2s}
+.D .tile.in{opacity:1;transform:none}
+.D .tile:active{transform:scale(.96)}
+.D .tile:hover{border-color:var(--acc)}
+.D .tile .i{width:40px;height:40px;padding:9px;border-radius:13px;background:rgba(132,230,45,.14);color:var(--link)}
+.D .tile b{font-size:17px;line-height:1.3}
+.D .tile small{color:var(--sub);font-size:13px;line-height:1.4}
+.D .tile.big{grid-column:span 2;background:var(--acc);border-color:var(--acc);color:var(--acc-ink)}
+.D .tile.big .i{background:rgba(21,18,43,.12);color:var(--acc-ink)}.D .tile.big small{color:#2c4a12}
+.D .tile .p{position:absolute;right:16px;top:16px;color:var(--price);font-weight:700;font-size:15px}
+.D .tab{position:sticky;bottom:0;margin-top:auto;display:flex;justify-content:space-around;padding:10px 8px 14px;background:rgba(16,13,34,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.D .tab a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:12px;color:var(--sub);text-decoration:none}
+.D .tab a.on{color:var(--link)}.D .tab .i{width:24px;height:24px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <h1>แบบที่ 3 · ลองเลื่อนในกรอบ</h1>
+  <nav class="chips"><a href="#ad">A+D</a><a href="#bad">A+D+B</a><a href="#a">A ภาพค้างจอ</a><a href="#b">B เย็น→ค่ำ</a><a href="#c">C เลื่อนข้าง</a><a href="#d">D แบบแอป</a></nav>
+  <div class="dev" role="group" aria-label="ขนาดจอ"><button data-dev="pc" class="on">จอคอม</button><button data-dev="phone">มือถือ</button></div>
+</div></header>
+
+<section class="opt" id="ad">
+  <span class="lbl mix">ผสม A+D</span><h2>เล่าด้วยรูปก่อน แล้วจบที่ปุ่มใหญ่</h2>
+  <p class="why">เปิดมาเป็นรูปค้างจอเล่า ตลาด → สตรีทฟู้ด → เปิดท้าย → มาขายกับเรา · เลื่อนต่อจะถึงหน้าแบบแอป เลือกสาขา + ลูกค้า/ผู้ค้า แล้วกดปุ่มใหญ่ได้เลย</p>
+  <div class="fit"><span>คนใหม่: เห็นภาพตลาดก่อน</span><span>คนเดิม: เลื่อนผ่านไปกดปุ่ม</span></div>
+  <div class="frame" id="fad"></div><p class="hint">เลื่อนในกรอบ ↓ จนสุด</p>
+</section>
+<section class="opt" id="bad">
+  <span class="lbl mix">ผสม A+D+B</span><h2>เย็น→ค่ำ → รูปค้างจอ → ปุ่มใหญ่</h2>
+  <p class="why">เปิดมาเป็นฉากฟ้าเย็น นาฬิกาเดินถึงค่ำ ไฟร้านติด · ต่อด้วยรูปตลาดตอนค่ำค้างจอเล่าทีละเรื่อง · จบที่หน้าแบบแอป</p>
+  <div class="fit"><span>มีเอกลักษณ์ "ตลาดเย็น" ตั้งแต่วินาทีแรก</span><span>ยาวสุดในทุกแบบ</span></div>
+  <div class="frame" id="fbad"></div><p class="hint">เลื่อนในกรอบ ↓ จนสุด</p>
+</section>
+<p class="opt" style="padding-top:64px;color:var(--sub)">แบบเดี่ยวทั้ง 4 (ไว้เทียบ) ↓</p>
+<section class="opt" id="a">
+  <span class="lbl">แบบ A</span><h2>ภาพค้างจอ เล่าทีละช่วง</h2>
+  <p class="why">เลื่อนลงแล้วรูปใหญ่ค้างอยู่เต็มจอ เปลี่ยนรูปและข้อความทีละเรื่อง (แบบเว็บ Apple) · เล่าว่าตลาดมีอะไร แล้วจบที่ปุ่มจอง/นำทาง</p>
+  <div class="fit"><span>เหมาะกับ: คนที่ยังไม่รู้จักตลาด</span><span>ใช้รูปจริงเยอะ</span><span>ผู้ใหญ่/คู่ค้า ดูแล้วเข้าใจภาพรวม</span></div>
+  <div class="frame" id="fa"></div><p class="hint">เลื่อนในกรอบ ↓</p>
+</section>
+<section class="opt" id="b">
+  <span class="lbl">แบบ B</span><h2>เย็น→ค่ำ ไฟร้านติด</h2>
+  <p class="why">เลื่อนแล้วฟ้าเปลี่ยนจากเย็นเป็นค่ำ นาฬิกาเดิน 16:00→23:00 ไฟราวตามเต็นท์ค่อยๆ ติด ดาวขึ้น · บอกตัวตน "ตลาดเย็น" ตั้งแต่เปิดเว็บ แล้วต่อด้วยเนื้อหาปกติ</p>
+  <div class="fit"><span>เหมาะกับ: จำง่าย มีเอกลักษณ์</span><span>ไม่ต้องมีรูปจริงก็สวย</span><span>ลูกค้ามาเดินตลาด</span></div>
+  <div class="frame" id="fb"></div><p class="hint">เลื่อนในกรอบ ↓</p>
+</section>
+<section class="opt" id="c">
+  <span class="lbl">แบบ C</span><h2>เลื่อนข้างไล่สาขา</h2>
+  <p class="why">เลื่อนลงปกติ แต่การ์ดสาขาวิ่งไปทางขวาทีละสาขา · แต่ละสาขาการ์ดใหญ่ รูป เวลา ปุ่มนำทาง · ไม่มีผัง 3D หนักๆ เปิดเร็ว</p>
+  <div class="fit"><span>เหมาะกับ: หาสาขาใกล้ตัว</span><span>เพิ่มสาขาใหม่ง่าย (ต่อการ์ด)</span><span>เปิดบนมือถือเร็ว</span></div>
+  <div class="frame" id="fc"></div><p class="hint">เลื่อนในกรอบ ↓</p>
+</section>
+<section class="opt" id="d">
+  <span class="lbl">แบบ D</span><h2>แบบแอป ปุ่มใหญ่</h2>
+  <p class="why">เปิดมาเจอปุ่มใหญ่กดได้ทันที ไม่ต้องเลื่อนอ่าน · เลือกสาขา + "ลูกค้า/ผู้ค้า" ด้านบน ปุ่มเปลี่ยนตาม · แถบเมนูล่างแบบแอปมือถือ</p>
+  <div class="fit"><span>เหมาะกับ: ผู้ค้าที่เข้ามาทุกวัน</span><span>ใช้มือเดียวบนมือถือ</span><span>เปิดจาก LINE แล้วเหมือนแอป</span></div>
+  <div class="frame" id="fd"></div><p class="hint">ลองกดสาขา / ลูกค้า-ผู้ค้า</p>
+</section>
+<p class="end">ทุกแบบใช้สไตล์ B เดิม (สี + ฟอนต์ Prompt) ทำธีมสว่างได้เหมือนเดิม · ข้อความในตัวอย่างย่อจากของจริง ยังไม่ครบ · ชอบแบบไหน หรือเอาท่าของแบบหนึ่งไปผสมอีกแบบได้</p>
+
+<script>
+const ICON = {
+  pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  tag: '<path d="M3 12V4h8l10 10-8 8L3 12z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/>',
+  map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2-6-2zM9 4v14M15 6v14"/>',
+  list: '<path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4V5z"/>',
+  cam: '<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+  home: '<path d="M3 11l9-7 9 7v9H3z"/><path d="M9 20v-6h6v6"/>',
+  phone: '<path d="M5 4h4l2 5-3 2a11 11 0 0 0 5 5l2-3 5 2v4a2 2 0 0 1-2 2A17 17 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+};
+const ic = k => `<span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[k]}</svg></span>`;
+const IMG = 'content/korat/img/';
+// ความคืบหน้า 0→1 ของกล่อง el: เริ่มเมื่อขอบบนกล่องถึงขอบบนกรอบ จบเมื่อท้ายกล่องถึงขอบล่างกรอบ (หลายท่าต่อกันในกรอบเดียวได้)
+const prog = (fr, el) => { const max = el.offsetHeight - fr.clientHeight; return max > 0 ? Math.min(1, Math.max(0, (fr.scrollTop - el.offsetTop) / max)) : 0; };
+const add = (fr, html) => { fr.insertAdjacentHTML('beforeend', html); return fr.lastElementChild; };
+
+// ── A ภาพค้างจอ ── cta = ปุ่มจอง/นำทางในช่วงสุดท้าย (ไม่ใส่เมื่อมีหน้าปุ่มใหญ่ D ต่อท้าย)
+function mountA(fr, { cta = true } = {}) {
+  const S = [
+    [IMG + 'aerial-dusk-1.jpg', 'ตลาดเย็น ทุกวัน', '<span class="nb">ตลาดเซฟวัน</span> GO', 'ตลาดเย็นใกล้บ้าน 3 สาขา · ประตูกรุงเทพ · บางนา · โคราช'],
+    [IMG + 'food-stalls.jpg', 'สตรีทฟู้ด', '<span class="nb">ของกินปรุงสด</span> <span class="nb">เดินกินได้ทั้งคืน</span>', 'ประตูกรุงเทพ · บางนา เปิด 16:00–23:00'],
+    [IMG + 'goods-stalls.jpg', 'เปิดท้าย', '<span class="nb">ของใช้ เสื้อผ้า</span> <span class="nb">ของเล่น</span>', 'ขายจากท้ายรถ · ประตูกรุงเทพ · บางนา เปิดถึง 23:59'],
+    [IMG + 'event-concert.jpg', 'มาขายกับเรา', 'ล็อกเริ่ม <span class="price nb">100 บาท/วัน</span>', 'จองออนไลน์ หรือ Walk-in ที่สำนักงาน (ราคาประตูกรุงเทพ)'],
+  ];
+  const A = add(fr, `<div class="A" style="--n:${S.length + 1}"><div class="stage">${S.map(([src], i) => `<div class="ph${i ? '' : ' on'}" style="background-image:url('${src}')"></div>`).join('')}
+    <div class="shade"></div><div class="bar"><img class="wm" src="img/wordmark.svg" alt="ตลาดเซฟวัน GO"><div class="dots">${S.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div></div>
+    <div class="txt">${S.map(([, k, h, p], i) => `<div class="step${i ? '' : ' on'}"><span class="k">${k}</span><h3>${h}</h3><p>${p}</p>${cta && i === S.length - 1 ? `<div class="btns"><a class="btn pri">${ic('cal')}จองล็อก</a><a class="btn alt">${ic('pin')}นำทาง</a></div>` : ''}</div>`).join('')}</div>
+  </div></div>`);
+  const ph = A.querySelectorAll('.ph'), st = A.querySelectorAll('.step'), dt = A.querySelectorAll('.dots i');
+  let cur = 0;
+  fr.addEventListener('scroll', () => {
+    const n = Math.min(S.length - 1, Math.floor(prog(fr, A) * S.length * .999));
+    if (n === cur) return; cur = n;
+    [ph, st, dt].forEach(L => L.forEach((e, i) => e.classList.toggle('on', i === n)));
+  }, { passive: true });
+}
+
+// ── B เย็น→ค่ำ ── after = การ์ดสาขาต่อท้ายฉาก (แบบเดี่ยว)
+function mountB(fr, { after = true } = {}) {
+  // เต็นท์ + ไฟราว (วาดเอง)
+  const tents = [...Array(9)].map((_, i) => { const x = 20 + i * 110, h = 70 + (i % 3) * 14;
+    return `<path d="M${x} 300 L${x} ${300 - h * .55} L${x + 45} ${300 - h} L${x + 90} ${300 - h * .55} L${x + 90} 300 Z" fill="var(--tent)"/>`
+      + `<rect x="${x + 8}" y="${300 - h * .5}" width="74" height="${h * .5}" fill="var(--win)" opacity="var(--glow)"/>`; }).join('');
+  const bulbs = [...Array(40)].map((_, i) => { const x = 10 + i * 25, y = 150 + Math.sin(i / 39 * Math.PI * 4) * -14 + 14;
+    return `<circle class="bulb" cx="${x}" cy="${y}" r="4"/>`; }).join('');
+  const stars = [...Array(60)].map(() => `<i style="left:${Math.random() * 100}%;top:${Math.random() * 100}%"></i>`).join('');
+  const B = add(fr, `<div class="B"><div class="stage"><div class="sky"></div><div class="stars">${stars}</div><div class="sun"></div>
+    <svg class="town" viewBox="0 0 1000 300" preserveAspectRatio="xMidYMax slice"><path d="M0 150 Q 125 175 250 150 T 500 150 T 750 150 T 1000 150" fill="none" stroke="#2a2456" stroke-width="2"/>${bulbs}${tents}<rect x="0" y="296" width="1000" height="4" fill="#0e0b20"/></svg>
+    <img class="wm wmk" src="img/wordmark.svg" alt="ตลาดเซฟวัน GO"><div class="clock"><b>16:00</b><span></span></div></div></div>`);
+  if (after) add(fr, `<div class="after"><h3>ตลาดเย็น 3 สาขา</h3><div class="cards"><div><b>ประตูกรุงเทพ</b><small>สตรีทฟู้ด 16:00–23:00 · เปิดท้าย 16:00–23:59</small></div><div><b>บางนา</b><small>สตรีทฟู้ด 16:00–23:00 · เปิดท้าย 16:00–23:59</small></div><div><b>โคราช</b><small>ถ.มิตรภาพ ต.ในเมือง อ.เมือง</small></div></div></div>`);
+  const sky = B.querySelector('.sky'), sun = B.querySelector('.sun'), stEl = B.querySelector('.stars'), svg = B.querySelector('svg'),
+    clk = B.querySelector('.clock b'), cap = B.querySelector('.clock span'), bl = B.querySelectorAll('.bulb');
+  const mix = (a, b, t) => a.map((v, i) => Math.round(v + (b[i] - v) * t));
+  const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16)), rgb = c => `rgb(${c.join(',')})`;
+  const TOP = ['#ff9a5a', '#c25a8a', '#3b2a6e', '#15122b'].map(hex), BOT = ['#ffd27a', '#ff8a6a', '#6b3f8a', '#2a2456'].map(hex);
+  const grad = (L, t) => { const s = t * (L.length - 1), i = Math.min(L.length - 2, Math.floor(s)); return mix(L[i], L[i + 1], s - i); };
+  const CAP = [[0, 'ร้านเริ่มตั้ง ตลาดเปิด'], [.3, 'ฟ้าเริ่มมืด ไฟร้านติด'], [.6, 'คนเต็มตลาด'], [.9, 'ร้านเริ่มเก็บ']];
+  const draw = () => {
+    const p = prog(fr, B);
+    sky.style.background = `linear-gradient(${rgb(grad(TOP, p))},${rgb(grad(BOT, p))})`;
+    sun.style.top = `${18 + p * 70}%`; sun.style.opacity = 1 - p * 1.4;
+    stEl.style.opacity = Math.max(0, p * 1.6 - .5);
+    svg.style.setProperty('--tent', rgb(mix(hex('#4a2f6a'), hex('#0e0b20'), p)));
+    svg.style.setProperty('--win', '#ffcf6b'); svg.style.setProperty('--glow', Math.max(0, p * 1.5 - .3));
+    bl.forEach((b, i) => { const on = p > .22 + (i % 13) / 13 * .45; b.style.fill = on ? '#ffe9a8' : '#3a3358'; b.style.filter = on ? 'drop-shadow(0 0 5px #ffcf6b)' : 'none'; });
+    const m = Math.round(p * 7 * 60);
+    clk.textContent = `${16 + Math.floor(m / 60)}:${String(Math.floor(m % 60 / 10) * 10).padStart(2, '0')}`;
+    cap.textContent = CAP.filter(([t]) => p >= t).pop()[1];
+  };
+  fr.addEventListener('scroll', draw, { passive: true }); draw();
+}
+
+// ── C เลื่อนข้าง ──
+function mountC(fr) {
+  const BR = [
+    ['ประตูกรุงเทพ', 'แยก คปอ. · ใกล้ BTS แยก คปอ.', 'img/sg-3d-preview.jpg', [['สตรีทฟู้ด', '16:00–23:00'], ['เปิดท้าย', '16:00–23:59']]],
+    ['บางนา', 'ถ.เทพรัตน แขวงบางนาใต้', '', [['สตรีทฟู้ด', '16:00–23:00'], ['เปิดท้าย', '16:00–23:59']]],
+    ['โคราช', 'ถ.มิตรภาพ ต.ในเมือง อ.เมือง', IMG + 'aerial-dusk-2.jpg', [['สำนักงาน', '15:00–22:00']]],
+  ];
+  const C = add(fr, `<div class="C"><div class="stage"><div class="track">
+    <div class="intro"><img class="wm" src="img/wordmark.svg" alt="ตลาดเซฟวัน GO" style="height:26px;width:auto;align-self:flex-start"><h3 style="margin-top:22px">เลือกสาขา<br>ใกล้คุณ</h3><p>เลื่อนลงเพื่อดูทีละสาขา →</p></div>
+    ${BR.map(([n, w, src, h], i) => `<div class="pan"><div class="card"><div class="pic${src ? '' : ' none'}"${src ? ` style="background-image:url('${src}')"` : ''}>${src ? '' : 'รอรูปสาขา'}</div>
+      <div class="bd"><span class="no">สาขา ${i + 1} / ${BR.length}</span><h3>${n}</h3><p>${ic('pin')} ${w}</p><div class="hrs">${h.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px"><a class="btn pri">${ic('pin')}นำทาง</a><a class="btn alt">ราคา/จอง ${ic('arrow')}</a></div></div></div></div>`).join('')}
+    <div class="intro"><h3>มาขาย<br>กับเรา</h3><p>ล็อกเริ่ม <span class="price">100 บาท</span>/วัน (ประตูกรุงเทพ)</p><div style="margin-top:18px"><a class="btn pri">${ic('cal')}จองล็อก</a></div></div>
+  </div><div class="prog"><i></i></div></div></div>`);
+  const tr = C.querySelector('.track'), bar = C.querySelector('.prog i');
+  const draw = () => { const p = prog(fr, C), max = tr.scrollWidth - fr.clientWidth; tr.style.transform = `translateX(${-p * max}px)`; bar.style.width = p * 100 + '%'; };
+  fr.addEventListener('scroll', draw, { passive: true }); addEventListener('resize', draw);
+}
+
+// ── D แบบแอป ── ปุ่มค่อยๆ เด้งขึ้นเมื่อเลื่อนมาถึง (ต่อท้ายท่าอื่นได้)
+function mountD(fr) {
+  const T = {
+    cus: [['search', 'ตามหาร้าน', 'หาร้าน/สินค้า เปิดใน LINE', 1], ['pin', 'นำทาง', 'เปิด Google Maps'], ['map', 'ผังตลาด', 'ที่จอดรถ ห้องน้ำ'], ['cam', 'ดูกล้องสด', 'คนเยอะไหมตอนนี้'], ['chat', 'แจ้งปัญหา', 'LINE ลูกค้า']],
+    ven: [['cal', 'จองล็อก', '', 1], ['tag', 'ราคาล็อก', '', 0, 'เริ่ม 100'], ['list', 'ระเบียบ', 'คะแนน · การลา'], ['cam', 'ดูกล้องสด', 'ล็อกว่างไหม'], ['chat', 'แจ้งปัญหา', 'LINE ผู้ค้า']],
+  };
+  const box = add(fr, '<div></div>');
+  let br = 'ประตูกรุงเทพ', who = 'cus', seen = false;
+  const pop = () => box.querySelectorAll('.tile').forEach((t, i) => setTimeout(() => t.classList.add('in'), 60 + i * 60));
+  const render = () => {
+    // เวลา/ราคาเริ่มต้นที่รู้แน่ = ประตูกรุงเทพ + บางนา · โคราชยังไม่มีเวลาตลาด → ไม่โชว์ป้ายเปิด/ปิด และราคา
+    const kr = br === 'โคราช', now = new Date(), h = now.getHours() + now.getMinutes() / 60, open = h >= 16 && h < 23;
+    const tiles = T[who].map(([k, t, s, big, p]) => [k, t, k === 'cal' ? (kr ? 'จองวันนี้ ขายวันนี้' : 'จองวันนี้ ขายพรุ่งนี้') : s, big, kr ? '' : p]);
+    box.innerHTML = `<div class="D"><div class="hd"><img class="wm" src="img/wordmark.svg" alt="ตลาดเซฟวัน GO">${kr ? '' : `<span class="open${open ? ' on' : ''}"><i></i>${open ? 'เปิดอยู่' : 'ปิดแล้ว'} · 16:00–23:00</span>`}</div>
+      <div class="hi"><h3>${who === 'cus' ? 'วันนี้มาเดินตลาด' : 'วันนี้มาขายของ'}<br>ที่ไหนดี?</h3></div>
+      <div class="seg">${['ประตูกรุงเทพ', 'บางนา', 'โคราช'].map(b => `<button data-br="${b}"${b === br ? ' class="on"' : ''}>${b}</button>`).join('')}</div>
+      <div class="who"><button data-who="cus"${who === 'cus' ? ' class="on"' : ''}>มาเดินตลาด</button><button data-who="ven"${who === 'ven' ? ' class="on"' : ''}>มาขายของ</button></div>
+      <div class="tiles">${tiles.map(([k, t, s, big, p]) => `<a class="tile${big ? ' big' : ''}">${ic(k)}<b>${t}</b>${s ? `<small>${s}</small>` : ''}${p ? `<span class="p">${p} บาท</span>` : ''}</a>`).join('')}</div>
+      <nav class="tab"><a class="on">${ic('home')}หน้าแรก</a><a>${ic('map')}ผัง</a><a>${ic('tag')}ราคา</a><a>${ic('phone')}ติดต่อ</a></nav></div>`;
+    box.querySelectorAll('[data-br]').forEach(b => b.onclick = () => { br = b.dataset.br; render(); });
+    box.querySelectorAll('[data-who]').forEach(b => b.onclick = () => { who = b.dataset.who; render(); });
+    if (seen) pop();
+  };
+  render();
+  new IntersectionObserver(([e]) => { if (e.isIntersecting && !seen) { seen = true; pop(); } }, { root: fr, threshold: .25 }).observe(box);
+}
+
+const $f = id => document.getElementById(id);
+mountA($f('fad'), { cta: false }); mountD($f('fad'));                                      // A+D
+mountB($f('fbad'), { after: false }); mountA($f('fbad'), { cta: false }); mountD($f('fbad'));   // A+D+B: เย็น→ค่ำ → รูปค้างจอ → ปุ่มใหญ่
+mountA($f('fa')); mountB($f('fb')); mountC($f('fc')); mountD($f('fd'));                   // แบบเดี่ยว
+
+// จอคอม / มือถือ
+document.querySelectorAll('[data-dev]').forEach(b => b.onclick = () => {
+  document.querySelectorAll('[data-dev]').forEach(x => x.classList.toggle('on', x === b));
+  document.body.classList.toggle('phone', b.dataset.dev === 'phone');
+  document.querySelectorAll('.frame').forEach(f => f.dispatchEvent(new Event('scroll')));
+});
+</script>
+</body>
+</html>

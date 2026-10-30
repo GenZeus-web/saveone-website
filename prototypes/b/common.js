@@ -68,10 +68,12 @@ function openStatus(hours) {
 }
 
 // การ์ดลิงก์ด่วน (ลูกค้า/ผู้ค้า): ลิงก์มาจาก contact/links ของสาขา ถ้าไม่มีใช้ของส่วนกลาง · ยังไม่มีลิงก์ = จาง "รอลิงก์"
-function quickCards(C, k, list) {
+function quickHref(C, k, q) {
   const val = (kind, key) => get(C, `${k}.${kind}.${key}`) || get(C, `${kind}.${key}`) || '';
-  const href = q => q.tel ? (val('contact', q.tel) && 'tel:' + digits(val('contact', q.tel))) : q.line ? (val('contact', q.line) && lineUrl(val('contact', q.line))) : q.link ? val('links', q.link) : q.href || '';
-  return `<div class="quick">${list.filter(q => q.title).map(q => { const h = href(q);
+  return q.tel ? (val('contact', q.tel) && 'tel:' + digits(val('contact', q.tel))) : q.line ? (val('contact', q.line) && lineUrl(val('contact', q.line))) : q.link ? val('links', q.link) : q.href || '';
+}
+function quickCards(C, k, list) {
+  return `<div class="quick">${list.filter(q => q.title).map(q => { const h = quickHref(C, k, q);
     return `<a class="q rv${q.main ? ' main' : ''}${h ? '' : ' off'}" href="${esc(h || '#')}"${ext(h)}>${ic(q.ic)}<div><b>${esc(q.title)}</b><small>${phr(q.sub)}${h ? '' : ' · รอลิงก์'}</small></div><span class="arr">${ic(ext(h) ? 'arrow' : 'next')}</span></a>`; }).join('')}</div>`;
 }
 
@@ -99,11 +101,12 @@ function header() {
     </button>
     <a class="btn pri sm" href="booking-b.html">จองล็อก</a></div>`;
   document.body.prepend(top);
-  $('themeBtn').onclick = () => {
-    const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = t;
-    try { localStorage.setItem('theme', t); } catch {}
-  };
+  $('themeBtn').onclick = toggleTheme;
+}
+function toggleTheme() {
+  const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  document.documentElement.dataset.theme = t;
+  try { localStorage.setItem('theme', t); } catch {}
 }
 
 function footer(C) {
@@ -125,9 +128,9 @@ function reveal() {
   document.querySelectorAll('.rv:not(.in)').forEach(el => io.observe(el));
 }
 
-// เริ่มหน้า: render(C, สาขา) คืน HTML ของ <main> · after(C, สาขา) ผูกปุ่มหลังวาด (ถ้ามี)
-function page(render, after) {
-  header();
+// เริ่มหน้า: render(C, สาขา) คืน HTML ของ <main> · after(C, สาขา) ผูกปุ่มหลังวาด (ถ้ามี) · bar: false = ไม่มีแถบเมนูบน (หน้า A+D)
+function page(render, after, { bar = true } = {}) {
+  if (bar) header();
   fillWordmarks();
   CMS.load().then(async C => {
     // siteKeys = ลำดับสาขาบนเว็บนี้ รวมสาขาที่ยังไม่อยู่ใน branchKeys (เช่น บางนา) → โหลดไฟล์ของสาขานั้นเพิ่มเอง
