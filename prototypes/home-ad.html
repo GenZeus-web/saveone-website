@@ -78,10 +78,16 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 .D .tile .p.on{color:var(--acc-ink)}
 .D .more{display:flex;flex-wrap:wrap;gap:10px;padding-bottom:28px}
 .D .more a{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:999px;background:var(--card2);color:var(--head);font-weight:600;font-size:15px}
-.D .tab{position:sticky;bottom:0;z-index:5;margin-top:auto;display:flex;justify-content:center;gap:clamp(8px,6vw,64px);padding:10px 8px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
+.D .tab{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:clamp(8px,6vw,64px);padding:10px 8px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
 .D .tab a{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;font-size:13px;color:var(--sub)}
 .D .tab a.on{color:var(--link)}.D .tab .i{width:24px;height:24px}
 .ver{top:72px;bottom:auto;left:auto;right:16px}  /* ปุ่มสลับแบบชั่วคราว → มุมขวาบน ไม่บังข้อความ/แถบล่าง */
+/* มือถือ/แท็บเล็ต: แถบเมนูล่างล็อกติดจอตลอด (เจ้าของ 30 ต.ค. 69) → เว้นที่ให้ช่วงรูปและท้ายเว็บไม่โดนบัง */
+@media (max-width:899px){
+  :root{--tabh:calc(66px + env(safe-area-inset-bottom))}
+  body{padding-bottom:var(--tabh)}
+  .A .stage{height:calc(100svh - var(--tabh))}
+}
 
 @media (min-width:900px){
   .D{justify-content:center}
