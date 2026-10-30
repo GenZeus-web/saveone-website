@@ -117,7 +117,7 @@ const emb = Object.fromEntries(Object.entries(OURS).map(([k, f]) => [k, fs.readF
 // หมุดแบบ D (เจ้าของเลือก 28 ต.ค. · Blender ของเรา brand/3d/pins) + ไอคอนที่วาดเอง
 const PINS = path.join(path.dirname(dst), '..', 'brand', '3d', 'pins');
 emb.pin = fs.readFileSync(path.join(PINS, 'glb', 'pin-d.glb')).toString('base64');
-const pinIcon = Object.fromEntries(['food', 'boot', 'event', 'park', 'spot', 'moto', 'wc'].map(k => [k, 'data:image/png;base64,' + fs.readFileSync(path.join(PINS, 'icons', k + '.png')).toString('base64')]));
+const pinIcon = Object.fromEntries(['food', 'boot', 'event', 'park', 'spot', 'moto', 'wc', 'seat'].map(k => [k, 'data:image/png;base64,' + fs.readFileSync(path.join(PINS, 'icons', k + '.png')).toString('base64')]));
 const dstM = path.join(path.dirname(dst), 'models-embed.js');
 const LOGOS = path.join(path.dirname(process.argv[2]), 'logos');
 const logo = Object.fromEntries(out.logos.map(([n]) => [n, 'data:image/png;base64,' + fs.readFileSync(path.join(LOGOS, n + '.png')).toString('base64')]));

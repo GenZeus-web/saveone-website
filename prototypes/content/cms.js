@@ -6,10 +6,25 @@
   // วลีเดียวกันไม่ให้ตัดกลางบรรทัด: แยกตาม " · " และช่องว่าง ห่อแต่ละวลีเป็นก้อน (ขึ้นบรรทัดใหม่ได้แค่ระหว่างก้อน · จุดคั่นติดท้ายวลีก่อนหน้า)
   // คำสั้น (≤ 16 ตัว เช่น "สตรีทฟู้ด") ห้ามตัดในคำ (.nb) · คำยาวกว่านั้นยอมตัด ไม่งั้นล้นกล่องแคบ
   // วลีสั้น (≤ 24 ตัว เช่น "เปิด 12:00" · "หรือโทร 044-222-588") = ก้อนเดียว ไม่แยกคำในวลีออกจากกัน
+  // คำติดกัน (ไม่ให้ขึ้นบรรทัดใหม่คั่น): เลขกับหน่วย "1 คัน" "31 ต.ค." · คำสั้นหน้าเลข "หยุด 1 วัน" "โทร 044…" · "เซฟวัน โก" ·
+  // เครื่องหมาย "=" ติดคำหลัง "→" ติดคำหน้า · คำสุดท้ายสั้น (≤ 6 ตัว) ไม่ตกบรรทัดโดดๆ เช่น "LINE ⏎ สาขา" "แยก ⏎ คปอ."
+  const glue = (p, w) => /\d[).]?$/.test(p) && w.length <= 8 || /^\d/.test(w) && p.length <= 4 ||
+    p === 'เซฟวัน' && /^(โก|GO)$/.test(w) || /^[=–—]$/.test(p) || /^[→)]/.test(w);
+  const seg = typeof Intl !== 'undefined' && Intl.Segmenter ? new Intl.Segmenter('th', { granularity: 'word' }) : null;
+  const word = (w, dot = '') => {
+    if (w.length <= 16) return `<span class="w nb">${esc(w)}${dot}</span>`;
+    // คำยาวไม่มีช่องว่าง: ยอมตัดตามพจนานุกรม แต่ 2 คำท้ายติดกัน (ไม่ให้ "ตลาด" ตกบรรทัดเดียว)
+    const ps = seg ? [...seg.segment(w)].map(x => x.segment) : [w], k = ps.length > 2 && ps.slice(-2).join('').length <= 10 ? 2 : 0;
+    return `<span class="w">${esc(ps.slice(0, ps.length - k).join(''))}${k ? `<span class="nb">${esc(ps.slice(-k).join(''))}${dot}</span>` : dot}</span>`;
+  };
   const phr = s => String(s ?? '').split(' · ').map((c, i, a) => {
-    const dot = i < a.length - 1 ? '&nbsp;·' : '', ws = c.trim().split(/\s+/);
-    const words = ws.map((w, j) => `<span class="w${w.length <= 16 ? ' nb' : ''}">${esc(w)}${j === ws.length - 1 ? dot : ''}</span>`).join(' ');
-    return c.length <= 24 && ws.length > 1 ? `<span class="w">${words}</span>` : words;   // ก้อนวลีกว้างเกินกล่อง → ตัดได้แค่ระหว่างคำ
+    const dot = i < a.length - 1 ? '&nbsp;·' : '', ws = c.trim().split(/\s+/), gs = [];
+    for (const w of ws) gs.length && glue(gs.at(-1).at(-1), w) ? gs.at(-1).push(w) : gs.push([w]);
+    const len = g => g.join(' ').length;
+    if (gs.length > 1 && len(gs.at(-1)) <= 6 && len(gs.at(-2)) + len(gs.at(-1)) <= 22) gs.push([...gs.splice(-2, 2).flat()]);
+    const words = gs.map((g, j) => { const d = j === gs.length - 1 ? dot : '';
+      return g.length > 1 ? `<span class="w">${g.map((w, m) => word(w, m === g.length - 1 ? d : '')).join(' ')}</span>` : word(g[0], d); }).join(' ');
+    return c.length <= 24 && gs.length > 1 ? `<span class="w">${words}</span>` : words;   // ก้อนวลีกว้างเกินกล่อง → ตัดได้แค่ระหว่างก้อน
   }).join(' ');
   // ข้อความไทยที่หน้าเว็บวาดเอง (ไม่ผ่าน phr) → ห่อด้วย phr อัตโนมัติ · ไม่งั้น Chrome ตัดกลางคำ เช่น "สตรี|ทฟู้ด" "บัตร|ประชาชน"
   // (CSS word-break:keep-all ไม่มีผลกับภาษาไทย) · โหมดแก้ไม่ห่อ ให้ช่องพิมพ์เป็นข้อความล้วน
@@ -20,7 +35,9 @@
     for (let n; (n = tw.nextNode());) if (TH.test(n.data) && !n.parentElement?.closest(SKIP)) list.push(n);
     for (const n of list) {
       const [, a, body, z] = n.data.match(/^(\s*)([\s\S]*?)(\s*)$/), t = document.createElement('template');
-      t.innerHTML = esc(a) + phr(body) + esc(z); n.replaceWith(t.content);
+      // ในกล่อง flex/grid ทุกก้อนคำจะกลายเป็นชิ้นแยก (มีช่องไฟ gap คั่น หดตัวเอง) → รวมเป็น span เดียวก่อน
+      const box = /flex|grid/.test(getComputedStyle(n.parentElement).display);
+      t.innerHTML = esc(a) + (box ? `<span>${phr(body)}</span>` : phr(body)) + esc(z); n.replaceWith(t.content);
     }
   };
   if (!EDIT) {

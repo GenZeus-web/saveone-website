@@ -5,7 +5,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'icons')
 os.makedirs(OUT, exist_ok=True)
-KIND = {'food': '#ff8a3d', 'boot': '#b48cf0', 'event': '#2cc9b5', 'park': '#5aaeea', 'spot': '#6b5fa8', 'moto': '#5aaeea', 'wc': '#6b5fa8'}
+KIND = {'food': '#ff8a3d', 'boot': '#b48cf0', 'event': '#2cc9b5', 'park': '#5aaeea', 'spot': '#6b5fa8', 'moto': '#5aaeea', 'wc': '#6b5fa8', 'seat': '#2cc9b5'}
 S = 512
 
 
@@ -78,6 +78,21 @@ def wc(c):     # ห้องน้ำ: คนชาย (ตัวตรง) | �
     d.polygon([(362, 165), (440, 345), (284, 345)], fill=c)                   # ชุดหญิง
     d.rounded_rectangle([324, 330, 356, 450], 14, fill=c); d.rounded_rectangle([368, 330, 400, 450], 14, fill=c)
     d.rounded_rectangle([246, 70, 266, 450], 10, fill=c)                      # เส้นคั่น
+    return im
+
+
+def seat(c):   # ที่นั่งทานอาหาร: โต๊ะกลาง (หน้าโต๊ะ + ขาเดี่ยว + ฐาน) + เก้าอี้ 2 ข้าง (พนัก + ที่นั่ง + ขา)
+    im, d = canvas()
+    d.rounded_rectangle([150, 200, 362, 236], 18, fill=c)                     # หน้าโต๊ะ
+    d.rounded_rectangle([238, 230, 274, 410], 14, fill=c)                     # ขาโต๊ะ
+    d.rounded_rectangle([196, 394, 316, 420], 13, fill=c)                     # ฐานโต๊ะ
+    for sx in (1, -1):                                                        # เก้าอี้ซ้าย / ขวา (กลับด้าน)
+        box = lambda x0, y0, x1, y1, r: d.rounded_rectangle([min(256 + sx * (x0 - 256), 256 + sx * (x1 - 256)), y0,
+                                                             max(256 + sx * (x0 - 256), 256 + sx * (x1 - 256)), y1], r, fill=c)
+        box(40, 150, 72, 330, 14)    # พนัก
+        box(40, 300, 128, 334, 14)   # ที่นั่ง
+        box(46, 320, 74, 420, 12)    # ขาหลัง
+        box(100, 320, 128, 420, 12)  # ขาหน้า
     return im
 
 

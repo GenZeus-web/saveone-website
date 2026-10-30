@@ -6,11 +6,11 @@
 <title>ติดต่อ · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261029n">
+<link rel="stylesheet" href="b/style.css?v=20261030b">
 </head>
 <body>
 <main id="main"></main>
-<script src="content/cms.js?v=20261029c"></script>
+<script src="content/cms.js?v=20261030a"></script>
 <script src="b/common.js?v=20261029h"></script>
 <script>
 // เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
@@ -29,7 +29,7 @@ page((C) => {
   return `${pageHead('ติดต่อ', 'phone', 'ติดต่อตลาด', 'โทรหรือทัก LINE ของสาขาที่ต้องการได้เลย')}
   <section class="sec" style="padding-top:36px"><div class="wrap">
     <div class="grid2" style="margin-top:0">${C.keys.map(box).join('')}</div>
-    <div class="info rv" style="grid-template-columns:${C.contact.lineOfficial ? '1fr 1fr' : '1fr'}"><div><h4>${esc(C.contact.company)}</h4><p style="margin-top:6px;font-size:15px">${phr(C.contact.address)}</p></div>
+    <div class="info rv ${C.contact.lineOfficial ? 'two' : 'one'}"><div><h4>${esc(C.contact.company)}</h4><p style="margin-top:6px;font-size:15px">${phr(C.contact.address)}</p></div>
       ${C.contact.lineOfficial ? `<div><h4>LINE ทางการ</h4><p style="margin-top:6px;font-size:15px">สาขา${(C.contact.lineOfficialFor || []).filter(k => C[k]).map(k => esc(C[k].name)).join(' · สาขา')}</p>
         <a class="ln" style="font-size:20px" href="${esc(lineUrl(C.contact.lineOfficial))}" target="_blank" rel="noopener">${esc(C.contact.lineOfficial)}</a></div>` : ''}</div>
   </div></section>`;

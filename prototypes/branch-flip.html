@@ -28,7 +28,7 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 .seg{display:flex;gap:2px;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;backdrop-filter:blur(8px)}
 .seg button{font:inherit;font-size:13px;color:var(--muted);background:none;border:0;border-radius:999px;padding:6px 12px;cursor:pointer}
 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);font-weight:600}
-.seg span{font-size:12px;color:var(--muted);padding:6px 4px 6px 10px;align-self:center}
+.seg>span{font-size:12px;color:var(--muted);padding:6px 4px 6px 10px;align-self:center}
 .tools{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
 .tools[hidden]{display:none}
 .seg button:disabled{opacity:.4;cursor:default}
@@ -61,16 +61,16 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
   font:inherit;color:var(--ink);background:none;border:0;padding:0;cursor:pointer}
 .pin i{display:block;width:var(--d);height:var(--d);border-radius:50%}
 /* ป้ายชื่อทึบสีตามชนิด (เดิมพื้นกรมท่าเหมือนกันหมด กลืนกับผังกลางคืน) */
-.pin span{font-size:12px;font-weight:700;white-space:nowrap;padding:1px 9px;border-radius:999px;background:var(--c);color:#15122b;border:1.5px solid var(--c);
+.pin>span{font-size:12px;font-weight:700;white-space:nowrap;padding:1px 9px;border-radius:999px;background:var(--c);color:#15122b;border:1.5px solid var(--c);
   box-shadow:0 3px 10px rgba(0,0,0,.35);transition:background .15s,color .15s}
-.pin span:empty,.pin.bare span{display:none}
-.pin:hover span,.pin.on span{background:var(--panel-solid);color:var(--ink)}
+.pin>span:empty,.pin.bare>span{display:none}
+.pin:hover>span,.pin.on>span{background:var(--panel-solid);color:var(--ink)}
 .pin:focus-visible{outline:none} .pin:focus-visible i{outline:2px solid var(--c);outline-offset:3px}
-.pin.food{--c:var(--food)} .pin.boot{--c:var(--boot)} .pin.event{--c:var(--event)} .pin.park{--c:var(--park)} .pin.moto{--c:var(--park)} .pin.wc{--c:var(--wc)}
+.pin.food{--c:var(--food)} .pin.boot{--c:var(--boot)} .pin.event{--c:var(--event)} .pin.park{--c:var(--park)} .pin.moto{--c:var(--park)} .pin.wc{--c:var(--wc)} .pin.seat{--c:var(--event)}
 .pin.minor{opacity:0;pointer-events:none;transition:opacity .25s}
-.pin.minor span{font-size:11px}
+.pin.minor>span{font-size:11px}
 .pins.near .pin.minor{opacity:1;pointer-events:auto}
-@media (max-width:720px){ .pin{--d:34px} .pin span{font-size:11px;padding:0 7px} }
+@media (max-width:720px){ .pin{--d:34px} .pin>span{font-size:11px;padding:0 7px} }
 
 /* การ์ดรายละเอียด: ขวาบนจอกว้าง · แผ่นล่างบนมือถือ */
 .card{position:fixed;top:72px;right:16px;width:370px;max-height:calc(100% - 96px);overflow:auto;z-index:4;
@@ -79,7 +79,7 @@ canvas{position:fixed;inset:0;display:block;touch-action:none}
 .card.on{transform:none}
 .card .x{position:sticky;top:0;float:right;width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-size:14px;cursor:pointer}
 .tag{display:inline-block;font-size:12px;font-weight:600;padding:2px 10px;border-radius:999px;background:var(--c,var(--spot));color:var(--bg)}
-.tag.food{--c:var(--food)} .tag.boot{--c:var(--boot)} .tag.event{--c:var(--event)} .tag.park{--c:var(--park)} .tag.wc{--c:var(--wc)}
+.tag.food{--c:var(--food)} .tag.boot{--c:var(--boot)} .tag.event{--c:var(--event)} .tag.park{--c:var(--park)} .tag.wc{--c:var(--wc)} .tag.seat{--c:var(--event)}
 .card h2{font-size:21px;line-height:1.35;margin:8px 0 2px}
 .where{font-size:13px;color:var(--muted)}
 .sec{margin-top:14px}
@@ -131,6 +131,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 .edit [data-p].empty{min-width:5em}
 .edit [data-p].empty:not(:focus)::after{content:"พิมพ์…";color:#ffcf6b;opacity:.7;font-weight:400}
 .muted{color:var(--muted);font-size:13px;margin-top:10px}
+.seats{margin:8px 0 0;padding-left:18px;font-size:14px;line-height:1.7}
 .w{display:inline-block;max-width:100%}
 td .w,th .w{max-width:none}
 .nb{white-space:nowrap}
@@ -140,7 +141,7 @@ td .w,th .w{max-width:none}
   .card{top:36%;left:0;right:0;bottom:0;width:auto;max-height:none;border-radius:20px 20px 0 0;transform:translateY(105%);overscroll-behavior:contain;touch-action:pan-y;padding-bottom:28px}
   body.carded .nav{opacity:0;pointer-events:none}
 }
-@media (max-width:520px){ .label{min-width:0;padding:6px 14px} .label h2{font-size:18px} .label p{display:none} .seg button{padding:6px 8px;font-size:12px} .seg span{display:none} .tools{align-items:flex-start} }
+@media (max-width:520px){ .label{min-width:0;padding:6px 14px} .label h2{font-size:18px} .label p{display:none} .seg button{padding:6px 8px;font-size:12px} .seg>span{display:none} .tools{align-items:flex-start} }
 
 /* ซ่อนแถบเลื่อน (ยังเลื่อนได้) — แถบกินที่ทำให้หน้าไม่สมส่วน */
 *{scrollbar-width:none}
@@ -180,10 +181,10 @@ td .w,th .w{max-width:none}
 <div class="angle" id="angle" hidden><span id="angleTxt"></span><button id="angleSave">📌 ใช้มุมนี้เป็นมุมเปิด</button></div>
 
 <script src="korat-layout.js?v=3"></script>
-<script src="sg-layout.js?v=5"></script>
+<script src="sg-layout.js?v=6"></script>
 <script src="office-sign.js?v=2"></script>
-<script src="models-embed.js?v=3"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
-<script src="content/cms.js?v=20261029c"></script>
+<script src="models-embed.js?v=4"></script>   <!-- ?v= เปลี่ยนทุกครั้งที่สร้างไฟล์ใหม่ ไม่ให้เบราว์เซอร์ใช้ของเก่า -->
+<script src="content/cms.js?v=20261030a"></script>
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
@@ -434,7 +435,7 @@ const KB = (() => {
 })();
 const kp = (x, y) => [(x - KB.cx) * KB.s, (y - KB.cy) * KB.s];   // ผัง → แผ่น (X, Z)
 const KM = K.U * KB.s;                                           // 1 เมตร = กี่หน่วยบนแผ่น
-const KCOL = { food: '#ff8a3d', boot: '#b48cf0', event: '#2cc9b5', park: '#5aaeea', spot: '#f6f1e7', moto: '#5aaeea', wc: '#f48fc1' };   // wc = ห้องน้ำ (ชมพู · แยกจากจุดบริการสีครีม)   // moto = ลานจอดมอเตอร์ไซค์ (สีเดียวกับลานจอด)
+const KCOL = { food: '#ff8a3d', boot: '#b48cf0', event: '#2cc9b5', park: '#5aaeea', spot: '#f6f1e7', moto: '#5aaeea', wc: '#f48fc1', seat: '#2cc9b5' };   // wc = ห้องน้ำ (ชมพู · แยกจากจุดบริการสีครีม)   // moto = ลานจอดมอเตอร์ไซค์ (สีเดียวกับลานจอด)
 
 const koratGround = () => groundMat(g => {
   const P = (x, y) => { const [X, Z] = kp(x, y); return [(X + COLS / 2) * PX, (Z + ROWS / 2) * PX]; };
@@ -1068,7 +1069,7 @@ const now = new Date(), md = (now.getMonth() + 1) * 100 + now.getDate();
 const season = md >= 413 && md <= 1031 ? 'low' : 'high', wk = [5, 6, 0].includes(now.getDay()) ? 1 : 0, dayTxt = wk ? 'ศ.–อา.' : 'จ.–พฤ.';
 const range = z => { const v = z.tiers.map(t => t[season][wk]), a = Math.min(...v), b = Math.max(...v); return a === b ? `${a}` : `${a}–${b}`; };
 const m2txt = v => `≈ ${v.toLocaleString('th-TH')} ตร.ม. · ${(v / 1600).toFixed(1)} ไร่`;
-const KINDNAME = { ...K.about.kinds, spot: 'จุดบริการ', wc: 'ห้องน้ำ' };
+const KINDNAME = { ...K.about.kinds, spot: 'จุดบริการ', wc: 'ห้องน้ำ', seat: 'ที่นั่ง' };
 const head = (kind, name, where) => `<span class="tag ${kind}">${esc(KINDNAME[kind] || '')}</span><h2>${esc(name)}</h2>${where ? `<p class="where">📍 ${rt(where)}</p>` : ''}<!--ph-->`;
 // ── รูปจริงในการ์ด: ใส่ใน content/<สาขา>/data.json → photos: { "id หมุด": ["content/<สาขา>/img/x.jpg", …] } (ชื่อไฟล์ตัวพิมพ์เล็ก) · ยังไม่มี = ช่องว่างเส้นประ ──
 //    หลายรูป = เลื่อนซ้าย-ขวา · PHOTOS ด้านล่างไว้ทดลองในโค้ด (ทับของในไฟล์)
@@ -1138,6 +1139,9 @@ function sgCard(p) {
     + `<div class="sec facts">${sf('🕓', 'เวลาเปิด', 'sg.map.wc.hours')}${sf('💰', 'ค่าบริการ', 'sg.map.wc.fee')}</div>`;
   if (p.id === 'สำนักงาน') return officeCard('sg');
   const z = SGZ[p.id];
+  // ที่นั่งทานอาหาร: หมุดเดียว (เจ้าของ: อย่าให้รก) · การ์ดบอกทุกจุดที่มีในผัง (โซน seat/seatT ใน sg-layout.js)
+  if (z.kind === 'seat' || z.kind === 'seatT') return head('seat', 'ที่นั่งทานอาหาร', where)
+    + `<p class="muted">นั่งทานได้หลายจุดในตลาด</p><ul class="seats">${I.seats.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   if (z.kind === 'park' || z.kind === 'vpark' || z.kind === 'moto') {
     const r = I[z.kind === 'vpark' ? 'vpark' : 'park'];
     return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sg.map.parkEntrance')}</div>`
@@ -1352,7 +1356,7 @@ const pinLayer = $('pins'), card = $('card');
 let pinEls = [], sel = null, hl = null;
 // ── หน้าแรก (home.html) ส่งกลุ่มที่เลือกมา → กรองหมุด · ผู้ค้า: โซนขาย + ลานกิจกรรม (เช่าจัดงาน) + สำนักงาน + ที่จอด (ซ่อนห้องน้ำ/ประตู/น้ำพุ) · ลูกค้า: เห็นทั้งหมด ──
 let pinGroup = null;
-const PIN_HIDE = { ven: p => p.kind === 'wc' || p.id === 'gate' || p.id === 'fountain' };
+const PIN_HIDE = { ven: p => p.kind === 'wc' || p.kind === 'seat' || p.id === 'gate' || p.id === 'fountain' };   // ฝั่งผู้ค้า: ซ่อนหมุดของลูกค้า
 const pinHidden = p => !!(pinGroup && PIN_HIDE[pinGroup] && PIN_HIDE[pinGroup](p));
 addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
@@ -1421,14 +1425,14 @@ const pv = new THREE.Vector3(), pu = new THREE.Vector3();
 function placePins() {
   const W = innerWidth, H = innerHeight, near = camera.position.distanceTo(controls.target) < home.d * .6;   // น้ำพุ โผล่เมื่อซูมเข้าจากมุมบ้าน
   pinLayer.classList.toggle('near', near);
-  const off = pinLayer.classList.contains('hide'), wide = W > 720, D = wide ? 48 : 34, BASE = D * 1.15, MAXLIFT = wide ? 220 : 48;   // มือถือ: ไม่ยกหมุดสูง (เส้นยาวรก) · ที่ไม่พอ ซ่อนชื่อ/หมุดแทน
+  const off = pinLayer.classList.contains('hide'), wide = W > 720, D = wide ? 48 : 34, BASE = D * 1.15, MAXLIFT = wide ? 90 : 48;   // ยกหนีได้ไม่เกิน 90px (เจ้าของ: บางอันสูงเกิน) · มือถือ 48px · ที่ไม่พอ ซ่อนชื่อ/หมุดแทน
   const tanV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   // วัดตำแหน่งบนจอ แล้วเรียงลำดับวาง: หมุดโซนที่มีชื่อก่อน → หมุด P ไม่มีชื่อ → หมุดย่อย · ในกลุ่มเดียวกัน ใกล้กล้อง (ล่างจอ) ก่อน
   const list = pinEls.map(q => {
     pv.copy(q.p.pos).project(camera); pu.copy(q.p.pos).setY(q.p.pos.y + 1).project(camera);
     if (!q.w) { q.el.classList.remove('bare'); q.w = Math.max(D, q.el.offsetWidth); q.h = q.el.offsetHeight; q.named = !!q.el.textContent; }
     return { q, x: (pv.x + 1) / 2 * W, y: (1 - pv.y) / 2 * H, up: Math.max(((1 - pu.y) / 2 * H - (1 - pv.y) / 2 * H) * -1, .001), front: pv.z < 1,
-      rank: (q.p.minor ? 3 : !q.named ? 2 : q.p.kind === 'food' || q.p.kind === 'boot' ? 0 : 1) };   // โซนขายได้ที่ก่อน (ที่จอดเยอะ อย่าแย่งที่)
+      rank: (q.p.minor ? 4 : !q.named ? 3 : q.p.kind === 'food' || q.p.kind === 'boot' ? 0 : q.p.kind === 'park' || q.p.kind === 'moto' ? 2 : 1) };   // โซนขายได้ที่ก่อน → จุดบริการลูกค้า (ที่นั่ง ห้องน้ำ สำนักงาน) → ที่จอด (มีหลายลาน ซ่อนได้บ้าง)
   }).sort((a, b) => (a.rank - b.rank) || (b.y - a.y));
   // แถบบน (โลโก้) + ป้ายสาขาล่าง ถือว่าเป็นที่ที่มีของอยู่แล้ว หมุดห้ามทับ
   const placed = [$('top'), $('nav')].map(e => { const b = e.getBoundingClientRect(); return { x0: b.left, x1: b.right, y0: b.top, y1: b.bottom }; });
