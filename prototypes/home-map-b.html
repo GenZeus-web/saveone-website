@@ -10,7 +10,7 @@
      ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261030c">
+<link rel="stylesheet" href="b/style.css?v=20261030d">
 <link rel="stylesheet" href="b/map.css?v=20261029c">
 </head>
 <body>
@@ -77,11 +77,11 @@ const qHref = q => q.tel ? (brVal('contact', q.tel) && 'tel:' + digits(brVal('co
 const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const dots = p => `<ul class="dots">${get(C, p).map((_, i) => `<li>${T(C, `${p}.${i}`)}${del(`${p}.${i}`)}</li>`).join('')}</ul>${add(p)}`;
 const quick = p => `<div class="quick">${get(C, p).map((q, i) => { const h = qHref(q), off = !h && !EDIT;
-  return `<a class="q${q.main ? ' main' : ''}${off ? ' off' : ''}" href="${esc(h || '#')}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}${off ? ' aria-disabled="true"' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}${off ? '<small>· รอลิงก์</small>' : ''}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
+  return `<a class="q${q.main ? ' main' : ''}${off ? ' off' : ''}" href="${esc(h || '#')}"${ext(h)}${q.href === '#map' ? ' data-close' : ''}${off ? ' aria-disabled="true"' : ''}>${ic(q.ic)}<div>${T(C, `${p}.${i}.title`, 'b')}${T(C, `${p}.${i}.sub`, 'small')}${off ? '<small>รอลิงก์</small>' : ''}</div>${ext(h) ? `<span class="arr">${ic('arrow')}</span>` : ''}</a>`; }).join('')}</div>`;
 // รูปจริง [[ไฟล์, คำบรรยาย], …] · ไฟล์อยู่ content/<สาขา>/img/ · หน้าจริงข้ามรูปที่ยังว่าง · โหมดแก้: พิมพ์ชื่อไฟล์/คำบรรยาย + เพิ่ม/ลบ
 const pics = p => { const a = get(C, p) || [], on = a.map((x, i) => [x, i]).filter(([[src]]) => EDIT || src);
   return on.length || EDIT ? `<div class="pics">${on.map(([[src, alt], i]) => `<figure style="position:relative">${src ? `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">` : ''}<figcaption>${EDIT ? `ไฟล์: ${T(C, `${p}.${i}.0`)}<br>` : ''}${T(C, `${p}.${i}.1`)}</figcaption>${del(`${p}.${i}`)}</figure>`).join('')}</div>${add(p, '+ เพิ่มรูป')}` : ''; };
-const brName = () => C[BR] ? ` <span class="brn">· ${esc(C[BR].name)}</span>` : '';
+const brName = () => C[BR] ? ` <span class="brn">${esc(C[BR].name)}</span>` : '';
 // ปุ่มไปสาขาอื่น → สั่งผังด้านบนพลิก แล้วเลื่อนขึ้นไปดู
 const otherBranches = () => C.branchKeys.filter(k => k !== BR).map(k => `<button type="button" class="brgo" data-go="${k}">${ic('pin')}ดูสาขา${esc(C[k].name)} →</button>`).join('');
 const soon = () => `<div class="wrap"><div class="soon"><b>สาขาบางนา · เร็วๆ นี้</b>ยังไม่มีรายละเอียดของสาขานี้<br>${otherBranches()}</div></div>`;
@@ -181,13 +181,13 @@ function zone(z) {
   if (!$('pen')) return;
   const penOn = show(penHas(get(C, PP)));
   $('penCard').hidden = !penOn;
-  $('penZone').textContent = '· ' + Z.name;
+  $('penZone').textContent = Z.name;
   $('pen').innerHTML = get(C, PP).map((g, i) =>
     `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
       `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
 }
 function renderFoot() {
-  $('foot').innerHTML = `${T(C, 'contact.company')} · ${T(C, 'contact.address')} · โทร ${T(C, 'sg.contact.phone')}<br>${T(C, 'contact.footnote')}`;
+  $('foot').innerHTML = `<b>${T(C, 'contact.company')}</b><br>${T(C, 'contact.address')}<br>โทร ${T(C, 'sg.contact.phone')}<br>${T(C, 'contact.footnote')}`;
 }
 // แผงลิงก์/เบอร์ (เฉพาะโหมดแก้ · ค่าที่ปุ่มบนหน้าใช้ แต่ไม่ได้โชว์เป็นตัวหนังสือ)
 function renderPanel() {

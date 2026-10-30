@@ -6,19 +6,19 @@
 <title>วิธีจอง · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261030c">
+<link rel="stylesheet" href="b/style.css?v=20261030d">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261030d"></script>
+<script src="b/common.js?v=20261030e"></script>
 <script>
 // ขั้นตอนเริ่มขาย + ช่วงเวลาจองออนไลน์/Walk-in ของแต่ละโซน + ลิงก์ผู้ค้า (จองล็อก · แจ้งปัญหา · ดูกล้อง)
 page((C, k) => {
   const b = C[k], V = b.vendor, steps = V.steps.items.filter(([t]) => t);
   const when = zonesOf(C, k).map(([z, Z]) => { const f = key => Z.facts.find(x => x[0] === key)?.[2] || '';
     return `<tr><td><span class="zdot z-${z}"></span>${esc(Z.name)}</td><td>${dayTag(f('online'))}</td><td>${dayTag(f('walk'))}</td></tr>`; }).join('');
-  return `${pageHead(C.gate.ven.title, 'online', `วิธีจอง <span class="br">· ${esc(b.name)}</span>`, `เริ่มขายใน ${steps.length} ขั้น`)}
+  return `${pageHead(C.gate.ven.title, 'online', `วิธีจอง <span class="br">${esc(b.name)}</span>`, `เริ่มขายใน ${steps.length} ขั้น`)}
   <section class="sec" style="padding-top:28px"><div class="wrap">
     ${branchTabs(C, k)}
     ${!hasVendor(C, k) ? waitBox(C, k, 'การจอง') : `<h2 class="h3" style="margin-top:32px">${esc(V.steps.title || 'เริ่มขายครั้งแรก')}</h2>

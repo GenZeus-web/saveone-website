@@ -222,6 +222,7 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px 
 footer nav{display:flex;flex-wrap:wrap;gap:6px 18px;font-weight:500;color:var(--head)}
 footer nav a:hover{color:var(--link)}
 footer .fine{flex-basis:100%;font-size:13px}
+footer .fine b{color:var(--head);font-weight:600}
 
 /* เลื่อนแล้วค่อยโผล่ */
 /* ใช้ translate แยกจาก transform → ไม่ทับท่าลอยตอนชี้ (:hover) · ปุ่มที่ยังไม่มีลิงก์ (.off) คงความจาง */

@@ -113,7 +113,7 @@ function footer(C) {
   const f = document.createElement('footer');
   // ไม่มีเมนูท้ายหน้า (เจ้าของ 30 ต.ค. 69: ซ้ำกับเมนูบนที่ติดจออยู่แล้ว)
   f.innerHTML = `<div class="wrap"><span class="brand" data-wm></span>
-    <p class="fine">${esc(C.contact.company)} · ${phr(C.contact.address)}<br>${phr(C.contact.footnote)}</p></div>`;
+    <p class="fine"><b>${esc(C.contact.company)}</b><br>${phr(C.contact.address)}<br>${phr(C.contact.footnote)}</p></div>`;
   document.body.append(f);
 }
 
