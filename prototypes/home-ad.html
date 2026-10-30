@@ -28,6 +28,8 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 .A .bar{position:absolute;left:var(--gut);right:var(--gut);top:24px;display:flex;align-items:center;gap:12px;z-index:3;--wm-ink:#fff;--wm-go:#84e62d}
 .A .bar .brand{height:30px;transition:opacity .4s}.A .stage[data-s="0"] .bar .brand{opacity:0}
 .A .dots{display:flex;gap:6px;margin-left:auto}
+.A .x{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(21,18,43,.5);color:#fff;font-size:14px;font-weight:600;cursor:pointer;backdrop-filter:blur(6px)}
+.A .x:hover{background:rgba(255,255,255,.15)}.A .x svg{width:16px;height:16px}
 .A .dots i{width:26px;height:4px;border-radius:2px;background:rgba(255,255,255,.25);transition:background .3s}.A .dots i.on{background:#84e62d}
 .A .txt{position:absolute;left:var(--gut);bottom:96px;width:min(560px,calc(100% - 64px));z-index:3}
 .A .step{position:absolute;bottom:0;left:0;right:0;opacity:0;transform:translateY(30px);transition:opacity .5s,transform .6s cubic-bezier(.2,.7,.2,1);pointer-events:none}
@@ -115,7 +117,7 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261030c"></script>
+<script src="b/common.js?v=20261030d"></script>
 <script>
 // tile ไอคอน: ใช้ ic จากไฟล์เนื้อหา · map (#map) ลิงก์ไปผังในหน้าสาขา
 const tileHref = (C, k, q) => q.href === '#map' ? `branches-b.html?b=${k}#map` : quickHref(C, k, q);
@@ -139,7 +141,8 @@ page((C) => {
   return `
   <section class="A" id="story" style="--n:${steps.length + 1}"><div class="stage" data-s="0">
     ${steps.map(ph).join('')}<div class="shade"></div>
-    <div class="bar"><span class="brand" data-wm></span><div class="dots">${steps.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div></div>
+    <div class="bar"><span class="brand" data-wm></span><div class="dots">${steps.map((_, i) => `<i${i ? '' : ' class="on"'}></i>`).join('')}</div>
+      <button class="x" id="storyX" type="button" title="ปิดภาพเล่าเรื่อง ไปที่เมนูเลย">${esc(S.close)} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="txt">${steps.map(([, , h], i) => `<div class="step${i ? '' : ' on'}">${h}</div>`).join('')}</div>
     ${steps.map(([, c], i) => `<span class="cap${i ? '' : ' on'}">${esc(c)}</span>`).join('')}
     <a class="skip" href="#app">${esc(S.skip)} ${ic('next')}</a>
@@ -158,6 +161,17 @@ page((C) => {
     A.firstElementChild.dataset.s = s;
   };
   addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  // ปิดช่วงรูป → ไปเมนูทันที · จำไว้ (ครั้งหน้าเปิดมาเจอเมนูเลย) · เปิดกลับได้ที่ปุ่ม "ดูภาพตลาด"
+  const STORY = 'adStory';
+  let storyOff = false; try { storyOff = localStorage.getItem(STORY) === 'off'; } catch {}
+  const setStory = off => {
+    storyOff = off; A.hidden = off;
+    try { off ? localStorage.setItem(STORY, 'off') : localStorage.removeItem(STORY); } catch {}
+    scrollTo({ top: 0, behavior: 'instant' }); render();
+  };
+  A.hidden = storyOff;
+  $('storyX').onclick = () => setStory(true);
 
   // ── D: เลือกสาขา + ลูกค้า/ผู้ค้า → ปุ่มใหญ่จากไฟล์เนื้อหาสาขานั้น
   const D = $('app'), S = C.story;
@@ -183,11 +197,12 @@ page((C) => {
       <div class="seg" role="tablist" aria-label="เลือกสาขา">${C.keys.map(x => `<button data-k="${x}"${x === k ? ' class="on" aria-selected="true"' : ''}>${esc(C[x].name)}</button>`).join('')}</div>
       <div class="who">${['cus', 'ven'].map(w => `<button data-who="${w}"${w === who ? ' class="on" aria-pressed="true"' : ''}>${ic(w === 'cus' ? 'bag' : 'store')}${esc(C.gate[w].title)}</button>`).join('')}</div></div>
       <div class="tiles">${list.map(tile).join('')}</div>
-      <div class="more">${more.map(([h, i, t]) => `<a href="${h}">${ic(i)}${t}</a>`).join('')}</div></div>
+      <div class="more">${more.map(([h, i, t]) => `<a href="${h}">${ic(i)}${t}</a>`).join('')}${storyOff ? `<a href="#" id="storyOn">${ic('next')}${esc(S.reopen)}</a>` : ''}</div></div>
       <nav class="tab" aria-label="เมนูหลัก">${menu}</nav>`;
     D.querySelectorAll('[data-k]').forEach(x => x.onclick = () => { k = x.dataset.k; sync(); });
     D.querySelectorAll('[data-who]').forEach(x => x.onclick = () => { who = x.dataset.who; sync(); });
     $('themeBtn').onclick = toggleTheme;
+    if ($('storyOn')) $('storyOn').onclick = e => { e.preventDefault(); setStory(false); };
     fillWordmarks();
     if (seen) pop();
   };
