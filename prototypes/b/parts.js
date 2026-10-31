@@ -94,6 +94,25 @@ const ZIC = { food: 'food', boot: 'car', court: 'food' };
 const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${CMS.esc(name)}${typeof whereBtn === 'function' ? whereBtn(k, z) : ''}</div>
   <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${CMS.esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
 
+// คะแนนและอันดับ = ตาราง (เจ้าของ 31 ต.ค. 69: "คำแนะนำระบบอันดับ ทำเป็นรูปแบบตาราง")
+// อ่านจากข้อความเดิมใน vendor.points (แก้ที่เดิมได้เหมือนเดิม): chips "มาขาย +6" → แถว · text = สูตร + ข้อแยกด้วย " · "
+// note: ข้อที่เป็น "อันดับ … รอบ… 10:00" → ตารางรอบจองตามอันดับ · ที่เหลือเป็นหมายเหตุ
+function pointsBlock(P) {
+  const e = CMS.esc, parts = t => String(t || '').split(' · ').map(x => x.trim()).filter(Boolean);
+  const earn = (P.chips || []).filter(Boolean).map(t => { const m = t.match(/^(.*?)\s*([+−-]?\d[\d,]*)$/); return m ? [m[1], m[2]] : [t, '']; });
+  const tx = parts(P.text), formula = tx.find(x => x.includes('=')), how = tx.filter(x => x !== formula);
+  let zone = ''; const rounds = [], notes = [];
+  parts(P.note).forEach(x => { const m = x.match(/^(?:(\S+):\s*)?อันดับ\s*([\d–-]+(?:\s*ขึ้นไป)?)\s+(?:จอง)?(รอบ\S*)\s+(\d{1,2}:\d{2})/);
+    if (m) { zone = zone || m[1] || ''; rounds.push([m[2], m[3], m[4]]); } else notes.push(x); });
+  const earnT = earn.length ? `<table class="ptbl pts-t"><caption>ได้คะแนนจาก</caption><thead><tr><th scope="col">ทำอะไร</th><th scope="col">คะแนน</th></tr></thead><tbody>
+    ${earn.map(([a, b]) => `<tr><th scope="row">${e(a)}</th><td class="on${/^0$/.test(b) ? ' zero' : ''}">${e(b)}</td></tr>`).join('')}</tbody>
+    ${formula ? `<tfoot><tr><td colspan="2"><b>วิธีคิด</b> ${e(formula)}</td></tr></tfoot>` : ''}</table>` : '';
+  const roundT = rounds.length ? `<table class="ptbl pts-t"><caption>รอบจองตามอันดับ${zone ? ` · ${e(zone)}` : ''}</caption><thead><tr><th scope="col">อันดับ</th><th scope="col">รอบ</th><th scope="col">เวลาจอง</th></tr></thead><tbody>
+    ${rounds.map(([r, n, t]) => `<tr><th scope="row">${e(r)}</th><td>${e(n)}</td><td class="on">${e(t)}</td></tr>`).join('')}</tbody></table>` : '';
+  const list = [...how, ...notes];
+  return `<div class="pts-g">${earnT}${roundT}</div>${list.length ? `<ul class="dots pts-n">${list.map(x => `<li>${CMS.phr(x)}</li>`).join('')}</ul>` : ''}`;
+}
+
 // ท้ายเว็บ: 2 บริษัทแยกบรรทัด (SaveoneGo = สาขาที่ story.brand เป็น GO · Saveone Market = โคราช) + ลิงก์ "ติดต่อ · เกี่ยวกับเรา"
 // t(path) = HTML ของข้อความ (โหมดแก้ส่งตัวแก้ได้มา)
 function footHTML(C, t) {
