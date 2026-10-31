@@ -40,6 +40,7 @@ const ICON = {
   next: '<path d="M4 12h16M14 6l6 6-6 6"/>',
   map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
   list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
 };
 // โลโก้แพลตฟอร์มของจริง (ทรงจาก Simple Icons · CC0) — ทึบ ไม่ใช่เส้น · สีตามปุ่ม (เจ้าของ 31 ต.ค. 69)
@@ -118,11 +119,61 @@ addEventListener('click', e => {
     clearInterval(d._t); removeEventListener('message', on); f.contentWindow.postMessage({ focus }, location.origin); });
   d.querySelector('.mf').append(f); d.showModal();
 });
-const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
+// ผู้ใช้เป็นใคร (หน้าต่างเริ่มต้น · เจ้าของ 31 ต.ค. 69: "เอาป๊อปอัปของ 3D มาใช้ ... เลือกประเภท เลือกสถานที่") → { who: cus|ven, b: สาขา, z: โซน } เก็บในเครื่อง
+const getProf = () => { try { return JSON.parse(localStorage.getItem('prof')) || null; } catch { return null; } };
+const setProf = p => { try { localStorage.setItem('prof', JSON.stringify(p)); } catch {} };
+const pickBranch = C => { const b = new URLSearchParams(location.search).get('b') || getProf()?.b; return C.keys.includes(b) ? b : C.keys[0]; };
+const VEN_PAGES = ['prices-b.html', 'booking-b.html', 'rules-b.html', 'faq-b.html'];
+// โซนที่ดู: ?z= (z=all = ทุกโซน) ก่อน แล้วค่อยที่เลือกไว้ · ใช้เฉพาะหน้าผู้ค้า
+function pickZone(C, k) {
+  if (!VEN_PAGES.includes(here)) return null;
+  const q = new URLSearchParams(location.search).get('z'), zs = zonesOf(C, k).map(([z]) => z);
+  if (q) { const p = getProf(); if (p && !p.skip) setProf({ ...p, z: q === 'all' ? null : q }); }
+  const z = q || getProf()?.z;
+  return zs.includes(z) ? z : null;
+}
+// แถบบนหน้าผู้ค้า: สาขา ▾ + โซน (ทุกโซน · สตรีทฟู้ด · เปิดท้าย …) + ปุ่มเปลี่ยนกลุ่ม
+function pickBar(C, k) {
+  const zs = zonesOf(C, k), href = z => { const u = new URLSearchParams(location.search); u.set('b', k); u.set('z', z); return `?${u}`; };
+  const chip = (z, t, icn) => `<a class="zchip${(ZF || 'all') === z ? ' on' : ''}" href="${href(z)}"${(ZF || 'all') === z ? ' aria-current="true"' : ''}>${icn ? ic(icn) : ''}${esc(t)}</a>`;
+  return `<div class="pickbar">${branchTabs(C, k)}${zs.length > 1 ? `<div class="zpick" aria-label="เลือกโซน"><span>โซน</span>${chip('all', 'ทุกโซน')}${zs.map(([z, Z]) => chip(z, Z.name, ZIC[z])).join('')}</div>` : ''}<button type="button" class="whobtn" data-gate>${ic('user')}เปลี่ยนกลุ่ม</button></div>`;
+}
+
+// ── หน้าต่างเริ่มต้น (แบบ 1): มาทำอะไร → สาขาไหน → (ผู้ค้า) ขายโซนไหน ──
+// ข้อความจาก gate ใน content/site.json (ชุดเดียวกับม่านแบบ 2) · เลือกครบ → พาไปหน้าที่ตรงกลุ่ม · "ดูทั้งหมด" = ไม่ถามอีก
+function openGate(C, auto) {
+  if (document.querySelector('.vgate')) return;
+  const G = C.gate, d = document.createElement('dialog'); d.className = 'vgate'; d.setAttribute('aria-label', G.title);
+  let who = null, b = null, done = false;
+  const st = k => { const h = C[k].facts?.find(f => f[0] === 'food')?.[2]; if (!h || !h.includes('–')) return `<small>${esc(C[k].tag || '')}</small>`;
+    const o = openStatus(h); return `<span class="bst${o.open ? ' open' : ''}"><i></i>${o.open ? 'เปิดอยู่' : esc(o.text)}</span>`; };
+  const card = (attr, icn, t, sub) => `<button type="button" class="vg-c" ${attr}>${ic(icn)}<span class="t"><b>${t}</b>${sub}</span><span class="arr">→</span></button>`;
+  const step = (n, kick, h, body, back) => `<div class="vg-s" data-n="${n}">${kick ? `<p class="vg-k">${kick}</p>` : ''}<h2>${h}</h2>${body}${back ? `<button type="button" class="vg-back" data-back="${back}">← ย้อนกลับ</button>` : ''}</div>`;
+  const s1 = () => step(1, esc(G.kicker), esc(G.title), `<div class="vg-who">${['cus', 'ven'].map(g => `<button type="button" class="vg-w" data-who="${g}">${ic(g === 'cus' ? 'bag' : 'store')}<b>${esc(G[g].title)}</b><ul>${G[g].items.map(x => `<li>${esc(x)}</li>`).join('')}</ul></button>`).join('')}</div><button type="button" class="vg-skip" data-skip>${esc(G.skip === 'ดูผังเฉยๆ' ? 'ดูทั้งหมด ไม่ต้องเลือก' : G.skip)}</button>`);
+  const s2 = () => { const ks = who === 'ven' ? C.keys.filter(k => hasVendor(C, k)) : C.keys;
+    return step(2, `${ic(who === 'cus' ? 'bag' : 'store')} ${esc(G[who].title)}`, who === 'cus' ? 'ไปสาขาไหน?' : 'ขายที่สาขาไหน?', `<div class="vg-list">${ks.map(k => card(`data-b="${k}"`, 'pin', esc(C[k].name), st(k))).join('')}</div>`, 1); };
+  const s3 = () => step(3, `${ic('store')} ${esc(G.ven.title)} · ${esc(C[b].name)}`, 'ขายโซนไหน?', `<div class="vg-list">${zonesOf(C, b).map(([z, Z]) => card(`data-z="${z}"`, ZIC[z] || 'pin', esc(Z.name), Z.desc ? `<small>${esc(Z.desc)}</small>` : '')).join('')}${card('data-z=""', 'map', 'ดูทุกโซน', '<small>ยังไม่แน่ใจ / ขายหลายโซน</small>')}</div>`, 2);
+  const show = html => { d.innerHTML = `<button type="button" class="vg-x" aria-label="ปิด" data-skip>✕</button>${html}`; d.querySelector('.vg-s button')?.focus({ preventScroll: true }); };
+  const finish = z => { done = true; setProf({ who, b, z: z || null });
+    const q = new URLSearchParams({ b }); if (who === 'ven') q.set('z', z || 'all');
+    const to = who === 'cus' ? 'branches-b.html' : VEN_PAGES.includes(here) ? here : 'prices-b.html';
+    location.href = `${to}?${q}`; };
+  d.addEventListener('click', e => { const t = e.target.closest('button'); if (!t) { if (e.target === d) d.close(); return; }
+    if (t.dataset.skip != null) return d.close();
+    if (t.dataset.back) return show(t.dataset.back === '1' ? s1() : s2());
+    if (t.dataset.who) { who = t.dataset.who; return show(s2()); }
+    if (t.dataset.b) { b = t.dataset.b; return who === 'cus' || zonesOf(C, b).length < 2 ? finish(null) : show(s3()); }
+    if (t.dataset.z != null) return finish(t.dataset.z); });
+  d.addEventListener('close', () => { if (!done && auto && !getProf()) setProf({ skip: 1 }); d.remove(); });   // ปิดเอง = ไม่ถามซ้ำทุกหน้า
+  document.body.append(d); show(s1()); d.showModal();
+}
+// ปุ่ม "เปลี่ยนกลุ่ม" (แถบบนหน้าผู้ค้า + เมนู ☰) เปิดหน้าต่างอีกครั้ง
+let SITE_C = null;
+addEventListener('click', e => { if (e.target.closest('[data-gate]') && SITE_C) { e.preventDefault(); openGate(SITE_C, false); } });
 
 // เมนู (เจ้าของเลือกแบบ 3 · 31 ต.ค. 69): จอคอม = เรียงครบแถวเดียว · จอแคบ/มือถือ = ปุ่ม ☰ กางเป็นปุ่มใหญ่ 2 คอลัมน์มีไอคอน
 const NAV_IC = { 'home-b.html': 'home', 'branches-b.html': 'store', 'prices-b.html': 'tag', 'booking-b.html': 'cal', 'rules-b.html': 'shield', 'faq-b.html': 'search', 'contact-b.html': 'phone' };
-const navHTML = () => PAGES.map(([h, t]) => `<a href="${h}"${h === here ? ' class="on" aria-current="page"' : ''}>${ic(NAV_IC[h])}<span>${t}</span></a>`).join('');
+const navHTML = () => PAGES.map(([h, t]) => `<a href="${h}"${h === here ? ' class="on" aria-current="page"' : ''}>${ic(NAV_IC[h])}<span>${t}</span></a>`).join('') + `<button type="button" class="navwho" data-gate>${ic('user')}<span>เปลี่ยนกลุ่มผู้ใช้</span></button>`;
 function header() {
   const top = document.createElement('header');
   top.className = 'top nav3';
@@ -174,10 +225,13 @@ function page(render, after, { bar = true } = {}) {
     // siteKeys = ลำดับสาขาบนเว็บนี้ รวมสาขาที่ยังไม่อยู่ใน branchKeys (เช่น บางนา) → โหลดไฟล์ของสาขานั้นเพิ่มเอง
     C.keys = C.siteKeys || C.branchKeys;
     await Promise.all(C.keys.filter(k => !C[k]).map(async k => { C[k] = await (await fetch(`content/${k}/data.json`, { cache: 'no-store' })).json(); }));
-    const k = pickBranch(C);
+    const k = pickBranch(C); SITE_C = C; ZF = pickZone(C, k);
     $('main').innerHTML = render(C, k);
     footer(C);
     after?.(C, k);
     fillWordmarks(); reveal();
+    // เข้าเว็บครั้งแรก (ยังไม่เคยเลือก · ไม่ได้มาจากลิงก์ที่ระบุสาขา/โซน) → ถามก่อน
+    const q = new URLSearchParams(location.search);
+    if (bar && !getProf() && window === window.top && !q.has('b') && !q.has('z') && C.gate) openGate(C, true);
   }).catch(e => { $('main').innerHTML = `<p class="wrap sec">โหลดข้อมูลไม่ได้: ${esc(e.message)}</p>`; });
 }

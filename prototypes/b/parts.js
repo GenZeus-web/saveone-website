@@ -98,7 +98,10 @@ addEventListener('click', e => {
 // เวลา (จอง/วันขาย) = การ์ดละโซน · ในการ์ดเป็นตารางเส้นทึบ 2 คอลัมน์ (หัวข้อ | เวลา) → มือถือไม่ต้องเลื่อนข้าง
 // list = [[zoneKey, ชื่อโซน, [[หัวข้อ, ค่า(HTML)], …]], …] · k = สาขา (มีปุ่ม "อยู่ตรงไหน?" ถ้าหน้านั้นมี whereBtn)
 const ZIC = { food: 'food', boot: 'car', court: 'food' };
-const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${CMS.esc(name)}${typeof whereBtn === 'function' ? whereBtn(k, z) : ''}</div>
+// โซนที่ผู้ค้าเลือกดู (null = ทุกโซน) · หน้าแบบ 1 ตั้งจาก ?z= หรือที่เลือกไว้ในหน้าต่างเริ่มต้น (เจ้าของ 31 ต.ค. 69: "ดูข้อมูลแต่ละโซน ไม่งั้นข้อมูลเกินความจำเป็น")
+let ZF = null;
+const zOn = z => !ZF || !z || z === ZF;
+const zoneTimes = (list, k = '') => `<div class="ztimes">${list.filter(([z]) => zOn(z)).map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${CMS.esc(name)}${typeof whereBtn === 'function' ? whereBtn(k, z) : ''}</div>
   <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${CMS.esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
 
 // คะแนนและอันดับ = ตาราง (เจ้าของ 31 ต.ค. 69: "คำแนะนำระบบอันดับ ทำเป็นรูปแบบตาราง" + ส่งหน้า Wix newscorestreetfood / newscorecarboot)
@@ -108,8 +111,8 @@ const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, r
 function rankGuide(G, zones) {
   if (!G?.zones) return '';
   const e = CMS.esc, star = t => { const m = String(t).match(/^(\d)\s*ดาว$/); return m ? `<span class="stars" aria-label="${e(t)}">${'★'.repeat(+m[1])}<i>${'★'.repeat(3 - +m[1])}</i></span> ${e(t)}` : e(t); };
-  const zs = Object.keys(G.zones).filter(z => G.zones[z]?.length);
-  // โซนที่ไม่มีดาว (เปิดท้าย) = เควส 2 ขั้น: จ.–พฤ. ทำรอบคัดกรองครบ 2 วัน → ศ.–อา. ได้สิทธิ์รอบคัดกรองต่อ
+  const zs = Object.keys(G.zones).filter(z => G.zones[z]?.length && zOn(z));
+  // โซนที่ไม่มีดาว (เปิดท้าย) = เงื่อนไข 2 ขั้น: จ.–พฤ. ทำรอบคัดกรองครบ 2 วัน → ศ.–อา. ได้สิทธิ์รอบคัดกรองต่อ
   const flowT = (z, F) => `<div class="qflow z-${z}"><p class="qcap">${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</p>
     <div class="qbox"><p class="qh">${e(F.title)}</p><div class="qr">${(F.rounds || []).map(([n, t], i) => `<span class="${i ? 'gen' : 'scr'}"><b>${e(t)}</b>${e(n)}</span>`).join('')}</div>
     ${qsimHTML()}
@@ -117,7 +120,7 @@ function rankGuide(G, zones) {
       <p class="qwho">${e(st.who)}</p><p class="qget">${e(st.get)}</p><p class="qrest">${e(st.rest)}</p>${st.miss ? `<p class="qmiss">${e(st.miss)}</p>` : ''}</div>`).join('')}
     ${F.other ? `<p class="qother">${e(F.other)}</p>` : ''}</div></div>`;
   return `<div class="rguide"><h3 class="rg-h">${e(G.title)}<small>${e(G.sub || '')}</small></h3><div class="pts-g">${zs.map(z => `<table class="ptbl pts-t rg z-${z}"><caption>${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</caption>
-    <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}${Object.entries(G.flows || {}).map(([z, F]) => flowT(z, F)).join('')}</div></div>`;
+    <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}${Object.entries(G.flows || {}).filter(([z]) => zOn(z)).map(([z, F]) => flowT(z, F)).join('')}</div></div>`;
 }
 function pointsBlock(P, zones) {
   const e = CMS.esc, parts = t => String(t || '').split(' · ').map(x => x.trim()).filter(Boolean);
@@ -160,21 +163,21 @@ function footHTML(C, t) {
 // ครบ จ.–พฤ. แล้วกุญแจ ศ.–อา. เปิด/ไม่เปิด · 3 ตัวอย่าง (กดสลับได้) · ตัวอย่างสมมติ ตามกติกาในกล่องเดียวกัน
 const QDAYS = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
 const QSIM = {
-  ok: { tab: 'ทำเควสครบ', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เควส 1/2'], ['10', 'อ. รอบคัดกรองอีกวัน · เควส 2/2 ครบ!'], ['11', 'พ. ใช้รอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
+  ok: { tab: 'ทำครบเงื่อนไข', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เงื่อนไข 1/2'], ['10', 'อ. รอบคัดกรองอีกวัน · เงื่อนไข 2/2 ครบ!'], ['11', 'พ. ใช้รอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
     ['10', 'ศ. ได้จองรอบคัดกรอง 10:00'], ['10', 'ส. รอบคัดกรองวันที่ 2'], ['11', 'อา. ใช้ครบ 2 วัน → รอบทั่วไป 11:00']],
-    lock: ['open', 'ทำเควสครบ 2 วัน → ปลดล็อกรอบคัดกรอง ศ.–อา.'], end: 'สรุป: สัปดาห์นี้ได้จองรอบ 10:00 รวม 4 วัน' },
-  miss: { tab: 'ทำไม่ครบ', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เควส 1/2'], ['x', 'อ. จองรอบคัดกรองไว้ แต่ไม่มาขาย → ไม่นับ'], ['11', 'พ. จองรอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
+    lock: ['open', 'ทำครบเงื่อนไข 2 วัน → ปลดล็อกรอบคัดกรอง ศ.–อา.'], end: 'สรุป: สัปดาห์นี้ได้จองรอบ 10:00 รวม 4 วัน' },
+  miss: { tab: 'ทำไม่ครบ', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เงื่อนไข 1/2'], ['x', 'อ. จองรอบคัดกรองไว้ แต่ไม่มาขาย → ไม่นับ'], ['11', 'พ. จองรอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
     ['11', 'ศ. รอบทั่วไป 11:00'], ['11', 'ส. รอบทั่วไป 11:00'], ['11', 'อา. รอบทั่วไป 11:00']],
     lock: ['shut', 'มาขายรอบคัดกรองแค่ 1 วัน → ศ.–อา. จองได้แค่รอบทั่วไป'], end: 'สรุป: ได้รอบ 10:00 แค่ 1 วัน · ศ.–อา. ต้องจอง 11:00' },
   low: { tab: 'อันดับ 161+', days: QDAYS.map(d => ['11', `${d}. อันดับ 161 ขึ้นไป → รอบทั่วไป 11:00`]),
-    lock: ['none', 'ไม่ได้อยู่ 1–160 → ไม่มีเควส จองรอบทั่วไปทุกวัน'], end: 'สรุป: จองรอบทั่วไป 11:00 ทุกวัน · ขึ้นอันดับ 1–160 เพื่อได้รอบ 10:00' },
+    lock: ['none', 'ไม่ได้อยู่ 1–160 → ไม่ได้ทำเงื่อนไข จองรอบทั่วไปทุกวัน'], end: 'สรุป: จองรอบทั่วไป 11:00 ทุกวัน · ขึ้นอันดับ 1–160 เพื่อได้รอบ 10:00' },
 };
 const LOCK_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="sh" d="M8 11V7a4 4 0 0 1 8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M12 15v2"/></svg>';
 function qsimHTML() {
   const cell = (d, i) => `<div class="qc" data-i="${i}"><b>${d}</b><span class="t"></span></div>`;
   return `<div class="qsim" data-qsim=""><p class="qlbl">ดูตัวอย่าง 1 สัปดาห์</p>
     <div class="qtabs" role="tablist">${Object.entries(QSIM).map(([k, v], i) => `<button type="button" role="tab" data-s="${k}" aria-selected="${!i}"${i ? '' : ' class="on"'}>${v.tab}</button>`).join('')}</div>
-    <div class="qweek"><div class="qwk"><p>จ.–พฤ. <span class="qdots" aria-label="เควส"><i></i><i></i></span></p><div class="qd">${QDAYS.slice(0, 4).map(cell).join('')}</div></div>
+    <div class="qweek"><div class="qwk"><p>จ.–พฤ. <span class="qdots" aria-label="เงื่อนไข"><i></i><i></i></span></p><div class="qd">${QDAYS.slice(0, 4).map(cell).join('')}</div></div>
       <div class="qlock" aria-hidden="true">${LOCK_IC}</div>
       <div class="qwk w2"><p>ศ.–อา.</p><div class="qd">${QDAYS.slice(4).map((d, i) => cell(d, i + 4)).join('')}</div></div></div>
     <p class="qmsg" aria-live="polite">&nbsp;</p><button type="button" class="qplay">↻ ดูอีกครั้ง</button></div>`;

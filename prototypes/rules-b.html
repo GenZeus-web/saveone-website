@@ -6,13 +6,13 @@
 <title>ระเบียบตลาด · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031za">
+<link rel="stylesheet" href="b/style.css?v=20261031zb">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/parts.js?v=20261031k"></script>
-<script src="b/common.js?v=20261031m"></script>
+<script src="b/parts.js?v=20261031l"></script>
+<script src="b/common.js?v=20261031n"></script>
 <script>
 // ระเบียบผู้ค้าของสาขาที่เลือก: วันขาย · มาสาย · แจ้งลา · คะแนน/ข้อที่ถูกหัก (แยกโซน ?z=) · สิทธิ์ · คำถาม
 // ส่วนที่สาขายังไม่มีข้อมูล = ไม่แสดง · ไม่มีเลยทั้งหน้า = บอกให้ถาม LINE ผู้ค้า
@@ -20,8 +20,8 @@ page((C, k) => {
   const b = C[k], V = b.vendor, dots = items => `<ul class="dots">${items.filter(Boolean).map(t => `<li>${phr(t)}</li>`).join('')}</ul>`;
   const dayOn = filled(V.day.rows.map(r => r.slice(1))), lateOn = filled(V.late.items), leaveOn = filled(V.leave.items);
   const penHas = list => (list || []).some(g => filled(g.title) || filled(g.rows));
-  const pz = Object.keys(V.penalties).filter(z => penHas(V.penalties[z]));
-  const zq = new URLSearchParams(location.search).get('z'), z = pz.includes(zq) ? zq : pz[0];
+  const pz = Object.keys(V.penalties).filter(z => penHas(V.penalties[z]) && zOn(z));
+  const zq = ZF || new URLSearchParams(location.search).get('z'), z = pz.includes(zq) ? zq : pz[0];
   const ptsOn = filled(V.points.chips) || filled(V.points.text);
   const rights = V.rights.filter(r => filled(r.title) || filled(r.items)), faq = V.faq.filter(f => filled(f[0]));
   const zLink = x => { const u = new URLSearchParams(location.search); u.set('b', k); u.set('z', x); return `?${u}#pen`; };
@@ -30,7 +30,7 @@ page((C, k) => {
     (lateOn || leaveOn) && `<div class="grid2">${lateOn ? `<div class="card rv"><h3>${ic('clock')}${esc(V.late.title)}</h3>${dots(V.late.items)}</div>` : ''}${leaveOn ? `<div class="card rv"><h3>${ic('leave')}${esc(V.leave.title)}</h3>${dots(V.leave.items)}</div>` : ''}</div>`,
     (ptsOn || pz.length) && `<h2 class="h3">${esc(V.points.title)}</h2>
       ${ptsOn ? `<div class="rv" style="margin-top:22px">${pointsBlock(V.points, V.zones)}</div>` : ''}
-      ${pz.length ? `<div id="pen" style="scroll-margin-top:90px"><div class="zsw" role="tablist">${pz.map(x => `<a class="z-${x}${x === z ? ' on' : ''}" href="${zLink(x)}" data-z="${x}" role="tab" aria-selected="${x === z}">${esc(V.zones[x]?.name || x)}</a>`).join('')}</div>
+      ${pz.length ? `<div id="pen" style="scroll-margin-top:90px"><div class="zsw" role="tablist"${pz.length > 1 ? '' : ' hidden'}>${pz.map(x => `<a class="z-${x}${x === z ? ' on' : ''}" href="${zLink(x)}" data-z="${x}" role="tab" aria-selected="${x === z}">${esc(V.zones[x]?.name || x)}</a>`).join('')}</div>
         ${pz.map(z => `<div class="grid2" data-zp="${z}"${z === zq || (!pz.includes(zq) && z === pz[0]) ? '' : ' hidden'}>${V.penalties[z].filter(g => filled(g.rows)).map(g => `<div class="card rv"><h3>${ic(g.ic)}${esc(g.title)}</h3><table class="ptbl pen-t"><thead><tr><th scope="col">ข้อ</th><th scope="col">หัก</th></tr></thead><tbody>${g.rows.filter(([t]) => t).map(([t, p]) => `<tr><td>${phr(t)}</td><td class="minus">−${esc(p)}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`).join('')}
         <p class="note">ตัวเลขสีแดง = คะแนนที่ถูกหัก</p></div>` : ''}`,
     rights.length && `<h2 class="h3">${esc(V.rightsTitle)}</h2><div class="grid2">${rights.map(r => `<div class="card rv"><h3>${ic(r.ic)}${esc(r.title)}</h3>${dots(r.items)}</div>`).join('')}</div>`,
@@ -38,7 +38,7 @@ page((C, k) => {
   ].filter(Boolean);
   return `${pageHead(C.gate.ven.title, 'list', `ระเบียบตลาด <span class="br">${esc(b.name)}</span>`, 'สำหรับผู้ค้า · อ่านก่อนเริ่มขาย')}
   <section class="sec" style="padding-top:28px"><div class="wrap">
-    ${branchTabs(C, k)}
+    ${pickBar(C, k)}
     ${!hasVendor(C, k) ? waitBox(C, k, 'ระเบียบ') : body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
   </div></section>`;
 }, () => {
