@@ -525,3 +525,5 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .qmsg{margin-top:10px;min-height:44px;padding:8px 10px;border-radius:10px;background:var(--card);font-size:14px;font-weight:600;color:var(--head);line-height:1.5}
 .qplay{margin-top:6px;padding:0;border:0;background:none;color:var(--link);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
 @media (prefers-reduced-motion:reduce){.qc,.qlock,.qlock .sh,.qdots i{transition:none}.qlock.shut{animation:none}.qc.now{transform:none}}
+/* แท็บโซนหักคะแนน: .grid2{display:grid} ทับ hidden → ต้องสั่งซ่อนเอง */
+[data-zp][hidden]{display:none}
