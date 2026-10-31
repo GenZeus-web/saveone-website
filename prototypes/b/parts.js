@@ -112,6 +112,7 @@ function rankGuide(G, zones) {
   // โซนที่ไม่มีดาว (เปิดท้าย) = เควส 2 ขั้น: จ.–พฤ. ทำรอบคัดกรองครบ 2 วัน → ศ.–อา. ได้สิทธิ์รอบคัดกรองต่อ
   const flowT = (z, F) => `<div class="qflow z-${z}"><p class="qcap">${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</p>
     <div class="qbox"><p class="qh">${e(F.title)}</p><div class="qr">${(F.rounds || []).map(([n, t], i) => `<span class="${i ? 'gen' : 'scr'}"><b>${e(t)}</b>${e(n)}</span>`).join('')}</div>
+    ${qsimHTML()}
     ${F.steps.map((st, i) => `${i ? `<div class="qarr" aria-hidden="true">ทำครบ 2 วัน ↓</div>` : ''}<div class="qstep"><span class="qn">ขั้น ${i + 1}</span><span class="qday">${e(st.when)}</span>
       <p class="qwho">${e(st.who)}</p><p class="qget">${e(st.get)}</p><p class="qrest">${e(st.rest)}</p>${st.miss ? `<p class="qmiss">${e(st.miss)}</p>` : ''}</div>`).join('')}
     ${F.other ? `<p class="qother">${e(F.other)}</p>` : ''}</div></div>`;
@@ -153,3 +154,55 @@ function footHTML(C, t) {
     <p class="fine"><b>${t('contact.company')}</b>${go.length ? ` (${nm(go)})` : ''}<br>${t('contact.address')}
     ${mk.length ? `<br><br><b>Saveone Market</b> (${nm(mk)})<br>${CMS.phr(C[mk[0]].where)}` : ''}<br><br>${t('contact.footnote')}</p></div>`;
 }
+
+// ── เปิดท้าย: ภาพเคลื่อนไหว "1 สัปดาห์" (เจ้าของ 31 ต.ค. 69: "ทำให้เข้าใจง่าย แบบอนิเมชั่น") ──
+// ไล่ทีละวัน จ.→อา. · ช่องเขียว = รอบคัดกรอง 10:00 · เทา = รอบทั่วไป 11:00 · แดง = จองแล้วไม่มา
+// ครบ จ.–พฤ. แล้วกุญแจ ศ.–อา. เปิด/ไม่เปิด · 3 ตัวอย่าง (กดสลับได้) · ตัวอย่างสมมติ ตามกติกาในกล่องเดียวกัน
+const QDAYS = ['จ', 'อ', 'พ', 'พฤ', 'ศ', 'ส', 'อา'];
+const QSIM = {
+  ok: { tab: 'ทำเควสครบ', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เควส 1/2'], ['10', 'อ. รอบคัดกรองอีกวัน · เควส 2/2 ครบ!'], ['11', 'พ. ใช้รอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
+    ['10', 'ศ. ได้จองรอบคัดกรอง 10:00'], ['10', 'ส. รอบคัดกรองวันที่ 2'], ['11', 'อา. ใช้ครบ 2 วัน → รอบทั่วไป 11:00']],
+    lock: ['open', 'ทำเควสครบ 2 วัน → ปลดล็อกรอบคัดกรอง ศ.–อา.'], end: 'สรุป: สัปดาห์นี้ได้จองรอบ 10:00 รวม 4 วัน' },
+  miss: { tab: 'ทำไม่ครบ', days: [['10', 'จ. จองรอบคัดกรอง 10:00 มาขาย · เควส 1/2'], ['x', 'อ. จองรอบคัดกรองไว้ แต่ไม่มาขาย → ไม่นับ'], ['11', 'พ. จองรอบคัดกรองครบ 2 วันแล้ว → รอบทั่วไป 11:00'], ['11', 'พฤ. รอบทั่วไป 11:00'],
+    ['11', 'ศ. รอบทั่วไป 11:00'], ['11', 'ส. รอบทั่วไป 11:00'], ['11', 'อา. รอบทั่วไป 11:00']],
+    lock: ['shut', 'มาขายรอบคัดกรองแค่ 1 วัน → ศ.–อา. จองได้แค่รอบทั่วไป'], end: 'สรุป: ได้รอบ 10:00 แค่ 1 วัน · ศ.–อา. ต้องจอง 11:00' },
+  low: { tab: 'อันดับ 161+', days: QDAYS.map(d => ['11', `${d}. อันดับ 161 ขึ้นไป → รอบทั่วไป 11:00`]),
+    lock: ['none', 'ไม่ได้อยู่ 1–160 → ไม่มีเควส จองรอบทั่วไปทุกวัน'], end: 'สรุป: จองรอบทั่วไป 11:00 ทุกวัน · ขึ้นอันดับ 1–160 เพื่อได้รอบ 10:00' },
+};
+const LOCK_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path class="sh" d="M8 11V7a4 4 0 0 1 8 0v4"/><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M12 15v2"/></svg>';
+function qsimHTML() {
+  const cell = (d, i) => `<div class="qc" data-i="${i}"><b>${d}</b><span class="t"></span></div>`;
+  return `<div class="qsim" data-qsim=""><p class="qlbl">ดูตัวอย่าง 1 สัปดาห์</p>
+    <div class="qtabs" role="tablist">${Object.entries(QSIM).map(([k, v], i) => `<button type="button" role="tab" data-s="${k}" aria-selected="${!i}"${i ? '' : ' class="on"'}>${v.tab}</button>`).join('')}</div>
+    <div class="qweek"><div class="qwk"><p>จ.–พฤ. <span class="qdots" aria-label="เควส"><i></i><i></i></span></p><div class="qd">${QDAYS.slice(0, 4).map(cell).join('')}</div></div>
+      <div class="qlock" aria-hidden="true">${LOCK_IC}</div>
+      <div class="qwk w2"><p>ศ.–อา.</p><div class="qd">${QDAYS.slice(4).map((d, i) => cell(d, i + 4)).join('')}</div></div></div>
+    <p class="qmsg" aria-live="polite">&nbsp;</p><button type="button" class="qplay">↻ ดูอีกครั้ง</button></div>`;
+}
+function qsimRun(q, key, instant) {
+  const S = QSIM[key], cs = [...q.querySelectorAll('.qc')], lock = q.querySelector('.qlock'), msg = q.querySelector('.qmsg'), dots = [...q.querySelectorAll('.qdots i')];
+  clearTimeout(q._t); q.dataset.s = key;
+  q.querySelectorAll('.qtabs button').forEach(b => { b.classList.toggle('on', b.dataset.s === key); b.setAttribute('aria-selected', b.dataset.s === key); });
+  cs.forEach(c => { c.className = 'qc'; c.querySelector('.t').textContent = ''; }); lock.className = 'qlock'; dots.forEach(d => d.className = ''); q.classList.remove('w2off');
+  let n = 0;
+  const day = i => { const [st, m] = S.days[i], c = cs[i];
+    cs.forEach(x => x.classList.remove('now')); c.classList.add('s' + st); if (!instant) c.classList.add('now');
+    c.querySelector('.t').textContent = st === 'x' ? 'ไม่มา' : st === '10' ? '10:00' : '11:00';
+    if (i < 4 && st === '10') dots[n++]?.classList.add('on');
+    msg.textContent = m; };
+  const doLock = () => { const [st, m] = S.lock; lock.classList.add(st); if (st === 'shut') q.classList.add('w2off'); msg.textContent = m; };
+  if (instant) { S.days.forEach((_, i) => day(i)); doLock(); msg.textContent = S.end; return; }
+  // จังหวะ: จ.–พฤ. ทีละวัน → กุญแจ → ศ.–อา. ทีละวัน → สรุป
+  const seq = [0, 1, 2, 3].map(i => [() => day(i), 1100]).concat([[doLock, 1700]], [4, 5, 6].map(i => [() => day(i), 1100]), [[() => { cs.forEach(x => x.classList.remove('now')); msg.textContent = S.end; }, 0]]);
+  let k = 0; const next = () => { if (k >= seq.length) return; const [f, w] = seq[k++]; f(); q._t = setTimeout(next, w); }; next();
+}
+function qsimInit(q) {
+  q.dataset.qsim = '1';
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  q.querySelectorAll('.qtabs button').forEach(b => b.onclick = () => qsimRun(q, b.dataset.s, still));
+  q.querySelector('.qplay').onclick = () => qsimRun(q, q.dataset.s || 'ok', still);
+  if (still) return qsimRun(q, 'ok', true);
+  qsimRun(q, 'ok', true);   // ก่อนเลื่อนมาถึง: โชว์ผลเต็มไว้ก่อน (ไม่ว่าง)
+  new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); qsimRun(q, 'ok'); } }, { threshold: .5 }).observe(q);
+}
+new MutationObserver(() => document.querySelectorAll('[data-qsim=""]').forEach(qsimInit)).observe(document.documentElement, { childList: true, subtree: true });
