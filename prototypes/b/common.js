@@ -111,9 +111,14 @@ function toggleTheme() {
 
 function footer(C) {
   const f = document.createElement('footer');
-  // ไม่มีเมนูท้ายหน้า (เจ้าของ 30 ต.ค. 69: ซ้ำกับเมนูบนที่ติดจออยู่แล้ว)
+  // ไม่มีเมนูท้ายหน้า (เจ้าของ 30 ต.ค. 69: ซ้ำกับเมนูบน) — มีแค่ลิงก์ "เกี่ยวกับเรา" ที่ไม่อยู่ในเมนูบน
+  // 2 บริษัทแยกบรรทัด (31 ต.ค. 69): SaveoneGo = สาขาที่ story.brand เป็น GO · Saveone Market = โคราช
+  const B = C.story?.brand || {}, ofCo = re => C.keys.filter(k => re.test(B[k] || ''));
+  const go = ofCo(/go/i), mk = ofCo(/market/i), nm = ks => ks.map(k => esc(C[k].name)).join(' · ');
   f.innerHTML = `<div class="wrap"><span class="brand" data-wm></span>
-    <p class="fine"><b>${esc(C.contact.company)}</b><br>${phr(C.contact.address)}<br>${phr(C.contact.footnote)}</p></div>`;
+    <nav aria-label="เกี่ยวกับเรา"><a href="about-b.html">เกี่ยวกับเรา · ร่วมงานกับเรา</a></nav>
+    <p class="fine"><b>${esc(C.contact.company)}</b>${go.length ? ` (${nm(go)})` : ''}<br>${phr(C.contact.address)}
+    ${mk.length ? `<br><br><b>Saveone Market</b> (${nm(mk)})<br>${phr(C[mk[0]].where)}` : ''}<br><br>${phr(C.contact.footnote)}</p></div>`;
   document.body.append(f);
 }
 
