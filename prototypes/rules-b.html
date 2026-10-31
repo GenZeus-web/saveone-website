@@ -30,8 +30,8 @@ page((C, k) => {
     (lateOn || leaveOn) && `<div class="grid2">${lateOn ? `<div class="card rv"><h3>${ic('clock')}${esc(V.late.title)}</h3>${dots(V.late.items)}</div>` : ''}${leaveOn ? `<div class="card rv"><h3>${ic('leave')}${esc(V.leave.title)}</h3>${dots(V.leave.items)}</div>` : ''}</div>`,
     (ptsOn || pz.length) && `<h2 class="h3">${esc(V.points.title)}</h2>
       ${ptsOn ? `<div class="rv" style="margin-top:22px">${pointsBlock(V.points, V.zones)}</div>` : ''}
-      ${pz.length ? `<div id="pen" style="scroll-margin-top:90px"><div class="zsw">${pz.map(x => `<a class="z-${x}${x === z ? ' on' : ''}" href="${zLink(x)}">${esc(V.zones[x]?.name || x)}</a>`).join('')}</div>
-        <div class="grid2">${V.penalties[z].filter(g => filled(g.rows)).map(g => `<div class="card rv"><h3>${ic(g.ic)}${esc(g.title)}</h3><table class="ptbl pen-t"><thead><tr><th scope="col">ข้อ</th><th scope="col">หัก</th></tr></thead><tbody>${g.rows.filter(([t]) => t).map(([t, p]) => `<tr><td>${phr(t)}</td><td class="minus">−${esc(p)}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>
+      ${pz.length ? `<div id="pen" style="scroll-margin-top:90px"><div class="zsw" role="tablist">${pz.map(x => `<a class="z-${x}${x === z ? ' on' : ''}" href="${zLink(x)}" data-z="${x}" role="tab" aria-selected="${x === z}">${esc(V.zones[x]?.name || x)}</a>`).join('')}</div>
+        ${pz.map(z => `<div class="grid2" data-zp="${z}"${z === zq || (!pz.includes(zq) && z === pz[0]) ? '' : ' hidden'}>${V.penalties[z].filter(g => filled(g.rows)).map(g => `<div class="card rv"><h3>${ic(g.ic)}${esc(g.title)}</h3><table class="ptbl pen-t"><thead><tr><th scope="col">ข้อ</th><th scope="col">หัก</th></tr></thead><tbody>${g.rows.filter(([t]) => t).map(([t, p]) => `<tr><td>${phr(t)}</td><td class="minus">−${esc(p)}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`).join('')}
         <p class="note">ตัวเลขสีแดง = คะแนนที่ถูกหัก</p></div>` : ''}`,
     rights.length && `<h2 class="h3">${esc(V.rightsTitle)}</h2><div class="grid2">${rights.map(r => `<div class="card rv"><h3>${ic(r.ic)}${esc(r.title)}</h3>${dots(r.items)}</div>`).join('')}</div>`,
     faq.length && `<p class="note" style="margin-top:28px">มีข้อสงสัย ดู <a href="faq-b.html?b=${k}" style="color:var(--link);font-weight:600">คำถามที่พบบ่อย</a> (${faq.length} ข้อ)</p>`,   // ย้ายไปหน้า faq-b (31 ต.ค. 69)
@@ -41,6 +41,15 @@ page((C, k) => {
     ${branchTabs(C, k)}
     ${!hasVendor(C, k) ? waitBox(C, k, 'ระเบียบ') : body.length ? body.join('') : `<div class="empty">สาขา${esc(b.name)}ยังไม่ได้ใส่ระเบียบในเว็บ · สอบถามได้ที่ <a href="${esc(lineUrl(b.contact.lineVendor))}" target="_blank" rel="noopener" style="color:var(--link);font-weight:600">LINE ${esc(b.contact.lineVendor)}</a> หรือโทร ${esc(b.contact.phone)}</div>`}
   </div></section>`;
+}, () => {
+  // แท็บโซน (สตรีทฟู้ด/เปิดท้าย) สลับตารางหักคะแนนในที่เดิม ไม่โหลดหน้าใหม่ (เจ้าของ: "กดแล้วเด้งไปบนสุด")
+  document.querySelectorAll('.zsw [data-z]').forEach(a => a.addEventListener('click', e => {
+    e.preventDefault(); const z = a.dataset.z;
+    document.querySelectorAll('.zsw [data-z]').forEach(x => { x.classList.toggle('on', x === a); x.setAttribute('aria-selected', x === a); });
+    document.querySelectorAll('[data-zp]').forEach(g => { g.hidden = g.dataset.zp !== z; g.querySelectorAll('.rv').forEach(c => c.classList.add('in')); });
+    const u = new URLSearchParams(location.search); u.set('z', z); history.replaceState(null, '', '?' + u + '#pen');
+  }));
+  if (location.hash === '#pen') requestAnimationFrame(() => $('pen')?.scrollIntoView());   // ลิงก์เก่า ?z=…#pen
 });
 </script>
 <script src="b/switch.js?v=20261030b"></script>
