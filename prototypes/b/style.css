@@ -141,7 +141,7 @@ img{display:block;max-width:100%}
 .zt{display:flex;align-items:center;gap:10px;padding:16px 22px;font-weight:700;font-size:20px;background:var(--zc);color:var(--zi)}
 .zt small{margin-left:auto;font-size:13px;font-weight:500}
 .z-food{--zc:var(--food);--zi:var(--food-ink)}.z-boot{--zc:var(--boot);--zi:var(--boot-ink)}.z-court{--zc:var(--court);--zi:var(--court-ink)}
-.zb{padding:8px 22px 20px}
+.zb{padding:8px 22px 22px}
 .zb .rule{font-size:15px;color:var(--sub);padding:10px 0 4px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .chip{font-size:13px;font-weight:500;padding:3px 11px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}
@@ -158,6 +158,30 @@ img{display:block;max-width:100%}
 .pr em{display:block;font-style:normal;font-size:13px;color:var(--sub);text-align:right;margin-top:4px}
 .sea.dim .pr b{font-size:24px;opacity:.8}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.fact.wide{grid-column:1/-1}
+/* ── ตารางราคา (31 ต.ค. 69 เจ้าของ: "ไม่มี solid ตาราง ดูยาก") — เส้นทึบทุกช่อง หัวตารางมีพื้น · ราคาออนไลน์ใหญ่สีราคา ── */
+.ptbl{--tl:color-mix(in srgb,var(--head) 24%,transparent);width:100%;min-width:0;border-collapse:separate;border-spacing:0;margin-top:14px;border:2px solid var(--tl);border-radius:16px;overflow:hidden;font-size:15px}
+.ptbl th,.ptbl td{padding:12px 14px;text-align:left;vertical-align:middle;border-bottom:1px solid var(--tl);border-right:1px solid var(--tl)}
+.ptbl tr>:last-child{border-right:0}
+.ptbl tbody tr:last-child>*{border-bottom:0}
+.ptbl thead th{background:var(--card2);color:var(--head);font-size:14px;font-weight:600;line-height:1.3}
+.ptbl thead th small{display:block;font-size:12px;font-weight:500;color:var(--sub)}
+.ptbl tbody th{font-size:16px;font-weight:600;color:var(--head);white-space:nowrap}
+.ptbl td.on{font-size:26px;font-weight:700;line-height:1.1;color:var(--price)}
+.ptbl td.wk{font-size:18px;font-weight:600;color:var(--ink)}
+.ptbl .sh th{background:var(--kick-bg);color:var(--head);font-size:14px;padding:9px 14px}
+.ptbl .sh.dim th{background:var(--card2);color:var(--sub);font-weight:500}
+.ptbl tr.dim:not(.sh)>*{opacity:.72}
+.ptbl tr.td>*{background:var(--ok-bg)}
+.ptbl .tag{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
+.spot+.spot{margin-top:18px}
+/* ตัวอย่างล็อก (ภาพเรนเดอร์ 3D) */
+.lots{margin-top:18px}
+.lots figure{margin:8px 0 0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
+.lots img{display:block;width:100%;height:auto}
+.lots figcaption{display:grid;gap:6px;padding:10px 12px;background:var(--card2);font-size:13px;color:var(--sub);text-align:center}
+.lots figcaption b{display:block;font-size:15px;color:var(--head)}
+.lnote{font-size:12px;color:var(--sub);margin-top:6px}
 .fact{padding:10px 12px;border-radius:12px;background:var(--card2)}
 .fact small{display:block;font-size:12px;color:var(--sub)}
 .fact b{font-size:14px;font-weight:600;color:var(--head)}
@@ -279,7 +303,8 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .sell.td{background:var(--ok-bg);color:var(--ok)}
 
 /* ราคาแยกตามฝั่ง/โซนย่อย (โคราช) — กล่องละตำแหน่ง */
-.spot{margin-top:12px;padding:4px 16px 8px;border-radius:16px;border:1px solid var(--line);background:var(--card2)}
+.spot{margin-top:14px}
+.spot .ptbl{margin-top:6px}
 .spot .pr:last-child{border-bottom:0}
 .sp{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;padding:10px 0 2px;font-size:17px;color:var(--head)}
 .sp .i{width:18px;height:18px;color:var(--link)}
@@ -287,11 +312,11 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .spot .season{margin-top:10px}
 
 /* หน้าราคา: โซนละแถวเต็มกว้าง · ซ้าย = ขายอะไร/เวลาจอง · ขวา = ราคา (มือถือเรียงลงมา) */
-.zones{grid-template-columns:1fr}
-.zb{display:grid;grid-template-columns:1.1fr 1fr;gap:8px 36px;align-items:start}
-.zp{padding-top:2px}
-.zp .sea:first-child .season{margin-top:12px}
-@media (max-width:760px){.zb{grid-template-columns:1fr}.zp{order:-1}}
+.zones{grid-template-columns:minmax(0,1fr)}
+/* 31 ต.ค. 69: ซ้าย = ตารางราคา + ตัวอย่างล็อก (ดูก่อน) · ขวา = ขายอะไร/ขนาด/เวลาจอง · มือถือเรียงลงมา ตารางขึ้นก่อน */
+.zb{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:8px 36px;align-items:start}
+@media (max-width:860px){.zb{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:520px){.zb{padding:8px 14px 18px}.ptbl th,.ptbl td{padding:10px 9px}.ptbl tbody th{white-space:normal;font-size:15px}.ptbl td.on{font-size:22px}.ptbl td.wk{font-size:16px}.ptbl .tag{margin-left:4px}.lots figcaption{padding:8px 6px;font-size:12px}}
 .sn{font-weight:700;color:var(--head);margin-right:2px}
 .sea.dim .sn{color:var(--sub)}
 /* ข้อมูลที่ยังไม่ยืนยัน (เจ้าของ: ใช้ที่มีไปก่อน ใส่ "รอข้อมูล") */
