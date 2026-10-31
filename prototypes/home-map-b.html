@@ -10,8 +10,8 @@
      ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031h">
-<link rel="stylesheet" href="b/map.css?v=20261029c">
+<link rel="stylesheet" href="b/style.css?v=20261031j">
+<link rel="stylesheet" href="b/map.css?v=20261031c">
 </head>
 <body>
 
@@ -31,6 +31,7 @@
 <footer id="foot"></footer>
 
 <script src="content/cms.js?v=20261030a"></script>
+<script src="b/parts.js?v=20261031c"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -145,7 +146,8 @@ function renderVen() {
       ${T(C, `${P}.steps.note`, 'p', 'note')}
       <div class="quick">${phones.map((_, i) => `<a class="q" href="tel:${digits(phones[i][0])}">${ic('phone')}<div>${T(C, `${BR}.contact.phones.${i}.0`, 'b')}${T(C, `${BR}.contact.phones.${i}.1`, 'small')}</div>${del(`${BR}.contact.phones.${i}`)}</a>`).join('')}</div>${add(`${BR}.contact.phones`, '+ เพิ่มเบอร์')}</section>` : ''}
     ${show(dayOn || lateOn || leaveOn) ? `<section class="sec">${T(C, `${P}.day.title`, 'h2')}
-      ${show(dayOn) ? `<div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
+      ${dayOn && !EDIT ? zoneTimes(V.day.rows.filter(r => filled(r.slice(1))).map(([name, ...vs]) => [Object.entries(V.zones).find(([, Z]) => Z.name === name)?.[0] || '', name, vs.map((v, i) => [V.day.head[i + 1], esc(v)]).filter(([, v]) => v)])) + T(C, `${P}.day.note`, 'p', 'note') : ''}
+      ${EDIT && show(dayOn) ? `<div class="card"><div class="tbl"><table><thead><tr>${V.day.head.map((_, i) => `<th>${T(C, `${P}.day.head.${i}`)}</th>`).join('')}</tr></thead>
         <tbody>${V.day.rows.map((r, i) => `<tr>${r.map((_, j) => `<td>${T(C, `${P}.day.rows.${i}.${j}`)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
         ${T(C, `${P}.day.note`, 'p', 'note')}</div>` : ''}
       <div class="two">
@@ -171,18 +173,13 @@ function zone(z) {
   zoneNow = z;
   const VP = `${BR}.vendor`, V = get(C, VP), Z = V.zones[z], P = `${VP}.zones.${z}`, now = CMS.seasonNow(V.seasons);
   $('zone').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.z === z));
-  const seasonal = Z.rows.some(r => r.season);
-  const sea = r => r.season ? `<b class="sn">${{ high: 'High Season', low: 'Low Season' }[r.season] || ''}</b> ` + esc(get(V.seasons, r.season + '.label') || '') + ' · ' : '';
-  const row = (r, i) => { const on = r.season && r.season === now;
-    return `<tr${on ? ' class="now"' : ''}><td>${sea(r)}${T(C, `${P}.rows.${i}.days`)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${T(C, `${P}.rows.${i}.online`)}${unit(r.online)}</td><td>${T(C, `${P}.rows.${i}.walkin`)}${unit(r.walkin)}</td></tr>`; };
-  const table = trs => `<div class="tbl"><table><thead><tr><th>${seasonal ? 'ช่วง' : ''}</th><th>จองออนไลน์</th><th>จอง Walk-in</th></tr></thead><tbody>${trs}</tbody></table></div>`;
-  // โคราช: ราคาแยกตามฝั่ง/โซนย่อย (Z.spots) → ตารางละตำแหน่ง · โหมดแก้ยังแก้ rows (ช่วงราคา) แบบเดิม
-  const srow = r => { const on = r.season && r.season === now;
-    return `<tr${on ? ' class="now"' : ''}><td>${sea(r)}${esc(r.days)}${on ? '<span class="now-tag">ตอนนี้</span>' : ''}</td><td class="big">${esc(r.online)}${unit(r.online)}</td><td>${esc(r.walkin)}${unit(r.walkin)}</td></tr>`; };
+  // ตาราง/ตัวอย่างล็อกชุดเดียวกับเว็บแบบ 1 (b/parts.js · เจ้าของ 31 ต.ค. 69 "แก้แบบ 1-2 ให้คล้ายกัน") · โหมดแก้: ช่องราคาแก้ได้
+  const cell = (r, i, key) => T(C, `${P}.rows.${i}.${key}`);
+  const table = rows => priceTable(rows, V, EDIT ? { cell, all: true } : {});
   $('zoneCard').innerHTML =
-    (Z.spots && !EDIT ? Z.spots.map(sp => `<p class="sph">${ic('pin')}<b>${esc(sp.name)}</b>${sp.pending ? `<span class="wait">${esc(sp.pending)}</span>` : ''}${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${table(sp.rows.map(srow).join(''))}`).join('') : (Z.pending && !EDIT ? `<p class="sph"><span class="wait">${esc(Z.pending)}</span></p>` : '') + table(Z.rows.map(row).join('')))
+    (Z.spots && !EDIT ? Z.spots.map(sp => `<p class="sph">${ic('pin')}<b>${esc(sp.name)}</b>${sp.pending ? `<span class="wait">${esc(sp.pending)}</span>` : ''}${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${table(sp.rows)}`).join('') : (Z.pending && !EDIT ? `<p class="sph"><span class="wait">${esc(Z.pending)}</span></p>` : '') + table(Z.rows))
     + T(C, `${P}.note`, 'p', 'note')
-    + `<div class="lot">${Z.photos.some(([src]) => src) || EDIT ? `<div>${pics(`${P}.photos`)}</div>` : ''}<div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
+    + `<div class="lot">${EDIT ? `<div>${pics(`${P}.photos`)}</div>` : `<div>${lotExamples(z, Z)}</div>`}<div><div class="facts">${Z.facts.map((f, i) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${i}.1`)}</small>${T(C, `${P}.facts.${i}.2`, 'b')}${del(`${P}.facts.${i}`)}</div>`).join('')}</div>${add(`${P}.facts`)}</div></div>`;
   const PP = `${VP}.penalties.${z}`;
   if (!$('pen')) return;
   const penOn = show(penHas(get(C, PP)));
@@ -192,8 +189,9 @@ function zone(z) {
     `<details${EDIT ? ' open' : ''}><summary>${ic(g.ic)}${T(C, `${PP}.${i}.title`)}<span class="n">${g.rows.length} ข้อ</span></summary><div><table>${g.rows.map((_, j) =>
       `<tr><td style="position:relative">${T(C, `${PP}.${i}.rows.${j}.0`)}${del(`${PP}.${i}.rows.${j}`)}</td><td class="minus">−${T(C, `${PP}.${i}.rows.${j}.1`)}</td></tr>`).join('')}</table>${add(`${PP}.${i}.rows`, '+ เพิ่มข้อ')}</div></details>`).join('');
 }
-function renderFoot() {
-  $('foot').innerHTML = `<b>${T(C, 'contact.company')}</b><br>${T(C, 'contact.address')}<br>โทร ${T(C, 'sg.contact.phone')}<br>${T(C, 'contact.footnote')}`;
+function renderFoot() {   // ท้ายเว็บชุดเดียวกับแบบ 1 (b/parts.js)
+  const f = $('foot'); f.innerHTML = footHTML(C, p => T(C, p));
+  fetch('img/wordmark.svg').then(r => r.text()).then(t => f.querySelectorAll('[data-wm]').forEach(el => el.innerHTML = t)).catch(() => {});
 }
 // แผงลิงก์/เบอร์ (เฉพาะโหมดแก้ · ค่าที่ปุ่มบนหน้าใช้ แต่ไม่ได้โชว์เป็นตัวหนังสือ)
 function renderPanel() {

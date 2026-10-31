@@ -8,12 +8,13 @@
      ส่วนร่วมอยู่ b/style.css + b/common.js · ข้อมูลจาก content/ ชุดเดียวกับ home.html -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031h">
+<link rel="stylesheet" href="b/style.css?v=20261031j">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031h"></script>
+<script src="b/parts.js?v=20261031c"></script>
+<script src="b/common.js?v=20261031i"></script>
 <script>
 page((C) => {
   const sg = C.sg, hours = sg.facts[0]?.[2] || '16:00–23:00', st = openStatus(hours);
@@ -29,7 +30,7 @@ page((C) => {
   <section class="hero"><div class="wrap">
     <div><span class="kick">${ic('clock')} ${esc(C.story.kick)} · เปิดทุกวัน ${esc(hours)}</span>
       <h1>ตลาด<em>เซฟวัน โก</em></h1>
-      <p class="sub">${C.keys.length} สาขา: ${names} — มาเดินกิน ช้อป หรือมาเป็นผู้ค้ากับเรา</p>
+      <p class="sub">มาเดินกิน ช้อป ทุกเย็น หรือมาเป็นผู้ค้ากับเรา</p>
       <div class="btns"><a class="btn pri" href="branches-b.html">${ic('bag')} ${esc(C.gate.cus.title)}</a><a class="btn alt" href="prices-b.html">${ic('store')} ${esc(C.gate.ven.title)}</a></div></div>
     <figure class="shot"><img src="${esc(hero[0])}" alt="${esc(hero[1])}"><span class="status${st.open ? ' open' : ''}"><i></i>${esc(st.text)} <small>(${esc(sg.name)})</small></span><figcaption>${esc(hero[1])}</figcaption></figure>
   </div></section>

@@ -52,8 +52,6 @@ const digits = s => String(s || '').replace(/[^\d+]/g, '');
 const lineUrl = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
 const ext = h => /^https?:/.test(h) ? ' target="_blank" rel="noopener"' : '';
 const nums = s => String(s || '').match(/\d[\d,]*/g)?.map(n => +n.replace(/,/g, '')) || [];
-// ชื่อฤดูราคา (เจ้าของสั่งให้มีคำ High/Low Season) · key ตาม vendor.seasons
-const SEASON = { high: 'High Season', low: 'Low Season' };
 const filled = v => Array.isArray(v) ? v.some(filled) : typeof v === 'string' && v.trim() !== '';
 // "ขายพรุ่งนี้ / ขายวันนี้" ในเวลาจอง → ป้ายสี (เจ้าของ: ต้องบอกชัด อย่าให้เดา)
 const dayTag = s => esc(s).replace(/ขาย(พรุ่งนี้|วันนี้)/g, (m, d) => `<span class="sell${d === 'วันนี้' ? ' td' : ''}">${m}</span>`);
@@ -102,11 +100,6 @@ function branchTabs(C, cur, all = false) {
 // ปิดดรอปดาวน์เมื่อแตะข้างนอก / กด Esc
 addEventListener('click', e => document.querySelectorAll('details.bpick[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
 addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('details.bpick[open]').forEach(d => { d.open = false; d.querySelector('summary').focus(); }); });
-// เวลา (จอง/วันขาย) = การ์ดละโซน · ในการ์ดเป็นตารางเส้นทึบ 2 คอลัมน์ (หัวข้อ | เวลา) → มือถือไม่ต้องเลื่อนข้าง (เจ้าของ 31 ต.ค. 69)
-// list = [[zoneKey, ชื่อโซน, [[หัวข้อ, ค่า(HTML)], …]], …]
-const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${esc(name)}${whereBtn(k, z)}</div>
-  <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
-const ZIC = { food: 'food', boot: 'car', court: 'food' };
 // ── "อยู่ตรงไหน?" = เปิดผัง 3D ของสาขานั้น บินไปที่โซน (เจ้าของ 31 ต.ค. 69: คนดูงงว่าโซนอยู่ตรงไหน) ──
 // MAP_READY = สาขาที่ผังเป็นของจริงแล้ว · บางนายังเป็นผังสมมติ → ไม่โชว์ปุ่ม (ไม่ชี้ผิดที่)
 const MAP_READY = ['sg', 'korat'];
@@ -129,17 +122,6 @@ addEventListener('click', e => {
   addEventListener('message', function on(ev) { if (ev.source !== f.contentWindow || ev.data?.branch !== b) return;
     clearInterval(d._t); removeEventListener('message', on); f.contentWindow.postMessage({ focus }, location.origin); });
   d.querySelector('.mf').append(f); d.showModal();
-});
-// แตะรูปตัวอย่างล็อก (หน้าราคา) = ขยายเต็มจอ ดูรายละเอียดได้ (เจ้าของ 31 ต.ค. 69)
-addEventListener('click', e => {
-  const im = e.target.closest('.lots img'); if (!im) return;
-  let d = document.getElementById('zoomDlg');
-  if (!d) { d = document.createElement('dialog'); d.id = 'zoomDlg'; d.className = 'zoomdlg';
-    d.innerHTML = '<button type="button" class="mx" aria-label="ปิด">✕</button><div class="zw"><img alt=""></div><p></p>';
-    d.onclick = () => d.close(); document.body.append(d); }
-  const cap = [...(im.closest('figure')?.querySelector('figcaption')?.children || [])].map(x => x.innerText.replace(/\s+/g, ' ').trim()).join('  ·  ') || im.alt;
-  d.querySelector('img').src = im.currentSrc || im.src; d.querySelector('img').alt = im.alt; d.querySelector('p').textContent = cap;
-  d.showModal();
 });
 const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
@@ -164,15 +146,7 @@ function toggleTheme() {
 }
 
 function footer(C) {
-  const f = document.createElement('footer');
-  // ไม่มีเมนูท้ายหน้า (เจ้าของ 30 ต.ค. 69: ซ้ำกับเมนูบน) — มีแค่ลิงก์ "ติดต่อ · เกี่ยวกับเรา" (รวมหน้าเดียวกัน)
-  // 2 บริษัทแยกบรรทัด (31 ต.ค. 69): SaveoneGo = สาขาที่ story.brand เป็น GO · Saveone Market = โคราช
-  const B = C.story?.brand || {}, ofCo = re => C.keys.filter(k => re.test(B[k] || ''));
-  const go = ofCo(/go/i), mk = ofCo(/market/i), nm = ks => ks.map(k => esc(C[k].name)).join(' · ');
-  f.innerHTML = `<div class="wrap"><span class="brand" data-wm></span>
-    <nav aria-label="เกี่ยวกับเรา"><a href="contact-b.html">ติดต่อ · เกี่ยวกับเรา</a></nav>
-    <p class="fine"><b>${esc(C.contact.company)}</b>${go.length ? ` (${nm(go)})` : ''}<br>${phr(C.contact.address)}
-    ${mk.length ? `<br><br><b>Saveone Market</b> (${nm(mk)})<br>${phr(C[mk[0]].where)}` : ''}<br><br>${phr(C.contact.footnote)}</p></div>`;
+  const f = document.createElement('footer'); f.innerHTML = footHTML(C);   // b/parts.js (แบบ 2 ใช้ชุดเดียวกัน)
   document.body.append(f);
 }
 

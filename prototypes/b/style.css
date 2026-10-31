@@ -381,3 +381,23 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .zoomdlg .mx{position:absolute;top:14px;right:14px;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;font-size:20px;background:rgba(255,255,255,.16);color:#fff}
 .lots figure{position:relative}
 .lots figure::after{content:"แตะเพื่อขยาย";position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(21,18,43,.7);color:#fff;pointer-events:none}
+/* แกลเลอรีรูปซ้อน (31 ต.ค. 69) — รูปหน้า + 2 รูปถัดไปเอียงซ้อนข้างหลัง · เลื่อนเอง · ปัดได้ */
+.gal .gstack{position:relative;margin:10px 0 0;padding-right:9%;touch-action:pan-y;user-select:none}
+.gal .gs{margin:0;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--card);box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .55s cubic-bezier(.2,.7,.2,1),opacity .45s,filter .45s;transform-origin:left center}
+.gal .gs:not([data-d="0"]){position:absolute;inset:0 9% 0 0}
+.gal .gs[data-d="0"]{position:relative;z-index:3}
+.gal .gs[data-d="1"]{z-index:2;transform:translateX(5.5%) scale(.93) rotate(2deg);filter:brightness(.8)}
+.gal .gs[data-d="2"]{z-index:1;transform:translateX(10.5%) scale(.86) rotate(4deg);filter:brightness(.62)}
+.gal .gs[data-d="x"]{z-index:0;opacity:0;transform:translateX(10%) scale(.8)}
+.gal .gs[data-d="out"]{z-index:4;opacity:0;transform:translateX(-30%) rotate(-6deg);pointer-events:none}
+.gal .gimg{aspect-ratio:16/9;display:grid;place-items:center;background:var(--card2);position:relative}
+.gal .gimg img{width:100%;height:100%;object-fit:contain;cursor:zoom-in;-webkit-user-drag:none}
+.gal .gs:not([data-d="0"]) img{cursor:pointer}
+.lots.gal figure::after{display:none}
+.gal .gs[data-d="0"] .gimg::after{content:"แตะเพื่อขยาย";position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(21,18,43,.7);color:#fff;pointer-events:none}
+.gal .gnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+.gal .gb{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--head);font-size:22px;line-height:1;cursor:pointer}
+.gal .gdots{display:flex;gap:6px}
+.gal .gdots button{width:8px;height:8px;padding:0;border-radius:999px;border:0;background:var(--line);cursor:pointer;transition:width .3s,background .3s}
+.gal .gdots button.on{width:22px;background:var(--acc)}
+@media (prefers-reduced-motion:reduce){.gal .gs{transition:none}}

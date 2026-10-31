@@ -6,35 +6,19 @@
 <title>ราคาค่าล็อก · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031h">
+<link rel="stylesheet" href="b/style.css?v=20261031j">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031h"></script>
+<script src="b/parts.js?v=20261031c"></script>
+<script src="b/common.js?v=20261031i"></script>
 <script>
 // ราคาทุกโซนของสาขาที่เลือก (?b=) · ราคาแยกฤดู ฤดูปัจจุบันขึ้นก่อน + ป้าย "ช่วงนี้" · แถววันนี้มีป้าย "วันนี้"
 page((C, k) => {
   const b = C[k], V = b.vendor, now = CMS.seasonNow(V.seasons), dow = CMS.dowNow();
-  // ตารางราคามีเส้นชัด (เจ้าของ 31 ต.ค. 69: "ไม่มี solid ตาราง ดูยาก") · คอลัมน์ วัน | จองออนไลน์ | Walk-in · แถวฤดู · แถววันนี้เน้นสี
-  const isToday = (s, r) => (!s || s === now) && r.dow === dow;
-  const table = (rs, cap = '') => {
-    const ss = [...new Set(rs.map(r => r.season))].sort((x, y) => (y === now) - (x === now));   // '' = ราคาเดียวทั้งปี · ฤดูปัจจุบันขึ้นก่อน
-    const walk = rs.some(r => r.walkin && r.online), cols = walk ? 3 : 2;
-    const body = ss.map(s => { const dim = s && s !== now ? ' dim' : '';
-      const head = s ? `<tr class="sh${dim}"><th colspan="${cols}" scope="colgroup">${SEASON[s] ? SEASON[s] + ' · ' : ''}${esc(get(V.seasons, s + '.label') || s)}${s === now ? '<span class="tag">ช่วงนี้</span>' : ''}</th></tr>` : '';
-      return head + rs.filter(r => r.season === s && r.online).map(r => `<tr class="${isToday(s, r) ? 'td' : ''}${dim}">
-        <th scope="row">${esc(r.days)}${isToday(s, r) ? '<span class="tag">วันนี้</span>' : ''}</th>
-        <td class="on">${esc(r.online)}</td>${walk ? `<td class="wk">${esc(r.walkin || '–')}</td>` : ''}</tr>`).join(''); }).join('');
-    return `<table class="ptbl">${cap ? `<caption>${cap}</caption>` : ''}<thead><tr><th scope="col">วัน</th><th scope="col">จองออนไลน์<small>บาท/ล็อก/วัน</small></th>${walk ? '<th scope="col">Walk-in<small>บาท/ล็อก/วัน</small></th>' : ''}</tr></thead><tbody>${body}</tbody></table>`;
-  };
-  // ตัวอย่างล็อก = ภาพเรนเดอร์จากโปรเจกต์ 3D ตลาด (blender/lot-guide.py) · ความกว้างคำนวณจากขนาดล็อกของสาขานั้น
-  const LOTS = { food: [['img/lots/food.jpg', [1, 2, 3], '1fr 1fr 1fr']], boot: [['img/lots/boot-12.jpg', [1, 2], '4fr 6fr'], ['img/lots/boot-34.jpg', [3, 4], '1fr 1fr']] };
-  const lots = (z, Z) => { const set = LOTS[z === 'court' ? 'food' : z]; if (!set) return '';
-    const w = parseFloat(Z.facts.find(f => f[0] === 'size')?.[2]?.match(/[\d.]+/)?.[0] || '');
-    return `<div class="lots"><span class="lbl">ตัวอย่างการจอง</span>${set.map(([src, ns, cols]) => `<figure><img src="${src}" alt="ตัวอย่างจอง ${ns.join(' และ ')} ล็อก" loading="lazy">
-      <figcaption style="grid-template-columns:${cols}">${ns.map(n => `<span><b>${n} ล็อก</b>${w ? `กว้าง ${+(w * n).toFixed(2)} ม.` : ''}</span>`).join('')}</figcaption></figure>`).join('')}
-      <p class="lnote">ภาพประกอบ · ขนาดจริงดูที่ "ขนาดล็อก"</p></div>`; };
+  const table = rs => priceTable(rs, V);   // b/parts.js
+  const lots = lotExamples;
   const zone = ([z, Z]) => { const R = C.vendor.rules[z] || {};
     // ราคาแยกตามฝั่ง/โซนย่อย (โคราช: Z.spots) → ตารางละตำแหน่ง ไม่รวมเป็นช่วง (เจ้าของ: "แยก อย่ารวมกัน งง")
     const prices = Z.spots ? Z.spots.map(sp => `<div class="spot"><p class="sp">${ic('pin')}<b>${esc(sp.name)}</b>${sp.pending ? `<span class="wait">${esc(sp.pending)}</span>` : ''}${sp.codes ? `<small>${esc(sp.codes)}</small>` : ''}</p>${table(sp.rows)}</div>`).join('')

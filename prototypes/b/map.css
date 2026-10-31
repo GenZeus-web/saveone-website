@@ -2,7 +2,7 @@
    สีทั้งหมดมาจาก b/style.css (ธีมสว่าง/มืด) · โครงหน้า/ชื่อคลาสเหมือน home.html เดิมทุกอย่าง */
 :root{--ed:#5fb3ff;--bad:var(--no);--warn:var(--kick)}
 .wrap{max-width:1120px;padding:0 24px}
-footer{margin-top:72px;padding:32px 24px 40px;text-align:center}
+
 
 /* ── ผัง 3D + ม่าน ── */
 .map{position:relative;height:min(84vh,780px);background:#100d24;overflow:hidden}
@@ -136,3 +136,7 @@ details table{min-width:0}
 .sph:first-child{margin-top:0}
 .sph .i{width:18px;height:18px;color:var(--link)}
 .sph small{font-size:13px;color:var(--sub)}
+
+/* แบบ 2 ไม่มีแอนิเมชันโผล่ตอนเลื่อน → การ์ดที่ใช้ร่วมกับแบบ 1 (.rv) แสดงเลย */
+.grp .rv{opacity:1;translate:none}
+.kind img{cursor:zoom-in}

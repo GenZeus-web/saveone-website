@@ -116,6 +116,7 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .btn{font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;border:1px solid var(--line);color:var(--ink);text-decoration:none}
 .btn.pri{background:var(--go);border-color:var(--go);color:var(--bg)}
+.btn .brand,.fact .brand{width:1.05em;height:1.05em;vertical-align:-.15em;margin-right:2px}
 .warn{margin-top:12px;font-size:12px;color:var(--warn)}
 /* ช่องรูปจริง (ใส่ทีหลัง) · ช่องข้อมูลที่ยังไม่มี = กรอบเส้นประ */
 .ph{margin-top:12px;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px}
@@ -1089,7 +1090,7 @@ const todo = (e, k, w = 0) => [e, k, 'รอข้อมูล', w, 1];   // ช
 const LOT_TODO = [todo('💰', 'ราคาต่อล็อก/วัน', 1), todo('📐', 'ขนาดล็อก'), todo('🕓', 'เวลาขาย'), todo('⚡', 'ไฟฟ้า'), todo('📞', 'ติดต่อจอง')];
 const chips = (a, c) => `<div class="chips">${a.map(([e, t]) => `<span class="chip ${c}">${esc(e)} ${rt(t)}</span>`).join('')}</div>`;
 const can = z => z.ok ? `<div class="sec"><p class="sec-h">✅ ขายได้</p>${chips(z.ok, 'ok')}${z.no && z.no.length ? `<p class="sec-h" style="margin-top:10px">🚫 ห้ามขาย${z.noTo ? ` <small>→ ${esc(z.noTo)}</small>` : ''}</p>${chips(z.no, 'no')}` : ''}</div>` : '';
-const facts = a => `<div class="sec facts">${a.map(([e, k, v, w, t]) => `<div class="fact${w ? ' w' : ''}${t || v === '—' ? ' todo' : ''}"><small>${esc(e)} ${esc(k)}</small><b>${rt(v)}</b></div>`).join('')}</div>`;
+const facts = a => `<div class="sec facts">${a.map(([e, k, v, w, t]) => `<div class="fact${w ? ' w' : ''}${t || v === '—' ? ' todo' : ''}"><small>${e.startsWith('<') ? e : esc(e)} ${esc(k)}</small><b>${rt(v)}</b></div>`).join('')}</div>`;
 const flow = a => a && a.length ? `<div class="sec"><p class="sec-h">วิธีจอง</p><ol class="flow">${a.map(([t, d]) => `<li><div><b>${rt(t)}</b><span>${rt(d)}</span></div></li>`).join('')}</ol></div>` : '';
 const telBtn = (t, label, pri) => `<a class="btn${pri ? ' pri' : ''}" href="tel:${esc(String(t).replace(/[^\d+]/g, ''))}">📞 ${esc(t)}${label ? ` <small>${esc(label)}</small>` : ''}</a>`;
 const calls = tel => tel && tel.length ? `<div class="actions">${tel.map((t, i) => telBtn(t, '', i === 0)).join('')}</div>` : '';
@@ -1098,8 +1099,10 @@ const warn = z => z.warn ? `<p class="warn">${rt(z.warn)}</p>` : '';
 // ประตูกรุงเทพ: ผังจากแผนที่ที่ตลาดเผยแพร่เอง (sg-layout.js → info) + เนื้อหาจาก content/site.json (ชุดเดียวกับหน้าแรก · แก้ได้ที่ admin)
 let SITE = null;
 const S = p => SITE ? CMS.get(SITE, p) : '';
-const sf = (e, k, p, w = 0) => `<div class="fact${w ? ' w' : ''}${S(p) ? '' : ' todo'}"><small>${esc(e)} ${esc(k)}</small><b>${SITE ? CMS.T(SITE, p) : 'รอข้อมูล'}</b></div>`;
+const sf = (e, k, p, w = 0) => `<div class="fact${w ? ' w' : ''}${S(p) ? '' : ' todo'}"><small>${e.startsWith('<') ? e : esc(e)} ${esc(k)}</small><b>${SITE ? CMS.T(SITE, p) : 'รอข้อมูล'}</b></div>`;
 const FACT_EMOJI = { size: '📐', online: '📱', walk: '🏢', clock: '🕓', bolt: '⚡', box: '📦', car: '🚗' };
+// โลโก้ LINE ของจริง (เจ้าของ 31 ต.ค. 69: ไอคอนแพลตฟอร์มใช้ของจริง) · สีตามตัวหนังสือ
+const LINE_IC = '<svg class="brand" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>';
 const lineHref = id => 'https://line.me/R/ti/p/' + encodeURIComponent(String(id || '').trim());
 const TT = (q, tag, cls) => SITE ? CMS.T(SITE, q, tag, cls) : '';
 // กติกาขายได้/ห้ามขาย: ส่วนกลาง (site.json → vendor.rules) ทุกสาขาเหมือนกัน · rk = food / boot / court (ศูนย์อาหาร)
@@ -1129,14 +1132,14 @@ function lotCard(b, kind) {
     + (ph.length ? `<div class="sec"><p class="sec-h">ตัวอย่างล็อก</p><div class="ph">${ph.map(([src, alt]) => `<img src="${esc(src)}" alt="${esc(alt)}" loading="lazy">`).join('')}</div></div>` : '')   // หลายรูป = เลื่อนซ้าย-ขวา
     + `<div class="sec facts">${Z.facts.map((f, j) => sf(FACT_EMOJI[f[0]] || '•', f[1], `${P}.facts.${j}.2`, j === 0)).join('')}</div>`
     + `<div class="sec"><p class="sec-h">${esc(V.steps.title || 'มาขายครั้งแรก')}</p><ol class="flow">${V.steps.items.map((_, j) => `<li><div><b>${CMS.T(SITE, `${b}.vendor.steps.items.${j}.0`)}</b>${CMS.T(SITE, `${b}.vendor.steps.items.${j}.1`)}</div></li>`).join('')}</ol></div>`
-    + `<div class="actions">${book ? `<a class="btn pri" href="${esc(book)}" target="_blank" rel="noopener">จองล็อก ↗</a>` : ''}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">💬 LINE ${esc(line)}</a>` : ''}</div>`;
+    + `<div class="actions">${book ? `<a class="btn pri" href="${esc(book)}" target="_blank" rel="noopener">จองล็อก ↗</a>` : ''}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">${LINE_IC} LINE ${esc(line)}</a>` : ''}</div>`;
 }
 // การ์ดสำนักงาน · ทุกสาขาช่องเดียวกัน (map.office + contact)
 function officeCard(b) {
   const phones = S(`${b}.contact.phones`) || [], line = S(`${b}.contact.lineVendor`);
   return head('spot', 'สำนักงานตลาด', S(`${b}.map.office.where`)) + TT(`${b}.map.office.note`, 'p', 'muted')
-    + `<div class="sec facts">${sf('📞', 'โทร', `${b}.contact.phone`)}${sf('🕓', 'เวลาโทร', `${b}.contact.phoneHours`)}${sf('💬', 'LINE ผู้ค้า', `${b}.contact.lineVendor`)}${sf('🏢', 'เวลาทำการสำนักงาน', `${b}.map.office.hours`)}${sf('🧭', 'จุดสังเกต', `${b}.map.office.landmark`, 1)}</div>`
-    + `<div class="actions">${phones.map(([t, l], i) => telBtn(t, l, i === 0)).join('')}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">💬 LINE</a>` : ''}</div>`;
+    + `<div class="sec facts">${sf('📞', 'โทร', `${b}.contact.phone`)}${sf('🕓', 'เวลาโทร', `${b}.contact.phoneHours`)}${sf(LINE_IC, 'LINE ผู้ค้า', `${b}.contact.lineVendor`)}${sf('🏢', 'เวลาทำการสำนักงาน', `${b}.map.office.hours`)}${sf('🧭', 'จุดสังเกต', `${b}.map.office.landmark`, 1)}</div>`
+    + `<div class="actions">${phones.map(([t, l], i) => telBtn(t, l, i === 0)).join('')}${line ? `<a class="btn" href="${esc(lineHref(line))}" target="_blank" rel="noopener">${LINE_IC} LINE</a>` : ''}</div>`;
 }
 function sgCard(p) {
   const I = SG.info, where = 'ประตูกรุงเทพ · แยก คปอ.';
@@ -1151,7 +1154,7 @@ function sgCard(p) {
     + `<p class="muted">นั่งทานได้หลายจุดในตลาด</p><ul class="seats">${I.seats.map(t => `<li>${esc(t)}</li>`).join('')}</ul>`;
   if (z.kind === 'park' || z.kind === 'vpark' || z.kind === 'moto') {
     const r = I[z.kind === 'vpark' ? 'vpark' : 'park'];
-    return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sg.map.parkEntrance')}</div>`
+    return head('park', z.name, where) + `<div class="sec facts">${r.who.map(([e, k, v]) => `<div class="fact"><small>${e.startsWith('<') ? e : esc(e)} ${esc(k)}</small><b>${esc(v)}</b></div>`).join('')}${sf('🧭', 'ทางเข้าลาน', 'sg.map.parkEntrance')}</div>`
       + `<p class="muted">${esc(r.note)} · ลานจอดผู้ค้า ลูกค้าจอดได้ · ลานจอดลูกค้า ผู้ค้าห้ามจอด</p><p class="warn">${esc(I.limit)}</p>`;
   }
   return head(z.kind, z.name, where) + (SITE ? rulesHtml(z.kind) + lotCard('sg', z.kind) : facts(LOT_TODO));
