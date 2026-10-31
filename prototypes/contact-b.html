@@ -49,8 +49,7 @@ page((C) => {
   const go = of(/go/i), mk = of(/market/i), fbOf = ks => ks.map(k => get(C, `${k}.links.facebook`)).find(Boolean);
   const btn = (h, i, t, pri) => h ? `<a class="btn ${pri ? 'pri' : 'alt'} sm" href="${esc(h)}" target="_blank" rel="noopener">${ic(i)} ${t}</a>` : '';
   // บริษัทที่มีสาขาเดียว (โคราช): หัวบริษัทอยู่ข้างการ์ดสาขา ไม่ซ้ำปุ่ม/ที่อยู่ และไม่เหลือที่ว่างครึ่งแถว
-  const solo = (logo, name, ks) => `<div class="grid2 solo" style="margin-top:44px"><div class="coh rv" style="margin:0;align-self:center"><span class="logo">${logo}</span><h2>${name}</h2>
-      <p class="addr">บริษัทแยก ดูแลตลาดเซฟวัน${ks.map(k => esc(C[k].name)).join(' · ')}</p></div>${ks.map(box).join('')}</div>`;
+  const solo = (logo, name, ks) => `<div class="grid2 solo" style="margin-top:44px"><div class="coh rv" style="margin:0;align-self:center"><span class="logo">${logo}</span><h2>${name}</h2></div>${ks.map(box).join('')}</div>`;
   const group = (logo, name, addr, line, fb, ks) => ks.length === 1 ? solo(logo, name, ks) : ks.length ? `<div class="coh rv"><span class="logo">${logo}</span><h2>${name}</h2>
       <div class="cta">${btn(line && lineUrl(line), 'line', 'LINE ' + esc(line || ''), true)}${btn(fb, 'fb', 'Facebook')}</div>
       <p class="addr">${phr(addr)}</p></div>
