@@ -1,18 +1,17 @@
-// ปุ่มสลับแบบเว็บ (ชั่วคราว · เจ้าของยังไม่เลือก 29 ต.ค. 69): "หลายหน้า" (home-b.html …) ⇄ "ผัง 3D" (home-map-b.html) ⇄ "A+D" (home-ad.html · 30 ต.ค.)
+// ปุ่มสลับแบบเว็บ (ชั่วคราว · รอเลือก): A = หลายหน้า (home-b.html …) ⇄ B = ผัง 3D (home-map-b.html) · A+D เอาออกแล้ว 31 ต.ค. 69
 // เลือกแบบได้แล้ว → ลบไฟล์นี้ + บรรทัด <script src="b/switch.js"> ในทุกหน้า + .ver ใน b/style.css
 (() => {
   const here = location.pathname.split('/').pop().replace(/\.html$/, '') + '.html'; // Cloudflare ตัด .html ออก
-  const VER = [['pages', 'หลายหน้า', 'home-b.html'], ['map', 'ผัง 3D', 'home-map-b.html'], ['ad', 'A+D', 'home-ad.html']];
+  const VER = [['pages', 'A', 'home-b.html', 'หลายหน้า'], ['map', 'B', 'home-map-b.html', 'ผัง 3D']];
   const cur = (VER.find(v => v[2] === here) || VER[0])[0];
   if (window !== top) {   // หน้าที่เปิดอยู่ในกรอบมือถือ → ไม่ต้องมีปุ่ม + ซ่อนแถบเลื่อนเหมือนมือถือจริง
     document.documentElement.classList.add('inphone');
     return;
   }
-  try { localStorage.setItem('ver', cur); } catch {}
   const box = document.createElement('nav');
   box.className = 'ver';
   box.setAttribute('aria-label', 'เลือกแบบเว็บ');
-  box.innerHTML = `<span>แบบ</span>${VER.map(([k, t, h]) => `<a href="${h}"${k === cur ? ' class="on" aria-current="true"' : ''}>${t}</a>`).join('')}<button class="phbtn" type="button" title="ดูหน้านี้ในจอมือถือ">มือถือ</button>`;
+  box.innerHTML = `<span>แบบ</span>${VER.map(([k, t, h, d]) => `<a href="${h}" title="แบบ ${t} · ${d}"${k === cur ? ' class="on" aria-current="true"' : ''}>${t}</a>`).join('')}<button class="phbtn" type="button" title="ดูหน้านี้ในจอมือถือ">มือถือ</button>`;
   document.body.append(box);
   // ดูแบบมือถือบนจอคอม: เปิดหน้าเดิมในกรอบ 390×844 (เลื่อน/กดได้จริง) · Esc หรือกดนอกกรอบ = ปิด
   let pv = null;

@@ -1,5 +1,5 @@
 /* หน้าแรกแบบ D (ผัง 3D + ม่านเลือกกลุ่ม) ในหน้าตาสไตล์ B · ใช้กับ home-map-b.html เท่านั้น
-   สีทั้งหมดมาจาก b/style.css (ธีมสว่าง/มืด) · โครงหน้า/ชื่อคลาสเหมือน home.html เดิมทุกอย่าง */
+   สีทั้งหมดมาจาก b/style.css (ธีมสว่าง/มืด) */
 :root{--ed:#5fb3ff;--bad:var(--no);--warn:var(--kick)}
 .wrap{max-width:1120px;padding:0 24px}
 
@@ -66,7 +66,6 @@ td:first-child{font-weight:600}
 td.big{font-size:26px;font-weight:700;color:var(--price);line-height:1.1}
 td .unit{font-size:13px;font-weight:500;color:var(--sub);white-space:nowrap}
 tr.now td{background:var(--ok-bg)}
-.now-tag{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
 .steps{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
 .steps li{position:relative}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}

@@ -51,9 +51,6 @@ img{display:block;max-width:100%}
 .h3{font-weight:700;font-size:clamp(22px,2.6vw,28px);line-height:1.3;color:var(--head);margin-top:48px}
 .lead{font-size:17px;color:var(--sub);margin-top:8px;max-width:62ch}
 .note{font-size:14px;color:var(--sub);margin-top:12px}
-.tabs{display:inline-flex;gap:4px;padding:4px;margin-top:24px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
-.tabs a{padding:8px 20px;border-radius:999px;font-weight:600;font-size:15px;color:var(--sub);transition:background .2s,color .2s}
-.tabs a.on{background:var(--head);color:var(--bg)}
 /* ดรอปดาวน์สาขา (31 ต.ค. 69) — ปุ่มใหญ่กดง่าย · เมนูเลื่อนลงนุ่มๆ · จุดเขียวกระพริบ = เปิดอยู่ตอนนี้ */
 .bpick{position:relative;display:inline-block;margin-top:24px;z-index:20}
 .bpick summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;min-height:52px;padding:6px 14px 6px 20px;border-radius:999px;background:var(--card);border:2px solid var(--line);box-shadow:var(--shadow);transition:border-color .2s}
@@ -105,9 +102,6 @@ img{display:block;max-width:100%}
 .hero h1 em{font-style:normal;color:var(--link);white-space:nowrap}
 .hero .sub{font-size:19px;color:var(--sub);margin-top:16px;max-width:40ch}
 .hero .btns{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
-.shot{position:relative;border-radius:28px;overflow:hidden;aspect-ratio:4/3.4;background:var(--card);box-shadow:0 30px 70px rgba(10,8,30,.35)}
-.shot img{width:100%;height:100%;object-fit:cover}
-.shot figcaption{position:absolute;left:14px;bottom:14px;padding:5px 12px;border-radius:999px;background:rgba(16,13,34,.75);color:#fff;font-size:13px}
 .status{position:absolute;top:14px;left:14px;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#fff;color:#15122b;font-size:14px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.2)}
 .status i{width:9px;height:9px;border-radius:50%;background:#a19bb3}
 .status.open i{background:#3fbf1a;box-shadow:0 0 0 4px rgba(63,191,26,.25)}
@@ -176,14 +170,12 @@ img{display:block;max-width:100%}
 .lbl{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-top:12px}
 .season{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;margin-top:16px;font-size:14px;font-weight:600;color:var(--head)}
 .season .now{font-size:12px;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink)}
-.sea.dim .season{color:var(--sub);font-weight:500}
 .pr{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
 .pr>span{font-size:16px;font-weight:500;color:var(--ink)}
 .pr .today{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
 .pr b{font-size:32px;font-weight:700;line-height:1;color:var(--price)}
 .pr b small{font-size:14px;font-weight:500;color:var(--sub);margin-left:4px}
 .pr em{display:block;font-style:normal;font-size:13px;color:var(--sub);text-align:right;margin-top:4px}
-.sea.dim .pr b{font-size:24px;opacity:.8}
 .facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
 .fact.wide{grid-column:1/-1}
 /* ── ตารางราคา (31 ต.ค. 69 เจ้าของ: "ไม่มี solid ตาราง ดูยาก") — เส้นทึบทุกช่อง หัวตารางมีพื้น · ราคาออนไลน์ใหญ่สีราคา ── */
@@ -244,7 +236,6 @@ tr:last-child td{border-bottom:0}
 .pen{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
 .pen:last-child{border-bottom:0}
 .pen b{flex:none;font-weight:700;color:var(--no)}
-.zdot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--zc);margin-right:10px}
 .zsw{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .zsw a{padding:7px 16px;border-radius:999px;font-weight:600;font-size:14px;border:2px solid var(--zc);color:var(--head)}
 .zsw a.on{background:var(--zc);color:var(--zi)}
@@ -275,7 +266,6 @@ details>div{padding:0 0 16px;font-size:15px;color:var(--sub)}
 .info h4{font-size:18px;font-weight:600;color:var(--info-head)}
 .info .tel{display:block;font-size:30px;font-weight:700;color:var(--info-head);margin-top:8px;line-height:1.2}
 .info p{font-size:14px;margin-top:2px}
-.info .ln{display:inline-block;margin-top:8px;margin-right:12px;font-size:14px;font-weight:600;color:var(--info-head);text-decoration:underline;text-underline-offset:3px}
 footer{margin-top:88px;padding:40px 0 44px;background:var(--bg2);border-top:1px solid var(--line);font-size:14px;color:var(--sub)}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px 40px;align-items:center}
 footer nav{display:flex;flex-wrap:wrap;gap:8px 16px;font-weight:500;color:var(--head)}
@@ -313,7 +303,6 @@ footer .fine b{color:var(--head);font-weight:600}
   .zones{grid-template-columns:1fr}
   .steps{grid-template-columns:1fr}
   .facts{grid-template-columns:1fr}
-  .tabs a{padding:8px 14px}
   .card{padding:20px}
 }
 
@@ -353,7 +342,6 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 @media (max-width:860px){.zb{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:520px){.zb{padding:8px 14px 18px}.ptbl th,.ptbl td{padding:10px 9px}.ptbl tbody th{white-space:normal;font-size:15px}.ptbl td.on{font-size:22px}.ptbl td.wk{font-size:16px}.ptbl .tag{margin-left:4px}.lots figcaption{padding:8px 6px;font-size:12px}}
 .sn{font-weight:700;color:var(--head);margin-right:2px}
-.sea.dim .sn{color:var(--sub)}
 /* ข้อมูลที่ยังไม่ยืนยัน (เจ้าของ: ใช้ที่มีไปก่อน ใส่ "รอข้อมูล") */
 .wait{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--kick-bg);color:var(--kick);white-space:nowrap}
 

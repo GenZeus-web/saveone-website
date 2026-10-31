@@ -6,7 +6,7 @@ const PAGES = [
   ['home-b.html', 'หน้าแรก'], ['branches-b.html', 'สาขา'], ['prices-b.html', 'ราคา'],
   ['booking-b.html', 'วิธีจอง'], ['rules-b.html', 'ระเบียบ'], ['faq-b.html', 'คำถามที่พบบ่อย'], ['contact-b.html', 'ติดต่อ'],
 ];
-// ไอคอนวาดเอง (ชุดเดียวกับ home.html) · ไม่ใช้อีโมจิ
+// ไอคอนวาดเอง · ไม่ใช้อีโมจิ
 const ICON = {
   bag: '<path d="M5 8h14l-1 13H6z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   store: '<path d="M3 9l2-5h14l2 5"/><path d="M4 9v11h16V9"/><path d="M9 20v-6h6v6"/><path d="M3 9a3 3 0 0 0 6 0a3 3 0 0 0 6 0a3 3 0 0 0 6 0"/>',

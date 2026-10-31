@@ -1,5 +1,5 @@
 // เนื้อหาเว็บอยู่ไฟล์เดียว content/site.json · หน้าเว็บอ่านไฟล์นี้แล้ววาด
-// โหมดแก้ (?edit): ทุกช่องที่ผูกด้วย data-p="ทาง.ใน.json" พิมพ์แก้ได้ตรงบนหน้าจริง · ใช้ร่วมกันทั้ง home.html และผัง 3D (branch-flip.html)
+// โหมดแก้ (?edit): ทุกช่องที่ผูกด้วย data-p="ทาง.ใน.json" พิมพ์แก้ได้ตรงบนหน้าจริง · ใช้ร่วมกันทั้ง home-map-b.html และผัง 3D (branch-flip.html)
 (() => {
   const EDIT = new URLSearchParams(location.search).has('edit');
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
