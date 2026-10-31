@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ตลาดเซฟวัน โก</title>
+<title>ตลาดเซฟวัน โก · ไนท์มาร์เก็ต</title>
 <!-- เว็บสไตล์ B แยกหลายหน้า (เจ้าของสั่ง 29 ต.ค. 69): หน้าแรก · สาขา · ราคา · วิธีจอง · ระเบียบ · ติดต่อ
      ส่วนร่วมอยู่ b/style.css + b/common.js · ข้อมูลจาก content/ ชุดเดียวกับ home.html -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
@@ -27,9 +27,9 @@ page((C) => {
       <div class="hours">${hasInfo(C, k) ? b.facts.filter(f => f[2]).map(f => `<span>${esc(f[1])} <b>${esc(f[2])}</b></span>`).join('') : '<span>ยังไม่มีข้อมูล · เร็วๆ นี้</span>'}</div></div></a>`; };
   return `
   <section class="hero"><div class="wrap">
-    <div><span class="kick">${ic('clock')} เปิดทุกวัน ${esc(hours)}</span>
+    <div><span class="kick">${ic('clock')} ${esc(C.story.kick)} · เปิดทุกวัน ${esc(hours)}</span>
       <h1>ตลาด<em>เซฟวัน โก</em></h1>
-      <p class="sub">${C.keys.length} สาขา: ${names} — มาเดินเล่นหาของกิน หรือมาเป็นผู้ค้ากับเรา</p>
+      <p class="sub">${C.keys.length} สาขา: ${names} — มาเดินกิน ช้อป หรือมาเป็นผู้ค้ากับเรา</p>
       <div class="btns"><a class="btn pri" href="branches-b.html">${ic('bag')} ${esc(C.gate.cus.title)}</a><a class="btn alt" href="prices-b.html">${ic('store')} ${esc(C.gate.ven.title)}</a></div></div>
     <figure class="shot"><img src="${esc(hero[0])}" alt="${esc(hero[1])}"><span class="status${st.open ? ' open' : ''}"><i></i>${esc(st.text)} <small>(${esc(sg.name)})</small></span><figcaption>${esc(hero[1])}</figcaption></figure>
   </div></section>

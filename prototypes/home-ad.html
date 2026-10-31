@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ตลาดเซฟวัน โก</title>
+<title>ตลาดเซฟวัน โก · ไนท์มาร์เก็ต</title>
 <!-- แบบที่ 3 "A+D" (เจ้าของเลือก 30 ต.ค. 69): รูปค้างจอเล่าทีละสาขา (A) → หน้าปุ่มใหญ่แบบแอป (D) · ซ่อนแถบเลื่อน
      ข้อความเล่าเรื่อง = site.json → story · เวลา/ราคา/ลิงก์ = content/<สาขา>/data.json · สาขา GO ขึ้นก่อน (siteKeys)
      รูปโคราชใช้เฉพาะช่วงโคราช (Saveone Market แยกบริษัท) -->
@@ -181,7 +181,10 @@ page((C) => {
   const hrs = k => C[k].facts.filter(f => f[2] && /\d/.test(f[2])).map(f => `<span>${esc(f[1])} <b>${esc(f[2])}</b></span>`).join('');
   // ช่วงเล่าเรื่อง: [รูป, ป้ายรูป, html ข้อความ] · เปิดด้วยโลโก้ → ทีละสาขา (GO ก่อน) → มาขายกับเรา
   const OP = ['1', '2', '3'].find(o => o === new URLSearchParams(location.search).get('op')) || '3';   // หน้าเปิด = แบบ 3 การ์ดลอย (เจ้าของเลือก 31 ต.ค. 69) · ?op=1|2 ไว้เทียบ
-  const open0 = `<span class="k">${esc(S.kick)}</span><h1>${esc(S.title)}</h1><p>${esc(S.sub)} ${C.keys.length} สาขา<br>${names}</p>`;
+  const hrsSg = sg.facts.find(f => f[0] === 'food')?.[2] || '';
+  const goNames = C.keys.filter(k => /go/i.test(S.brand[k] || '')).map(k => esc(C[k].name)).join(' · ');
+  const kick0 = `${esc(S.kick)}${hrsSg && OP !== '3' ? ` · เปิดทุกวัน ${esc(hrsSg)}` : ''}`;   // แบบ 3 มีป้ายเวลาลอยอยู่แล้ว → ไม่ซ้ำ
+  const open0 = `<span class="k">${kick0}</span><h1>${esc(S.title)}</h1><p>${esc(S.sub)}<br>${goNames}</p>`;
   const steps = [
     ['logo', OP === '1' ? S.imgNote.sg || '' : '', OP === '2' ? '' : open0],
     ...C.keys.map((k, i) => {
@@ -190,11 +193,10 @@ page((C) => {
         <h2>${esc(C[k].name)}</h2><p>${phr(C[k].where.split(' · ').pop())}</p><div class="hrs">${hrs(k)}</div>`]; }),
     ['', '', `<span class="k">${esc(S.sell.kick)}</span><h2>ล็อกเริ่ม <em class="nb">${minSg} บาท/วัน</em></h2><p>${esc(S.sell.sub)} (ราคา${esc(sg.name)})</p>`],
   ];
-  const hrsSg = sg.facts.find(f => f[0] === 'food')?.[2] || '';
   const OPEN = {
     '': `<div class="ph logo on"><img src="img/logo-3d-night.webp" alt=""></div>`,
     1: `<div class="ph op1 on"></div>`,
-    2: `<div class="ph op2 on"><i class="lights"></i><i class="lights"></i><div class="mid"><span class="k">${esc(S.kick)}</span><span data-wm role="img" aria-label="${esc(S.title)}"></span><h1 class="sr">${esc(S.title)}</h1><p>${esc(S.sub)} ${C.keys.length} สาขา<br>${names}</p></div></div>`,
+    2: `<div class="ph op2 on"><i class="lights"></i><i class="lights"></i><div class="mid"><span class="k">${kick0}</span><span data-wm role="img" aria-label="${esc(S.title)}"></span><h1 class="sr">${esc(S.title)}</h1><p>${esc(S.sub)}<br>${goNames}</p></div></div>`,
     3: `<div class="ph op3 on"><figure class="card"><img src="img/sg-3d-preview.jpg" alt="${esc(S.imgNote.sg || '')}"></figure>${hrsSg ? `<span class="chip c1">เปิดทุกวัน <b>${esc(hrsSg)}</b></span>` : ''}<span class="chip c2 g">ล็อกเริ่ม <b>${minSg} บาท/วัน</b></span></div>`,
   };
   const ph = ([img], i) => img === 'logo' ? OPEN[OP]
