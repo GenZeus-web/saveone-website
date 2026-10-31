@@ -81,12 +81,12 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
 .D .tab{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;gap:clamp(8px,6vw,64px);padding:10px 8px calc(12px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--bg2) 92%,transparent);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
 .D .tab a{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:64px;font-size:13px;color:var(--sub)}
 .D .tab a.on{color:var(--link)}.D .tab .i{width:24px;height:24px}
-.ver{top:72px;bottom:auto;left:auto;right:16px}  /* ปุ่มสลับแบบชั่วคราว → มุมขวาบน ไม่บังข้อความ/แถบล่าง */
 /* มือถือ/แท็บเล็ต: แถบเมนูล่างล็อกติดจอตลอด (เจ้าของ 30 ต.ค. 69) → เว้นที่ให้ช่วงรูปและท้ายเว็บไม่โดนบัง */
 @media (max-width:899px){
   :root{--tabh:calc(66px + env(safe-area-inset-bottom))}
   body{padding-bottom:var(--tabh)}
   .A .stage{height:calc(100svh - var(--tabh))}
+  .ver{bottom:calc(var(--tabh) + 12px)}  /* ปุ่มสลับแบบ: มุมซ้ายล่างเหมือนหน้าอื่น แค่ยกพ้นแถบเมนูล่าง */
 }
 
 @media (min-width:900px){
@@ -98,7 +98,6 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
   .D .topnav{display:flex;gap:4px;margin:0 auto}
   .D .topnav a{flex-direction:row;gap:6px;min-width:0;padding:8px 14px;border-radius:999px;font-size:15px;font-weight:600;color:var(--ink)}
   .D .topnav a:hover{background:var(--card2)}.D .topnav a.on{color:var(--link)}.D .topnav .i{width:18px;height:18px}
-  .ver{top:auto;bottom:16px}
 }
 @media (max-width:720px){
   .A .shade{background:linear-gradient(0deg,rgba(21,18,43,.95) 0%,rgba(21,18,43,.6) 50%,rgba(21,18,43,.1) 100%)}
@@ -108,9 +107,9 @@ html{scrollbar-width:none}html::-webkit-scrollbar{display:none}
   .A .step p{font-size:16px}
   .A .ph.logo img{right:auto!important;left:50%;top:30%;width:86%;transform:translate(-50%,-50%)}
   .D .open{font-size:13px;padding:5px 10px}
-  body:has(>.ver) .D h2{padding-top:72px}
   .A .cap{right:auto;left:var(--gut);bottom:60px;font-size:12px}
   .A .skip{left:auto;right:20px;transform:none;bottom:16px}
+  .ver>span{display:none}.ver a{padding:7px 11px}  /* ปุ่มสลับแบบย่อลง ไม่ทับปุ่ม "ข้ามไปเมนู" ด้านขวา (จอ 360 ก็ยังพอ) */
   .D .panel{padding:0 18px}
   .D .tiles{grid-template-columns:1fr 1fr;gap:10px}
   .D .tile{padding:16px;min-height:128px;border-radius:20px}
