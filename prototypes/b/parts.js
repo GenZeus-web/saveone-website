@@ -196,7 +196,7 @@ function qsimRun(q, key, instant) {
   const doLock = () => { const [st, m] = S.lock; lock.classList.add(st); if (st === 'shut') q.classList.add('w2off'); msg.textContent = m; };
   if (instant) { S.days.forEach((_, i) => day(i)); doLock(); msg.textContent = S.end; return; }
   // จังหวะ: จ.–พฤ. ทีละวัน → กุญแจ → ศ.–อา. ทีละวัน → สรุป
-  const seq = [0, 1, 2, 3].map(i => [() => day(i), 1100]).concat([[doLock, 1700]], [4, 5, 6].map(i => [() => day(i), 1100]), [[() => { cs.forEach(x => x.classList.remove('now')); msg.textContent = S.end; }, 0]]);
+  const seq = [0, 1, 2, 3].map(i => [() => day(i), 2000]).concat([[doLock, 3000]], [4, 5, 6].map(i => [() => day(i), 2000]), [[() => { cs.forEach(x => x.classList.remove('now')); msg.textContent = S.end; }, 0]]);
   let k = 0; const next = () => { if (k >= seq.length) return; const [f, w] = seq[k++]; f(); q._t = setTimeout(next, w); }; next();
 }
 function qsimInit(q) {
