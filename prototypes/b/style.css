@@ -527,3 +527,8 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 @media (prefers-reduced-motion:reduce){.qc,.qlock,.qlock .sh,.qdots i{transition:none}.qlock.shut{animation:none}.qc.now{transform:none}}
 /* แท็บโซนหักคะแนน: .grid2{display:grid} ทับ hidden → ต้องสั่งซ่อนเอง */
 [data-zp][hidden]{display:none}
+/* มุมโค้งตาราง: ตารางที่มีหัวข้อ (caption) ตัดมุมไม่ได้ → สีหัวตารางล้นมุม · ปัดมุมช่องหัวมุมท้ายเองทุกตาราง (16 − ขอบ 2) */
+.ptbl>thead>tr:first-child>:first-child,.ptbl:not(:has(>thead))>tbody:first-of-type>tr:first-child>:first-child{border-top-left-radius:14px}
+.ptbl>thead>tr:first-child>:last-child,.ptbl:not(:has(>thead))>tbody:first-of-type>tr:first-child>:last-child{border-top-right-radius:14px}
+.ptbl>:last-child>tr:last-child>:first-child{border-bottom-left-radius:14px}
+.ptbl>:last-child>tr:last-child>:last-child{border-bottom-right-radius:14px}
