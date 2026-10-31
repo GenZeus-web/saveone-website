@@ -40,6 +40,7 @@ const ICON = {
   next: '<path d="M4 12h16M14 6l6 6-6 6"/>',
   map: '<path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/>',
   list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  home: '<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
 };
 // โลโก้แพลตฟอร์มของจริง (ทรงจาก Simple Icons · CC0) — ทึบ ไม่ใช่เส้น · สีตามปุ่ม (เจ้าของ 31 ต.ค. 69)
 const BRAND = {
@@ -125,12 +126,30 @@ addEventListener('click', e => {
 });
 const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
+// แบบเมนู (ทดลอง 31 ต.ค. 69 · เจ้าของ: "เมนูเยอะ หาวิธีดู ไม่เอา scroll bar") — ?nav=1|2|3 จำไว้ในเครื่อง
+// 1 = เรียงทั้งหมด (มือถือขึ้น 2 แถว) · 2 = รวมหน้าผู้ค้าไว้ใต้ "ผู้ค้า ▾" · 3 = ปุ่ม ☰ เปิดแผงเมนูใหญ่ (มือถือ/จอแคบ)
+// เจ้าของเลือกแล้ว → ลบแบบที่ไม่ใช้ + ตัวเลือก .navpick
+const NAV_V = (() => { let v = new URLSearchParams(location.search).get('nav');
+  try { if (v) localStorage.setItem('nav', v); else v = localStorage.getItem('nav'); } catch {}
+  return ['1', '2', '3'].includes(v) ? v : '1'; })();
+const NAV_IC = { 'home-b.html': 'home', 'branches-b.html': 'store', 'prices-b.html': 'tag', 'booking-b.html': 'cal', 'rules-b.html': 'shield', 'faq-b.html': 'search', 'contact-b.html': 'phone' };
+const NAV_SUB = { 'prices-b.html': 'ราคาล็อกทุกโซน', 'booking-b.html': 'จองผ่านแอป ทีละขั้น', 'rules-b.html': 'กฎ คะแนน อันดับ', 'faq-b.html': 'คำถามที่ผู้ค้าถามบ่อย' };
+const VENDOR_PAGES = ['prices-b.html', 'booking-b.html', 'rules-b.html', 'faq-b.html'];
+function navHTML() {
+  const a = (h, sub) => { const t = PAGES.find(p => p[0] === h)[1];
+    return `<a href="${h}"${h === here ? ' class="on" aria-current="page"' : ''}>${ic(NAV_IC[h])}<span>${t}${sub && NAV_SUB[h] ? `<small>${NAV_SUB[h]}</small>` : ''}</span></a>`; };
+  if (NAV_V === '2') return `${a('home-b.html')}${a('branches-b.html')}
+    <details class="ngrp${VENDOR_PAGES.includes(here) ? ' on' : ''}"><summary>${ic('bag')}<span>ผู้ค้า</span></summary>
+      <div class="nmenu">${VENDOR_PAGES.map(h => a(h, true)).join('')}</div></details>${a('contact-b.html')}`;
+  return PAGES.map(([h]) => a(h)).join('');
+}
 function header() {
   const top = document.createElement('header');
-  top.className = 'top';
+  top.className = 'top nav' + NAV_V;
   top.innerHTML = `<div class="wrap bar">
     <a class="brand" data-wm href="home-b.html" aria-label="ตลาดเซฟวัน GO หน้าแรก"></a>
-    <nav aria-label="เมนูหลัก">${PAGES.map(([h, t]) => `<a href="${h}"${h === here ? ' class="on" aria-current="page"' : ''}>${t}</a>`).join('')}</nav>
+    <nav id="mainNav" aria-label="เมนูหลัก">${navHTML()}</nav>
+    ${NAV_V === '3' ? `<button class="burger" type="button" aria-label="เมนู" aria-expanded="false" aria-controls="mainNav"><b></b><b></b><b></b></button>` : ''}
     <button class="theme" id="themeBtn" title="สลับธีมสว่าง/มืด" aria-label="สลับธีมสว่าง/มืด">
       <i class="i sun"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></i>
       <i class="i moon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></i>
@@ -138,6 +157,18 @@ function header() {
     <a class="btn pri sm" href="booking-b.html">จองล็อก</a></div>`;
   document.body.prepend(top);
   $('themeBtn').onclick = toggleTheme;
+  // แบบ 2: กดนอกเมนูผู้ค้า / Esc = ปิด · แบบ 3: ☰ เปิด-ปิดแผง
+  const grp = top.querySelector('.ngrp'), bg = top.querySelector('.burger');
+  const shut = () => { grp && (grp.open = false); if (bg) { top.classList.remove('open'); bg.setAttribute('aria-expanded', 'false'); } };
+  if (bg) bg.onclick = () => { const o = top.classList.toggle('open'); bg.setAttribute('aria-expanded', o); };
+  document.addEventListener('click', e => { if (!top.contains(e.target) || e.target === top) shut(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape') shut(); });
+  // ตัวเลือกแบบเมนู (ชั่วคราว ให้เจ้าของลองเทียบ) · ไม่โชว์ในกรอบมือถือ
+  if (window === window.top) {
+    const p = document.createElement('nav'); p.className = 'navpick'; p.setAttribute('aria-label', 'เลือกแบบเมนู');
+    p.innerHTML = `<span>เมนูแบบ</span>${['1', '2', '3'].map(v => { const u = new URL(location.href); u.searchParams.set('nav', v); return `<a href="${u.pathname + u.search}"${v === NAV_V ? ' class="on"' : ''}>${v}</a>`; }).join('')}`;
+    document.body.append(p);
+  }
 }
 function toggleTheme() {
   const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
