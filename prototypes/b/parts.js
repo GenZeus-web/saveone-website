@@ -109,8 +109,14 @@ function rankGuide(G, zones) {
   if (!G?.zones) return '';
   const e = CMS.esc, star = t => { const m = String(t).match(/^(\d)\s*ดาว$/); return m ? `<span class="stars" aria-label="${e(t)}">${'★'.repeat(+m[1])}<i>${'★'.repeat(3 - +m[1])}</i></span> ${e(t)}` : e(t); };
   const zs = Object.keys(G.zones).filter(z => G.zones[z]?.length);
+  // โซนที่ไม่มีดาว (เปิดท้าย) = เควส 2 ขั้น: จ.–พฤ. ทำรอบคัดกรองครบ 2 วัน → ศ.–อา. ได้สิทธิ์รอบคัดกรองต่อ
+  const flowT = (z, F) => `<div class="qflow z-${z}"><p class="qcap">${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</p>
+    <div class="qbox"><p class="qh">${e(F.title)}</p><div class="qr">${(F.rounds || []).map(([n, t], i) => `<span class="${i ? 'gen' : 'scr'}"><b>${e(t)}</b>${e(n)}</span>`).join('')}</div>
+    ${F.steps.map((st, i) => `${i ? `<div class="qarr" aria-hidden="true">ทำครบ 2 วัน ↓</div>` : ''}<div class="qstep"><span class="qn">ขั้น ${i + 1}</span><span class="qday">${e(st.when)}</span>
+      <p class="qwho">${e(st.who)}</p><p class="qget">${e(st.get)}</p><p class="qrest">${e(st.rest)}</p>${st.miss ? `<p class="qmiss">${e(st.miss)}</p>` : ''}</div>`).join('')}
+    ${F.other ? `<p class="qother">${e(F.other)}</p>` : ''}</div></div>`;
   return `<div class="rguide"><h3 class="rg-h">${e(G.title)}<small>${e(G.sub || '')}</small></h3><div class="pts-g">${zs.map(z => `<table class="ptbl pts-t rg z-${z}"><caption>${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</caption>
-    <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}</div></div>`;
+    <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}${Object.entries(G.flows || {}).map(([z, F]) => flowT(z, F)).join('')}</div></div>`;
 }
 function pointsBlock(P, zones) {
   const e = CMS.esc, parts = t => String(t || '').split(' · ').map(x => x.trim()).filter(Boolean);
