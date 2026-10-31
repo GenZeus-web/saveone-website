@@ -410,6 +410,8 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .gal.hero-gal{--gw:62%}
 .gal.hero-gal .gstack{overflow:visible;padding:30px 0 60px;margin:-30px 0 -60px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}   /* รูปข้างจางหายที่ขอบ ไม่ทับหัวเรื่อง */
 .gal.hero-gal .gs:not([data-d="0"]){top:30px}
+.gal.hero-gal .gstack{pointer-events:none}.gal.hero-gal .gs{pointer-events:auto}   /* ขอบเงาที่ยื่นออกไม่บังปุ่ม ‹ › และจุด */
+.gal.hero-gal .gnav{position:relative;z-index:7}
 .gal.hero-gal .gimg{aspect-ratio:4/3.4}
 .gal.hero-gal .gimg img{object-fit:cover}
 .gal.hero-gal .gs{box-shadow:0 30px 70px rgba(10,8,30,.35);border-radius:26px}
