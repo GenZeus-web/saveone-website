@@ -381,23 +381,39 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .zoomdlg .mx{position:absolute;top:14px;right:14px;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;font-size:20px;background:rgba(255,255,255,.16);color:#fff}
 .lots figure{position:relative}
 .lots figure::after{content:"แตะเพื่อขยาย";position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(21,18,43,.7);color:#fff;pointer-events:none}
-/* แกลเลอรีรูปซ้อน (31 ต.ค. 69) — รูปหน้า + 2 รูปถัดไปเอียงซ้อนข้างหลัง · เลื่อนเอง · ปัดได้ */
-.gal .gstack{position:relative;margin:10px 0 0;padding-right:9%;touch-action:pan-y;user-select:none}
-.gal .gs{margin:0;border-radius:18px;overflow:hidden;border:1px solid var(--line);background:var(--card);box-shadow:0 10px 26px rgba(0,0,0,.18);transition:transform .55s cubic-bezier(.2,.7,.2,1),opacity .45s,filter .45s;transform-origin:left center}
-.gal .gs:not([data-d="0"]){position:absolute;inset:0 9% 0 0}
-.gal .gs[data-d="0"]{position:relative;z-index:3}
-.gal .gs[data-d="1"]{z-index:2;transform:translateX(5.5%) scale(.93) rotate(2deg);filter:brightness(.8)}
-.gal .gs[data-d="2"]{z-index:1;transform:translateX(10.5%) scale(.86) rotate(4deg);filter:brightness(.62)}
-.gal .gs[data-d="x"]{z-index:0;opacity:0;transform:translateX(10%) scale(.8)}
-.gal .gs[data-d="out"]{z-index:4;opacity:0;transform:translateX(-30%) rotate(-6deg);pointer-events:none}
+/* แกลเลอรีต่อกัน (31 ต.ค. 69 เจ้าของ: "ตรงกลางชัด ซ้ายขวาซ้อนกันไปเรื่อยๆ แต่เบลอ") — รูปกลาง + ข้างละ 2 รูป ยิ่งไกลยิ่งเล็ก/เบลอ/มืด */
+.gal{--gw:66%}
+.gal .gstack{position:relative;overflow:hidden;margin-top:10px;padding:6px 0 10px;touch-action:pan-y;user-select:none;border-radius:18px}
+.gal .gs{margin:0 auto;width:var(--gw);border-radius:16px;overflow:hidden;background:var(--card);box-shadow:0 12px 30px rgba(0,0,0,.25);transition:transform .6s cubic-bezier(.2,.7,.2,1),filter .6s,opacity .5s}
+.gal .gs:not([data-d="0"]){position:absolute;top:6px;left:calc((100% - var(--gw)) / 2)}
+.gal .gs[data-d="0"]{position:relative;z-index:5}
+.gal .gs[data-d="1"]{z-index:4;transform:translateX(52%) scale(.8);filter:blur(2.5px) brightness(.7)}
+.gal .gs[data-d="-1"]{z-index:4;transform:translateX(-52%) scale(.8);filter:blur(2.5px) brightness(.7)}
+.gal .gs[data-d="2"]{z-index:3;transform:translateX(88%) scale(.64);filter:blur(5px) brightness(.5)}
+.gal .gs[data-d="-2"]{z-index:3;transform:translateX(-88%) scale(.64);filter:blur(5px) brightness(.5)}
+.gal .gs[data-d="x"]{z-index:0;opacity:0;transform:scale(.5)}
+.gal .gs:not([data-d="0"]) figcaption{visibility:hidden}
 .gal .gimg{aspect-ratio:16/9;display:grid;place-items:center;background:var(--card2);position:relative}
 .gal .gimg img{width:100%;height:100%;object-fit:contain;cursor:zoom-in;-webkit-user-drag:none}
 .gal .gs:not([data-d="0"]) img{cursor:pointer}
+.gal .gs figcaption{display:grid;gap:6px;padding:10px 12px;background:var(--card2);font-size:13px;color:var(--sub);text-align:center}
+.gal .gs figcaption b{display:block;font-size:15px;color:var(--head)}
 .lots.gal figure::after{display:none}
 .gal .gs[data-d="0"] .gimg::after{content:"แตะเพื่อขยาย";position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(21,18,43,.7);color:#fff;pointer-events:none}
-.gal .gnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:12px}
+.gal .gnav{display:flex;align-items:center;justify-content:center;gap:12px;margin-top:8px}
 .gal .gb{width:38px;height:38px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--head);font-size:22px;line-height:1;cursor:pointer}
 .gal .gdots{display:flex;gap:6px}
 .gal .gdots button{width:8px;height:8px;padding:0;border-radius:999px;border:0;background:var(--line);cursor:pointer;transition:width .3s,background .3s}
 .gal .gdots button.on{width:22px;background:var(--acc)}
+/* หน้าแรก: รูปใหญ่ เต็มกรอบ (รูปถ่าย ตัดขอบได้) · คำบรรยาย + ป้ายเปิดอยู่ลอยบนรูป */
+.gal.hero-gal{--gw:74%}
+.gal.hero-gal .gstack{overflow:visible;padding:0}
+.gal.hero-gal .gimg{aspect-ratio:4/3.4}
+.gal.hero-gal .gimg img{object-fit:cover}
+.gal.hero-gal .gs{box-shadow:0 30px 70px rgba(10,8,30,.35);border-radius:26px}
+.gal.hero-gal .gs figcaption{position:absolute;left:14px;bottom:14px;padding:5px 12px;border-radius:999px;background:rgba(16,13,34,.75);color:#fff;font-size:13px}
+.gal.hero-gal .gs[data-d="0"] .gimg::after{display:none}
+.gal.hero-gal .status{z-index:6;left:calc((100% - var(--gw)) / 2 + 14px)}
+.hero{overflow:hidden}
+@media (max-width:700px){.gal{--gw:76%}.gal.hero-gal{--gw:80%}}
 @media (prefers-reduced-motion:reduce){.gal .gs{transition:none}}
