@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>คำถามที่พบบ่อย · ตลาดเซฟวัน โก</title>
+<script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="b/style.css?v=20261031t">
+</head>
+<body>
+<main id="main"></main>
+<script src="content/cms.js?v=20261030a"></script>
+<script src="b/parts.js?v=20261031h"></script>
+<script src="b/common.js?v=20261031j"></script>
+<script>
+// คำถามที่พบบ่อยของผู้ค้า (vendor.faq ของสาขาที่เลือก) · แยกจากหน้าระเบียบ (เจ้าของ 31 ต.ค. 69: "คำถามที่พบบ่อย อยู่ข้างติดต่อ")
+// ท้ายหน้า = ถามเพิ่มทาง LINE / โทร ของสาขานั้น
+page((C, k) => {
+  const b = C[k], V = b.vendor, faq = V.faq.filter(f => filled(f[0])), line = b.contact.lineVendor || b.contact.lineCustomer;
+  return `${pageHead('คำถามที่พบบ่อย', 'search', `คำถามที่พบบ่อย <span class="br">${esc(b.name)}</span>`, faq.length ? `${faq.length} คำถามที่ผู้ค้าถามบ่อย` : '')}
+  <section class="sec" style="padding-top:28px"><div class="wrap">
+    ${branchTabs(C, k)}
+    ${faq.length ? `<div class="card rv faq" style="margin-top:22px;padding-top:6px;padding-bottom:6px">${faq.map(([q, a]) => `<details><summary><span>${phr(q)}</span></summary><div>${phr(a)}</div></details>`).join('')}</div>`
+      : `<div class="empty" style="margin-top:22px">สาขา${esc(b.name)}ยังไม่ได้ใส่คำถามที่พบบ่อยในเว็บ</div>`}
+    <div class="info rv" style="margin-top:22px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px 24px"><div><b style="font-size:18px">ไม่เจอคำตอบ?</b><br>ทักถามสาขา${esc(b.name)}ได้เลย</div>
+      <div class="cta" style="margin:0">${line ? `<a class="btn pri sm" href="${esc(lineUrl(line))}" target="_blank" rel="noopener">${ic('line')} LINE ${esc(line)}</a>` : ''}${b.contact.phone ? `<a class="btn alt sm" href="tel:${digits(b.contact.phone)}">${ic('phone')} ${esc(b.contact.phone)}</a>` : ''}<a class="btn alt sm" href="contact-b.html">ติดต่อทุกสาขา</a></div></div>
+  </div></section>`;
+});
+</script>
+<script src="b/switch.js?v=20261030b"></script>
+</body>
+</html>

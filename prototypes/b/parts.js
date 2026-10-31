@@ -97,7 +97,15 @@ const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, r
 // คะแนนและอันดับ = ตาราง (เจ้าของ 31 ต.ค. 69: "คำแนะนำระบบอันดับ ทำเป็นรูปแบบตาราง" + ส่งหน้า Wix newscorestreetfood / newscorecarboot)
 // vendor.points: chips "มาขาย +6" → ตารางได้คะแนน · rank / watch = [[หัวข้อ, รายละเอียด]] · rounds = { title, head, rows, notes } (เปิดท้าย)
 // ไม่มี rank (ข้อมูลเก่า) → อ่านจาก text/note แบบเดิม
-function pointsBlock(P) {
+// ตารางคำแนะนำระบบอันดับ (รูป Wix newscorestreetfood-02 / newscorecarboot-02): รอบ | อันดับ | เวลาจอง แยกโซน · ดาว = ★ · แถวแรก = จองก่อน
+function rankGuide(G, zones) {
+  if (!G?.zones) return '';
+  const e = CMS.esc, star = t => { const m = String(t).match(/^(\d)\s*ดาว$/); return m ? `<span class="stars" aria-label="${e(t)}">${'★'.repeat(+m[1])}<i>${'★'.repeat(3 - +m[1])}</i></span> ${e(t)}` : e(t); };
+  const zs = Object.keys(G.zones).filter(z => G.zones[z]?.length);
+  return `<div class="rguide"><h3 class="rg-h">${e(G.title)}<small>${e(G.sub || '')}</small></h3><div class="pts-g">${zs.map(z => `<table class="ptbl pts-t rg z-${z}"><caption>${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</caption>
+    <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}</div></div>`;
+}
+function pointsBlock(P, zones) {
   const e = CMS.esc, parts = t => String(t || '').split(' · ').map(x => x.trim()).filter(Boolean);
   const earn = (P.chips || []).filter(Boolean).map(t => { const m = t.match(/^(.*?)\s*([+−-]?\d[\d,]*)$/); return m ? [m[1], m[2]] : [t, '']; });
   const kv = (cap, rows, cls = '') => rows?.length ? `<table class="ptbl pts-t kv ${cls}"><caption>${cap}</caption><tbody>${rows.filter(([a]) => a).map(([a, b]) => `<tr><th scope="row">${e(a)}</th><td>${e(b)}</td></tr>`).join('')}</tbody></table>` : '';
@@ -109,7 +117,7 @@ function pointsBlock(P) {
     const R = P.rounds, roundT = R?.rows?.length ? `<div class="pts-r"><table class="ptbl pts-t stack"><caption>${e(R.title)}</caption><thead><tr>${R.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>
       ${R.rows.map(r => `<tr>${r.map((c, i) => i ? `<td data-h="${e(R.head[i])}">${e(c)}</td>` : `<th scope="row">${e(c)}</th>`).join('')}</tr>`).join('')}</tbody></table>
       ${R.notes?.length ? `<ul class="dots pts-n">${R.notes.filter(Boolean).map(x => `<li>${e(x)}</li>`).join('')}</ul>` : ''}</div>` : '';
-    return `<div class="pts-g">${earnT}${kv('การจัดอันดับ', P.rank)}</div>${kv('ข้อควรรู้', P.watch, 'warn')}${roundT}`;
+    return `${rankGuide(P.guide, zones)}<div class="pts-g" style="margin-top:22px">${earnT}${kv('การจัดอันดับ', P.rank)}</div>${kv('ข้อควรรู้', P.watch, 'warn')}${roundT}`;
   }
   // ข้อมูลแบบเก่า: note ข้อ "อันดับ … รอบ… 10:00" → ตารางรอบจอง · ที่เหลือเป็นหมายเหตุ
   let zone = ''; const rounds = [], notes = [];

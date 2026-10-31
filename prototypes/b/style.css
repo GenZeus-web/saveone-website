@@ -294,7 +294,8 @@ footer .fine b{color:var(--head);font-weight:600}
   .wrap{padding:0 20px}
   .top .bar{height:60px;gap:12px}.top .theme{margin-left:auto}
   /* เมนูหน้าลงไปเป็นแถวที่ 2 เลื่อนข้างได้ */
-  .top nav{order:9;flex-basis:100%;margin:0 -20px;padding:0 16px 10px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
+  .top nav{order:9;flex-basis:100%;margin:0;padding:0 0 10px;flex-wrap:wrap;justify-content:center;gap:4px 2px;white-space:nowrap}   /* มือถือ: เมนูขึ้น 2 แถว เห็นครบทุกอัน (เดิมเลื่อนข้าง "ติดต่อ" หลุดจอ) */
+  .top nav a{padding:6px 11px}
   .top nav::-webkit-scrollbar{display:none}
   .top .bar{flex-wrap:wrap;height:auto;padding-top:10px}
   .hero{padding:40px 0 64px}.hero .wrap{grid-template-columns:1fr;gap:32px}
@@ -305,7 +306,7 @@ footer .fine b{color:var(--head);font-weight:600}
   .info,.info.two{grid-template-columns:1fr}
 }
 @media (max-width:560px){
-  .wrap{padding:0 16px}.top nav{margin:0 -16px}
+  .wrap{padding:0 16px}
   .brand{height:22px}.top .btn{padding:8px 14px;font-size:13px}
   .sec{padding-top:60px}
   .stats{grid-template-columns:1fr;gap:10px}.stat{padding:16px}.stat b{font-size:28px}
@@ -443,3 +444,17 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 @media (max-width:600px){.pts-t.stack thead{display:none}.pts-t.stack tr{display:block;border-bottom:1px solid var(--tl)}.pts-t.stack tbody tr:last-child{border-bottom:0}
   .pts-t.stack th,.pts-t.stack td{display:block;border:0;border-right:0}.pts-t.stack th{background:var(--card2)}
   .pts-t.stack td{padding:8px 12px}.pts-t.stack td::before{content:attr(data-h);display:block;font-size:12px;font-weight:600;color:var(--sub)}}
+/* คำแนะนำระบบอันดับ (ดาว) */
+.rguide{margin-top:4px}
+.rg-h{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-size:19px;color:var(--head)}
+.rg-h small{font-size:14px;font-weight:600;padding:2px 12px;border-radius:999px;background:var(--ok-bg);color:var(--ok)}
+.rguide .pts-g{margin-top:12px}
+.rg caption{white-space:nowrap}
+.rg caption .i{width:18px;height:18px;vertical-align:-3px;margin-right:4px;color:var(--link)}
+.rg thead th{background:var(--zc,var(--card2));color:var(--zi,var(--head))}
+.rg thead th small{color:inherit}
+.rg tbody th{white-space:nowrap}
+.rg tr.first>*{background:var(--ok-bg)}
+.rg td.on{font-size:19px}
+.stars{color:#f5b301;letter-spacing:1px;font-size:15px}
+.stars i{font-style:normal;color:var(--line)}

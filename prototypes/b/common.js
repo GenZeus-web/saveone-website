@@ -4,7 +4,7 @@ const { esc, get, phr } = CMS;
 const $ = id => document.getElementById(id);
 const PAGES = [
   ['home-b.html', 'หน้าแรก'], ['branches-b.html', 'สาขา'], ['prices-b.html', 'ราคา'],
-  ['booking-b.html', 'วิธีจอง'], ['rules-b.html', 'ระเบียบ'], ['contact-b.html', 'ติดต่อ'],
+  ['booking-b.html', 'วิธีจอง'], ['rules-b.html', 'ระเบียบ'], ['faq-b.html', 'คำถามที่พบบ่อย'], ['contact-b.html', 'ติดต่อ'],
 ];
 // ไอคอนวาดเอง (ชุดเดียวกับ home.html) · ไม่ใช้อีโมจิ
 const ICON = {
