@@ -6,7 +6,7 @@
 <title>ติดต่อ · เกี่ยวกับเรา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261030d">
+<link rel="stylesheet" href="b/style.css?v=20261031c">
 <style>
 /* ติดต่อ + เกี่ยวกับเรา รวมหน้าเดียว (เจ้าของ 31 ต.ค. 69) · จัดกลุ่มตาม 2 บริษัท: SaveoneGo (ประตูกรุงเทพ+บางนา) · Saveone Market (โคราช) */
 .coh{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:44px 0 16px}
@@ -29,7 +29,7 @@
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031b"></script>
+<script src="b/common.js?v=20261031c"></script>
 <script>
 // เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
 page((C) => {
@@ -40,8 +40,8 @@ page((C) => {
       ${c.phoneHours ? `<p class="note" style="margin-top:2px">โทรได้ ${esc(c.phoneHours)}</p>` : ''}
       ${(c.phones || []).filter(([n]) => n && digits(n) !== digits(c.phone)).map(([n, t]) => `<p style="margin-top:6px;font-size:15px">${t ? esc(t) + ' ' : ''}<a href="tel:${digits(n)}" style="font-weight:700;color:var(--head)">${esc(n)}</a></p>`).join('')}
       <div class="cta" style="margin-top:16px">
-        <a class="btn pri sm" href="${esc(lineUrl(c.lineCustomer))}" target="_blank" rel="noopener">${ic('chat')} ${same ? 'LINE' : 'LINE ลูกค้า'} ${esc(c.lineCustomer)}</a>
-        ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('chat')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
+        <a class="btn pri sm" href="${esc(lineUrl(c.lineCustomer))}" target="_blank" rel="noopener">${ic('line')} ${same ? 'LINE' : 'LINE ลูกค้า'} ${esc(c.lineCustomer)}</a>
+        ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('line')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
         ${fb ? `<a class="btn alt sm" href="${esc(fb)}" target="_blank" rel="noopener">${ic('fb')} Facebook</a>` : ''}
         ${map ? `<a class="btn alt sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}</div></div>`; };
   const S = C.story || {}, of = re => C.keys.filter(k => re.test((S.brand || {})[k] || ''));
@@ -51,7 +51,7 @@ page((C) => {
   const solo = (logo, name, ks) => `<div class="grid2 solo" style="margin-top:44px"><div class="coh rv" style="margin:0;align-self:center"><span class="logo">${logo}</span><h2>${name}</h2>
       <p class="addr">บริษัทแยก ดูแลตลาดเซฟวัน${ks.map(k => esc(C[k].name)).join(' · ')}</p></div>${ks.map(box).join('')}</div>`;
   const group = (logo, name, addr, line, fb, ks) => ks.length === 1 ? solo(logo, name, ks) : ks.length ? `<div class="coh rv"><span class="logo">${logo}</span><h2>${name}</h2>
-      <div class="cta">${btn(line && lineUrl(line), 'chat', 'LINE ' + esc(line || ''), true)}${btn(fb, 'fb', 'Facebook')}</div>
+      <div class="cta">${btn(line && lineUrl(line), 'line', 'LINE ' + esc(line || ''), true)}${btn(fb, 'fb', 'Facebook')}</div>
       <p class="addr">${phr(addr)}</p></div>
     <div class="grid2" style="margin-top:0">${ks.map(box).join('')}</div>` : '';
   return `${pageHead('ติดต่อ · เกี่ยวกับเรา', 'phone', 'ติดต่อตลาด', 'ไนท์มาร์เก็ตเปิดทุกวัน มี 2 บริษัทดูแล แยกตามพื้นที่ · โทรหรือทัก LINE สาขาที่ต้องการได้เลย')}

@@ -31,6 +31,7 @@ img{display:block;max-width:100%}
 .wrap{max-width:1180px;margin:0 auto;padding:0 32px}
 .i{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.22em;flex:none}
 .i svg{width:100%;height:100%;display:block}
+.i.brand{margin-right:3px}  /* โลโก้ LINE/Facebook ทึบเต็มกรอบ → เว้นจากตัวหนังสือเพิ่มนิดหน่อย */
 .brand{display:block;height:28px}
 .brand svg{height:100%;width:auto;display:block}
 

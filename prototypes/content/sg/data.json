@@ -62,7 +62,7 @@
         "link": "map"
       },
       {
-        "ic": "chat",
+        "ic": "line",
         "title": "แจ้งปัญหา / ติดต่อตลาด",
         "sub": "LINE @saveone.go.cs",
         "line": "lineCustomer"
@@ -88,7 +88,7 @@
         "main": true
       },
       {
-        "ic": "chat",
+        "ic": "line",
         "title": "แจ้งปัญหา / ติดต่อแอดมิน",
         "sub": "LINE @saveone.go",
         "line": "lineVendor"
