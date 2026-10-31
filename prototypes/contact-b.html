@@ -3,15 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>ติดต่อ · ตลาดเซฟวัน โก</title>
+<title>ติดต่อ · เกี่ยวกับเรา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="b/style.css?v=20261030d">
+<style>
+/* ติดต่อ + เกี่ยวกับเรา รวมหน้าเดียว (เจ้าของ 31 ต.ค. 69) · จัดกลุ่มตาม 2 บริษัท: SaveoneGo (ประตูกรุงเทพ+บางนา) · Saveone Market (โคราช) */
+.coh{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:44px 0 16px}
+.coh:first-child{margin-top:0}
+.coh .logo{display:flex;align-items:center;--wm-ink:var(--head);--wm-go:var(--acc)}
+.coh .logo svg{height:34px;width:auto}
+.coh .mk{width:70px;height:44px;}
+.solo .coh .mk{width:120px;height:76px}
+.solo .coh{flex-direction:column;align-items:flex-start}
+.coh .mk{background:var(--head);-webkit-mask:url(img/market-logo.png) left center/contain no-repeat;mask:url(img/market-logo.png) left center/contain no-repeat}
+.coh h2{font-size:22px;line-height:1.3;color:var(--head)}
+.coh .cta{margin-left:auto}
+.coh .addr{flex-basis:100%;font-size:14px;color:var(--sub)}
+.soon{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:40px;padding:20px 24px;border-radius:22px;border:2px dashed var(--line);color:var(--sub)}
+.soon b{font-size:18px;color:var(--head)}
+.soon .tag{padding:4px 12px;border-radius:999px;background:var(--kick-bg);color:var(--kick);font-weight:600;font-size:14px}
+@media (max-width:720px){.coh .cta{margin-left:0}}
+</style>
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031a"></script>
+<script src="b/common.js?v=20261031b"></script>
 <script>
 // เบอร์โทร · LINE ลูกค้า/ผู้ค้า · นำทาง ของทุกสาขา + ที่อยู่บริษัท
 page((C) => {
@@ -26,12 +44,23 @@ page((C) => {
         ${same ? '' : `<a class="btn alt sm" href="${esc(lineUrl(c.lineVendor))}" target="_blank" rel="noopener">${ic('chat')} LINE ผู้ค้า ${esc(c.lineVendor)}</a>`}
         ${fb ? `<a class="btn alt sm" href="${esc(fb)}" target="_blank" rel="noopener">${ic('fb')} Facebook</a>` : ''}
         ${map ? `<a class="btn alt sm" href="${esc(map)}"${ext(map)}>${ic('pin')} นำทาง</a>` : ''}</div></div>`; };
-  return `${pageHead('ติดต่อ', 'phone', 'ติดต่อตลาด', 'โทรหรือทัก LINE ของสาขาที่ต้องการได้เลย')}
+  const S = C.story || {}, of = re => C.keys.filter(k => re.test((S.brand || {})[k] || ''));
+  const go = of(/go/i), mk = of(/market/i), fbOf = ks => ks.map(k => get(C, `${k}.links.facebook`)).find(Boolean);
+  const btn = (h, i, t, pri) => h ? `<a class="btn ${pri ? 'pri' : 'alt'} sm" href="${esc(h)}" target="_blank" rel="noopener">${ic(i)} ${t}</a>` : '';
+  // บริษัทที่มีสาขาเดียว (โคราช): หัวบริษัทอยู่ข้างการ์ดสาขา ไม่ซ้ำปุ่ม/ที่อยู่ และไม่เหลือที่ว่างครึ่งแถว
+  const solo = (logo, name, ks) => `<div class="grid2 solo" style="margin-top:44px"><div class="coh rv" style="margin:0;align-self:center"><span class="logo">${logo}</span><h2>${name}</h2>
+      <p class="addr">บริษัทแยก ดูแลตลาดเซฟวัน${ks.map(k => esc(C[k].name)).join(' · ')}</p></div>${ks.map(box).join('')}</div>`;
+  const group = (logo, name, addr, line, fb, ks) => ks.length === 1 ? solo(logo, name, ks) : ks.length ? `<div class="coh rv"><span class="logo">${logo}</span><h2>${name}</h2>
+      <div class="cta">${btn(line && lineUrl(line), 'chat', 'LINE ' + esc(line || ''), true)}${btn(fb, 'fb', 'Facebook')}</div>
+      <p class="addr">${phr(addr)}</p></div>
+    <div class="grid2" style="margin-top:0">${ks.map(box).join('')}</div>` : '';
+  return `${pageHead('ติดต่อ · เกี่ยวกับเรา', 'phone', 'ติดต่อตลาด', 'ไนท์มาร์เก็ตเปิดทุกวัน มี 2 บริษัทดูแล แยกตามพื้นที่ · โทรหรือทัก LINE สาขาที่ต้องการได้เลย')}
   <section class="sec" style="padding-top:36px"><div class="wrap">
-    <div class="grid2" style="margin-top:0">${C.keys.map(box).join('')}</div>
-    <div class="info rv ${C.contact.lineOfficial ? 'two' : 'one'}"><div><h4>${esc(C.contact.company)}</h4><p style="margin-top:6px;font-size:15px">${phr(C.contact.address)}</p></div>
-      ${C.contact.lineOfficial ? `<div><h4>LINE ทางการ</h4><p style="margin-top:6px;font-size:15px">สาขา${(C.contact.lineOfficialFor || []).filter(k => C[k]).map(k => esc(C[k].name)).join(' · สาขา')}</p>
-        <a class="ln" style="font-size:20px" href="${esc(lineUrl(C.contact.lineOfficial))}" target="_blank" rel="noopener">${esc(C.contact.lineOfficial)}</a></div>` : ''}</div>
+    ${group('<span data-wm></span>', esc(C.contact.company), C.contact.address, C.contact.lineOfficial, fbOf(go), go)}
+    ${group('<span class="mk" role="img" aria-label="Saveone Market ตลาดเซฟวัน"></span>', 'Saveone Market', mk[0] ? C[mk[0]].where : '', mk[0] && C[mk[0]].contact.lineCustomer, fbOf(mk), mk)}
+    <div class="soon rv"><span class="tag">Coming Soon</span><b>สาขาใหม่ · เร็วๆ นี้</b><span>ติดตามได้ทาง LINE และ Facebook</span></div>
+    <div class="info one rv"><div><h4>ติดต่อเรื่องธุรกิจ · ร่วมงานกับเรา</h4>
+      <p style="margin-top:6px;font-size:15px">ทัก LINE ของบริษัท หรือโทรหาสำนักงานของสาขาที่สนใจ (เบอร์อยู่ในการ์ดสาขาด้านบน)</p></div></div>
   </div></section>`;
 });
 </script>
