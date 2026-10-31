@@ -460,26 +460,11 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .rg td.on{font-size:19px}
 .stars{color:#f5b301;letter-spacing:1px;font-size:15px}
 .stars i{font-style:normal;color:var(--line)}
-/* ── แบบเมนู (ทดลอง 31 ต.ค. 69 · ?nav=1|2|3) ── */
-.top nav>a .i,.ngrp>summary .i{display:none}
-.top nav small{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-top:1px}
-/* แบบ 2: รวมหน้าผู้ค้าใต้ "ผู้ค้า ▾" */
-.ngrp,.ngrp:last-child{position:relative;border-bottom:0}
-.ngrp>summary{display:flex;align-items:center;gap:4px;padding:7px 13px;border-radius:999px;font-size:15px;font-weight:500;color:var(--head);opacity:.85;transition:opacity .2s,background .2s}
-.ngrp>summary::after,.ngrp[open]>summary::after{content:"";width:7px;height:7px;border:solid currentColor;border-width:0 2px 2px 0;transform:translateY(-2px) rotate(45deg);margin-left:5px;transition:transform .2s}
-.ngrp[open]>summary::after{transform:translateY(2px) rotate(-135deg)}
-.ngrp>summary:hover,.ngrp[open]>summary{opacity:1;background:var(--card)}
-.ngrp.on>summary{opacity:1;background:var(--card2);color:var(--link);font-weight:600}
-.ngrp>.nmenu{position:absolute;z-index:40;top:calc(100% + 10px);left:50%;translate:-50% 0;width:min(320px,calc(100vw - 32px));padding:8px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);box-shadow:0 18px 40px rgba(20,14,60,.18);display:grid;gap:2px;animation:nm .18s ease-out}
+/* ── เมนู (เจ้าของเลือกแบบ 3 · 31 ต.ค. 69): จอแคบ = ปุ่ม ☰ กางแผงปุ่มใหญ่ ── */
+.top nav>a .i{display:none}
 @keyframes nm{from{opacity:0;transform:translateY(-6px)}}
-.top .nmenu a{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;opacity:1;white-space:normal;font-weight:600}
-.top nav .nmenu a .i,.top.open nav a .i{display:grid;place-items:center;width:40px;height:40px;padding:10px;flex:none;border-radius:12px;background:var(--card2);color:var(--link)}
-.top .nmenu a:hover{background:var(--card)}
-.top .nmenu a.on{background:var(--card2)}.top .nmenu a.on .i{background:var(--acc);color:#15122b}
-/* แบบ 3: ปุ่ม ☰ (จอแคบ) */
 .burger{display:none}
 @media (max-width:980px){
-  .top.nav2 nav{position:relative}.top.nav2 .ngrp{position:static}
   .top.nav3 .burger{order:5;display:grid;gap:4px;place-content:center;width:42px;height:42px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--card);cursor:pointer}
   .burger b{display:block;width:18px;height:2px;border-radius:2px;background:var(--head);transition:transform .25s,opacity .2s}
   .top.open .burger b:nth-child(1){transform:translateY(6px) rotate(45deg)}
@@ -489,10 +474,6 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
   .top.nav3 .bar{padding-bottom:10px}
   .top.nav3.open nav{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:4px 0 6px;white-space:normal;animation:nm .2s ease-out}
   .top.nav3.open nav a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;background:var(--card);border:1px solid var(--line);opacity:1;font-weight:600}
+  .top.nav3.open nav a .i{display:grid;place-items:center;width:40px;height:40px;padding:10px;flex:none;border-radius:12px;background:var(--card2);color:var(--link)}
   .top.nav3.open nav a.on{background:var(--card2);border-color:var(--acc)}.top.nav3.open nav a.on .i{background:var(--acc);color:#15122b}
 }
-/* ตัวเลือกแบบเมนู (ชั่วคราว) */
-.navpick{position:fixed;z-index:70;left:16px;bottom:72px;display:flex;align-items:center;gap:4px;padding:5px;border-radius:999px;background:#100d22;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.35);font-size:13px;font-weight:600}
-.navpick>span{padding:0 8px 0 10px;color:#c9c3df}
-.navpick a{min-width:34px;text-align:center;padding:7px 12px;border-radius:999px;color:#fff}
-.navpick a.on{background:#84e62d;color:#15122b}

@@ -10,8 +10,8 @@
      ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031v">
-<link rel="stylesheet" href="b/map.css?v=20261031c">
+<link rel="stylesheet" href="b/style.css?v=20261031w">
+<link rel="stylesheet" href="b/map.css?v=20261031e">
 </head>
 <body>
 
@@ -31,7 +31,7 @@
 <footer id="foot"></footer>
 
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/parts.js?v=20261031h"></script>
+<script src="b/parts.js?v=20261031i"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -96,7 +96,21 @@ const soon = () => `<div class="wrap"><div class="soon"><b>สาขาบาง
 // ── ม่าน ──
 function renderGate() {
   const who = g => `<div data-g="${g}" tabindex="0" role="button"><b>${ic(g === 'cus' ? 'bag' : 'store')}${T(C, `gate.${g}.title`)}</b><ul>${C.gate[g].items.map((_, i) => `<li>${T(C, `gate.${g}.items.${i}`)}</li>`).join('')}</ul><span class="go">เลือก →</span></div>`;
-  $('gateIn').innerHTML = `<img class="logo3d" src="img/logo-3d-night.webp" alt="${esc(C.gate.kicker)}">${EDIT ? T(C, 'gate.kicker', 'p', 'hi') : ''}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button>`;
+  $('gateIn').innerHTML = `<div class="g1"><img class="logo3d" src="img/logo-3d-night.webp" alt="${esc(C.gate.kicker)}">${EDIT ? T(C, 'gate.kicker', 'p', 'hi') : ''}${T(C, 'gate.title', 'h1')}<div class="who">${who('cus')}${who('ven')}</div><button class="skip" id="skip">${T(C, 'gate.skip')}</button></div>${EDIT ? '' : brStep()}`;
+}
+// ขั้น 2 ของลูกค้า: เลือกสาขา (บอกเปิด/ปิดตอนนี้ · สาขาที่ไปล่าสุดขึ้นป้าย) → ผังพลิกไปสาขานั้น + เนื้อหาลูกค้าของสาขานั้น
+const lastBr = () => { try { return localStorage.getItem('br'); } catch { return null; } };
+function brStep() {
+  const last = lastBr();
+  const card = k => { const b = C[k], h = b.facts?.find(f => f[0] === 'food')?.[2], o = h && h.includes('–') && openStatus(h);
+    return `<button type="button" class="brc" data-br="${k}">${ic('pin')}<span class="t"><b>${esc(b.name)}</b>${o ? `<span class="bst${o.open ? ' open' : ''}"><i></i>${o.open ? 'เปิดอยู่' : esc(o.text)}</span>` : `<small>${esc(b.tag || '')}</small>`}</span>${k === last ? '<em>ไปล่าสุด</em>' : ''}<span class="arr">→</span></button>`; };
+  return `<div class="g2"><p class="hi">${ic('bag')} ${esc(C.gate.cus.title)}</p><h1>ไปสาขาไหน?</h1><div class="brs">${C.branchKeys.map(card).join('')}</div><button class="skip" id="brBack">← ย้อนกลับ</button></div>`;
+}
+function chooseBranch(k) {
+  try { localStorage.setItem('br', k); } catch {}
+  if (k !== BR) { BR = k; renderBranch(); }
+  try { frame.contentWindow.postMessage({ goBranch: k }, location.origin); } catch {}
+  gate.classList.remove('s2'); pick('cus');
 }
 
 // ── ลูกค้า ──
@@ -215,7 +229,7 @@ function wireGo() {
 // ── ม่านเลือกกลุ่ม · ส่งกลุ่ม (+ เนื้อหา) ไปผัง 3D ──
 const gate = $('gate'), chip = $('chip'), frame = $('mapFrame');
 let group = null;
-const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C }, location.origin); } catch {} };
+const tellMap = () => { try { frame.contentWindow.postMessage({ pinGroup: group, content: C, goBranch: BR }, location.origin); } catch {} };
 frame.addEventListener('load', tellMap);
 // มือถือ: แถบที่อยู่เบราว์เซอร์หด/โผล่ตอนเลื่อนจอ → ความสูงจอเปลี่ยน → ผังเคยยืดหด (ดูเหมือนซูมเข้าออก)
 // ล็อกความสูงกรอบผังเป็นพิกเซล เปลี่ยนเฉพาะตอนความกว้างเปลี่ยน (หมุนจอ) · จอคอมใช้ค่าใน CSS ตามเดิม
@@ -230,18 +244,22 @@ lockMapHeight(); addEventListener('resize', lockMapHeight);
 addEventListener('message', e => {
   if (e.origin !== location.origin || !e.data) return;
   if ('cardOpen' in e.data) document.documentElement.classList.toggle('mapfull', !!e.data.cardOpen && innerWidth <= 720);
-  if (e.data.branch && e.data.branch !== BR && C) { BR = e.data.branch; renderBranch(); }   // ผังพลิกสาขา → เนื้อหาข้างล่างเปลี่ยนตาม
+  if (e.data.branch && e.data.branch !== BR && C) { BR = e.data.branch; renderBranch(); if (!chip.hidden) chipText(); }   // ผังพลิกสาขา → เนื้อหาข้างล่างเปลี่ยนตาม
 });
+const chipText = () => { chip.textContent = (group ? C.gate[group].title : 'ดูผังทั้งหมด') + (group === 'cus' && C[BR] ? ' · ' + C[BR].name : '') + ' · เปลี่ยน'; };
 function pick(g) {
   group = g; tellMap();
-  gate.classList.add('off'); chip.hidden = false; chip.textContent = (g ? C.gate[g].title : 'ดูผังทั้งหมด') + ' · เปลี่ยน';
+  gate.classList.add('off'); chip.hidden = false; chipText();
   document.querySelectorAll('.grp').forEach(m => m.classList.toggle('on', m.id === 'g-' + g));
 }
 function wireGate() {
   gate.querySelectorAll('[data-g]').forEach(b => {
-    b.onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(b.dataset.g); };
-    b.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === b) { e.preventDefault(); pick(b.dataset.g); } };
+    const go = () => { if (b.dataset.g === 'cus' && !EDIT) { gate.classList.add('s2'); gate.querySelector('.brc')?.focus({ preventScroll: true }); } else pick(b.dataset.g); };
+    b.onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; go(); };
+    b.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === b) { e.preventDefault(); go(); } };
   });
+  gate.querySelectorAll('.brc').forEach(b => b.onclick = () => chooseBranch(b.dataset.br));
+  if ($('brBack')) $('brBack').onclick = () => gate.classList.remove('s2');
   $('skip').onclick = e => { if (EDIT && e.target.closest('[data-p]')) return; pick(null); };
   document.querySelectorAll('[data-close]').forEach(a => a.addEventListener('click', () => gate.classList.add('off')));
 }
@@ -250,7 +268,7 @@ $('themeBtn').onclick = () => {
   document.documentElement.dataset.theme = t;
   try { localStorage.setItem('theme', t); } catch {}
 };
-chip.onclick = () => { gate.classList.remove('off'); chip.hidden = true; scrollTo({ top: 0 }); };
+chip.onclick = () => { gate.classList.remove('off'); gate.classList.toggle('s2', group === 'cus'); chip.hidden = true; scrollTo({ top: 0 }); };
 
 // ── โหมดแก้: แถบล่าง (บันทึก/ฉบับร่าง) ──
 // ตอนนี้ (ทดลองในเครื่อง) บันทึก = เลือกโฟลเดอร์ prototypes/content ครั้งแรก แล้วเขียนทับ site.json + <สาขา>/data.json ด้วย Chrome
@@ -300,8 +318,10 @@ function editBar(hasDraft) {
   let hasDraft = false;
   if (EDIT) { try { const d = localStorage.getItem(DRAFT); if (d) { C = JSON.parse(d); hasDraft = true; } } catch {} }
   document.body.classList.toggle('edit', EDIT);
-  frame.src = 'branch-flip.html?v=20261031b' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
+  frame.src = 'branch-flip.html?v=20261031c' + (EDIT ? '&edit' : '');   // ?v= เปลี่ยนทุกครั้งที่แก้ไฟล์ ไม่ให้เบราว์เซอร์ใช้ของเก่า
   renderAll();
+  { const q = new URLSearchParams(location.search), qb = q.get('b');   // ป้ายสแกน/ลิงก์ตรง: ?b=sg&g=cus → ข้ามม่าน ไปสาขานั้นเลย
+    if (!EDIT && qb && C.branchKeys.includes(qb)) { if (q.get('g') === 'ven') { BR = qb; renderBranch(); frame.contentWindow.postMessage({ goBranch: qb }, location.origin); pick('ven'); } else chooseBranch(qb); } }
   if (!EDIT) return;
   editBar(hasDraft);
   CMS.bind(document.body, C, changed, () => { changed(); renderAll(); pick(group); });

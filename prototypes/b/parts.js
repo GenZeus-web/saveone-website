@@ -1,3 +1,10 @@
+// ตอนนี้ตลาดเปิดไหม (เวลาเครื่อง เทียบ "16:00–23:00")
+function openStatus(hours) {
+  const [o, c] = hours.split('–').map(t => { const [h, m] = t.split(':').map(Number); return h * 60 + (m || 0); });
+  const d = new Date(), n = d.getHours() * 60 + d.getMinutes(), open = n >= o && n < c, m = ((o - n) + 1440) % 1440;
+  return { open, text: open ? `ตอนนี้เปิดอยู่ · ถึง ${hours.split('–')[1]}` : `เปิดอีก ${m >= 60 ? Math.floor(m / 60) + ' ชม. ' : ''}${m % 60 ? (m % 60) + ' นาที' : ''}` };
+}
+
 // ชิ้นส่วนที่เว็บแบบ 1 (หลายหน้า) และแบบ 2 (ผัง 3D) ใช้ร่วมกัน → หน้าตาเหมือนกันทั้งสองแบบ (เจ้าของ 31 ต.ค. 69)
 // ต้องโหลดหลัง content/cms.js · ใช้ ic() ของหน้านั้น (ประกาศทีหลังได้ เรียกตอนวาด)
 

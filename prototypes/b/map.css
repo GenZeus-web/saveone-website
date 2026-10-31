@@ -140,3 +140,24 @@ details table{min-width:0}
 /* แบบ 2 ไม่มีแอนิเมชันโผล่ตอนเลื่อน → การ์ดที่ใช้ร่วมกับแบบ 1 (.rv) แสดงเลย */
 .grp .rv{opacity:1;translate:none}
 .kind img{cursor:zoom-in}
+/* ม่านขั้น 2: ลูกค้าเลือกสาขา (31 ต.ค. 69) */
+.gate .g2{display:none}
+.gate.s2 .g1{display:none}
+.gate.s2 .g2{display:block;animation:g2in .35s cubic-bezier(.2,.7,.2,1)}
+@keyframes g2in{from{opacity:0;transform:translateX(24px)}}
+.g2 .hi{display:inline-flex;align-items:center;gap:8px;padding:5px 14px;border-radius:999px;background:var(--ok-bg);color:var(--link);font-weight:600;font-size:14px}
+.g2 .hi .i{width:18px;height:18px}
+.brs{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px;text-align:left}
+.brc{position:relative;display:flex;align-items:center;gap:12px;padding:16px 18px;border-radius:22px;border:2px solid var(--line);background:var(--card);box-shadow:var(--shadow);color:var(--ink);font:inherit;cursor:pointer;transition:border-color .2s,transform .2s}
+.brc:hover,.brc:focus-visible{border-color:var(--acc);transform:translateY(-3px);outline:0}
+.brc>.i{width:44px;height:44px;padding:10px;border-radius:14px;background:var(--ok-bg);color:var(--link);flex:none}
+.brc .t{display:grid;gap:4px;flex:1;min-width:0;text-align:left;justify-items:start}
+.brc .t b{font-size:20px;font-weight:700;color:var(--head)}
+.brc .t small{font-size:13px;color:var(--sub)}
+.brc .bst{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--sub)}
+.brc .bst i{width:8px;height:8px;border-radius:50%;background:var(--sub)}
+.brc .bst.open{color:var(--ok)}.brc .bst.open i{background:#3ccf4e;box-shadow:0 0 0 0 rgba(60,207,78,.6);animation:bpulse 1.6s infinite}
+@keyframes bpulse{70%{box-shadow:0 0 0 7px rgba(60,207,78,0)}100%{box-shadow:0 0 0 0 rgba(60,207,78,0)}}
+.brc em{position:absolute;top:-9px;right:14px;padding:2px 10px;border-radius:999px;background:var(--acc);color:var(--acc-ink);font-style:normal;font-size:12px;font-weight:700}
+.brc .arr{font-size:20px;color:var(--link)}
+@media (max-width:640px){.brs{gap:10px}.brc{padding:12px 14px}.brc .t b{font-size:18px}}

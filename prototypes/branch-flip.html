@@ -1383,13 +1383,17 @@ function tryFocus() {
   const q = pinEls.find(ok) || pinEls.find(q => q.p.kind === f.kind);
   focusWant = null; if (q) openCard(q.p, q.el);
 }
-setInterval(tryFocus, 300);
+setInterval(() => { tryBranch(); tryFocus(); }, 300);
 // รหัสสาขา (ตรงกับโฟลเดอร์ content/<รหัส>/) · บอกหน้าแรกทุกครั้งที่พลิกเสร็จ → เนื้อหาข้างล่างเปลี่ยนตาม
 const brKey = i => BRANCHES[i].sg ? 'sg' : BRANCHES[i].korat ? 'korat' : 'sb';
 const tellBranch = () => { if (parent !== window) parent.postMessage({ branch: brKey(cur) }, location.origin); };
-function goBranch(k) {
-  const i = BRANCHES.findIndex((_, j) => brKey(j) === k);
-  if (i < 0 || i === cur || busy || $('loading')) return;
+let brWant = null;
+function goBranch(k) { brWant = k; tryBranch(); }
+function tryBranch() {
+  const i = BRANCHES.findIndex((_, j) => brKey(j) === brWant);
+  if (i < 0 || i === cur) { brWant = null; return; }
+  if (busy || $('loading')) return;
+  brWant = null;
   go((i - cur + BRANCHES.length) % BRANCHES.length === 1 ? 1 : -1);   // 3 สาขา = ห่างกันไม่เกิน 1 ช่องเสมอ
 }
 let cur = 0, mode = 'wave', busy = false;   // เจ้าของเลือก "พลิกไล่ทีละช่อง" (28 ต.ค. 69) · อีก 2 ท่าเก็บไว้ในโค้ด เรียกได้ทาง __flip.setMode
