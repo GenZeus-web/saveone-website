@@ -25,9 +25,12 @@ function priceTable(rows, V, { cell, all = false } = {}) {
 // slides = [[src, alt, figcaptionHTML?], …] · cls = คลาสเพิ่ม (hero = หน้าแรก · lots = ตัวอย่างการจอง) · top = HTML ลอยบนรูป (เช่น ป้ายเปิดอยู่)
 function gallery(slides, { cls = '', label = '', note = '', top = '' } = {}) {
   const e = CMS.esc; if (!slides.length) return '';
-  const many = slides.length > 1;
-  return `<div class="gal ${cls}" data-gal>${label ? `<span class="lbl">${label}</span>` : ''}
-    <div class="gstack">${slides.map(([src, alt, cap], i) => `<figure class="gs" data-i="${i}"><div class="gimg"><img src="${e(src)}" alt="${e(alt)}"${i ? ' loading="lazy"' : ''} draggable="false"></div>${cap ?? `<figcaption><span>${e(alt)}</span></figcaption>`}</figure>`).join('')}${top}</div>
+  const many = slides.length > 1, n = slides.length;
+  // ซ้าย-ขวาต้องเท่ากันเสมอ (เจ้าของ: "รูปที่โชว์ต้องจำนวนคี่ ไม่งั้นไม่อยู่ตรงกลาง") → โชว์ 5 รูป (กลาง + ข้างละ 2)
+  // รูปน้อยกว่า 5 → วนรูปเดิมซ้ำจนพอ (จุดบอกลำดับยังนับตามรูปจริง)
+  const reel = many ? Array.from({ length: n * Math.ceil(5 / n) }, (_, i) => slides[i % n]) : slides;
+  return `<div class="gal ${cls}" data-gal data-n="${n}">${label ? `<span class="lbl">${label}</span>` : ''}
+    <div class="gstack">${reel.map(([src, alt, cap], i) => `<figure class="gs" data-i="${i}"><div class="gimg"><img src="${e(src)}" alt="${e(alt)}"${i ? ' loading="lazy"' : ''} draggable="false"></div>${cap ?? `<figcaption><span>${e(alt)}</span></figcaption>`}</figure>`).join('')}${top}</div>
     ${many ? `<div class="gnav"><button type="button" class="gb" data-d="-1" aria-label="รูปก่อนหน้า">‹</button><div class="gdots">${slides.map((_, i) => `<button type="button" data-to="${i}" aria-label="รูปที่ ${i + 1}"></button>`).join('')}</div><button type="button" class="gb" data-d="1" aria-label="รูปถัดไป">›</button></div>` : ''}
     ${note ? `<p class="lnote">${note}</p>` : ''}</div>`;
 }
@@ -44,18 +47,21 @@ function lotExamples(z, Z) {
 }
 // ตำแหน่งรูป: d = ห่างจากรูปกลางกี่รูป (ลบ = ซ้าย) · เกิน 2 = ซ่อน
 function galSet(g, i) {
-  const fs = [...g.querySelectorAll('.gs')], n = fs.length; g._i = ((i % n) + n) % n;
+  const fs = [...g.querySelectorAll('.gs')], n = fs.length, m = +g.dataset.n || n; g._i = ((i % n) + n) % n;
   fs.forEach((f, j) => { let d = (j - g._i + n) % n; if (d > n / 2) d -= n;
     f.dataset.d = Math.abs(d) > 2 ? 'x' : d; f.setAttribute('aria-hidden', d ? 'true' : 'false'); });
-  g.querySelectorAll('.gdots button').forEach((b, j) => b.classList.toggle('on', j === g._i));
+  g.querySelectorAll('.gdots button').forEach((b, j) => b.classList.toggle('on', j === g._i % m));
 }
+// จุดที่ j → ไปรูปชุดที่ใกล้ที่สุด (รูปวนซ้ำ ไม่กระโดดไกล)
+const galTo = (g, j) => { const n = g.querySelectorAll('.gs').length, m = +g.dataset.n || n;
+  let best = j, bd = 1e9; for (let k = j; k < n; k += m) { const d = Math.min((k - g._i + n) % n, (g._i - k + n) % n); if (d < bd) { bd = d; best = k; } } return best; };
 function galInit(g) {
   g.dataset.gal = 'on'; galSet(g, 0);
   const n = g.querySelectorAll('.gs').length; if (n < 2) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let x0 = null, hold = false, seen = false;
   g.addEventListener('click', e => { const b = e.target.closest('.gb,[data-to]'); if (!b) return;
-    galSet(g, b.dataset.to != null ? +b.dataset.to : g._i + +b.dataset.d); g._t = Date.now(); });
+    galSet(g, b.dataset.to != null ? galTo(g, +b.dataset.to) : g._i + +b.dataset.d); g._t = Date.now(); });
   const st = g.querySelector('.gstack');
   st.addEventListener('pointerdown', e => { x0 = e.clientX; hold = true; });
   st.addEventListener('pointerup', e => { hold = false; if (x0 == null) return; const dx = e.clientX - x0; x0 = null;

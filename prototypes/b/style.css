@@ -406,14 +406,17 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .gal .gdots button{width:8px;height:8px;padding:0;border-radius:999px;border:0;background:var(--line);cursor:pointer;transition:width .3s,background .3s}
 .gal .gdots button.on{width:22px;background:var(--acc)}
 /* หน้าแรก: รูปใหญ่ เต็มกรอบ (รูปถ่าย ตัดขอบได้) · คำบรรยาย + ป้ายเปิดอยู่ลอยบนรูป */
-.gal.hero-gal{--gw:74%}
-.gal.hero-gal .gstack{overflow:visible;padding:0}
+.gal.hero-gal{--gw:62%}
+.gal.hero-gal .gstack{overflow:visible;padding:30px 0 60px;margin:-30px 0 -60px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent);mask-image:linear-gradient(90deg,transparent,#000 9%,#000 91%,transparent)}   /* รูปข้างจางหายที่ขอบ ไม่ทับหัวเรื่อง */
+.gal.hero-gal .gs:not([data-d="0"]){top:30px}
 .gal.hero-gal .gimg{aspect-ratio:4/3.4}
 .gal.hero-gal .gimg img{object-fit:cover}
 .gal.hero-gal .gs{box-shadow:0 30px 70px rgba(10,8,30,.35);border-radius:26px}
 .gal.hero-gal .gs figcaption{position:absolute;left:14px;bottom:14px;padding:5px 12px;border-radius:999px;background:rgba(16,13,34,.75);color:#fff;font-size:13px}
 .gal.hero-gal .gs[data-d="0"] .gimg::after{display:none}
-.gal.hero-gal .status{z-index:6;left:calc((100% - var(--gw)) / 2 + 14px)}
+.gal.hero-gal .status{z-index:6;top:44px;left:50%;transform:translateX(-50%);width:max-content;max-width:calc(var(--gw) - 24px);flex-wrap:wrap;justify-content:center;row-gap:0;text-align:center;line-height:1.35}
+.gal.hero-gal .status i{flex:none}   /* ป้ายเปิด/ปิด กลางรูปกลาง ไม่ล้นกรอบ */
+@media (max-width:700px){.gal.hero-gal .status{font-size:12px;padding:6px 11px;gap:6px}.gal.hero-gal .status small{font-size:11px}}
 .hero{overflow:hidden}
-@media (max-width:700px){.gal{--gw:76%}.gal.hero-gal{--gw:80%}}
+@media (max-width:700px){.gal{--gw:76%}.gal.hero-gal{--gw:72%}}
 @media (prefers-reduced-motion:reduce){.gal .gs{transition:none}}
