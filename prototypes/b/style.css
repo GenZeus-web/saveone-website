@@ -433,3 +433,13 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .pen-t td{font-size:14px;color:var(--ink);line-height:1.5}
 .pen-t td.minus{width:64px;text-align:center;font-size:18px;font-weight:700;color:var(--no);white-space:nowrap}
 .pen-t thead th:last-child{text-align:center}
+.pts-t.kv th{width:38%;font-size:14px;font-weight:600;color:var(--sub);background:var(--card2);white-space:normal}
+.pts-t.kv td{font-size:15px;font-weight:600;color:var(--head);line-height:1.5}
+.pts-t.kv.warn{margin-top:16px}
+.pts-t.kv.warn th{background:var(--no-bg);color:var(--no)}
+.pts-r{margin-top:18px}
+.pts-t.stack td{font-size:15px;color:var(--head);line-height:1.5}
+/* มือถือ: ตารางรอบจอง 4 คอลัมน์ → การ์ดละแถว (หัวคอลัมน์อยู่หน้าค่า) ไม่ต้องเลื่อนข้าง */
+@media (max-width:600px){.pts-t.stack thead{display:none}.pts-t.stack tr{display:block;border-bottom:1px solid var(--tl)}.pts-t.stack tbody tr:last-child{border-bottom:0}
+  .pts-t.stack th,.pts-t.stack td{display:block;border:0;border-right:0}.pts-t.stack th{background:var(--card2)}
+  .pts-t.stack td{padding:8px 12px}.pts-t.stack td::before{content:attr(data-h);display:block;font-size:12px;font-weight:600;color:var(--sub)}}

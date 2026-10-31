@@ -94,22 +94,30 @@ const ZIC = { food: 'food', boot: 'car', court: 'food' };
 const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${CMS.esc(name)}${typeof whereBtn === 'function' ? whereBtn(k, z) : ''}</div>
   <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${CMS.esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
 
-// คะแนนและอันดับ = ตาราง (เจ้าของ 31 ต.ค. 69: "คำแนะนำระบบอันดับ ทำเป็นรูปแบบตาราง")
-// อ่านจากข้อความเดิมใน vendor.points (แก้ที่เดิมได้เหมือนเดิม): chips "มาขาย +6" → แถว · text = สูตร + ข้อแยกด้วย " · "
-// note: ข้อที่เป็น "อันดับ … รอบ… 10:00" → ตารางรอบจองตามอันดับ · ที่เหลือเป็นหมายเหตุ
+// คะแนนและอันดับ = ตาราง (เจ้าของ 31 ต.ค. 69: "คำแนะนำระบบอันดับ ทำเป็นรูปแบบตาราง" + ส่งหน้า Wix newscorestreetfood / newscorecarboot)
+// vendor.points: chips "มาขาย +6" → ตารางได้คะแนน · rank / watch = [[หัวข้อ, รายละเอียด]] · rounds = { title, head, rows, notes } (เปิดท้าย)
+// ไม่มี rank (ข้อมูลเก่า) → อ่านจาก text/note แบบเดิม
 function pointsBlock(P) {
   const e = CMS.esc, parts = t => String(t || '').split(' · ').map(x => x.trim()).filter(Boolean);
   const earn = (P.chips || []).filter(Boolean).map(t => { const m = t.match(/^(.*?)\s*([+−-]?\d[\d,]*)$/); return m ? [m[1], m[2]] : [t, '']; });
-  const tx = parts(P.text), formula = tx.find(x => x.includes('=')), how = tx.filter(x => x !== formula);
-  let zone = ''; const rounds = [], notes = [];
-  parts(P.note).forEach(x => { const m = x.match(/^(?:(\S+):\s*)?อันดับ\s*([\d–-]+(?:\s*ขึ้นไป)?)\s+(?:จอง)?(รอบ\S*)\s+(\d{1,2}:\d{2})/);
-    if (m) { zone = zone || m[1] || ''; rounds.push([m[2], m[3], m[4]]); } else notes.push(x); });
+  const kv = (cap, rows, cls = '') => rows?.length ? `<table class="ptbl pts-t kv ${cls}"><caption>${cap}</caption><tbody>${rows.filter(([a]) => a).map(([a, b]) => `<tr><th scope="row">${e(a)}</th><td>${e(b)}</td></tr>`).join('')}</tbody></table>` : '';
+  const tx = parts(P.text), formula = !P.rank && tx.find(x => x.includes('='));
   const earnT = earn.length ? `<table class="ptbl pts-t"><caption>ได้คะแนนจาก</caption><thead><tr><th scope="col">ทำอะไร</th><th scope="col">คะแนน</th></tr></thead><tbody>
     ${earn.map(([a, b]) => `<tr><th scope="row">${e(a)}</th><td class="on${/^0$/.test(b) ? ' zero' : ''}">${e(b)}</td></tr>`).join('')}</tbody>
     ${formula ? `<tfoot><tr><td colspan="2"><b>วิธีคิด</b> ${e(formula)}</td></tr></tfoot>` : ''}</table>` : '';
+  if (P.rank) {
+    const R = P.rounds, roundT = R?.rows?.length ? `<div class="pts-r"><table class="ptbl pts-t stack"><caption>${e(R.title)}</caption><thead><tr>${R.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>
+      ${R.rows.map(r => `<tr>${r.map((c, i) => i ? `<td data-h="${e(R.head[i])}">${e(c)}</td>` : `<th scope="row">${e(c)}</th>`).join('')}</tr>`).join('')}</tbody></table>
+      ${R.notes?.length ? `<ul class="dots pts-n">${R.notes.filter(Boolean).map(x => `<li>${e(x)}</li>`).join('')}</ul>` : ''}</div>` : '';
+    return `<div class="pts-g">${earnT}${kv('การจัดอันดับ', P.rank)}</div>${kv('ข้อควรรู้', P.watch, 'warn')}${roundT}`;
+  }
+  // ข้อมูลแบบเก่า: note ข้อ "อันดับ … รอบ… 10:00" → ตารางรอบจอง · ที่เหลือเป็นหมายเหตุ
+  let zone = ''; const rounds = [], notes = [];
+  parts(P.note).forEach(x => { const m = x.match(/^(?:(\S+):\s*)?อันดับ\s*([\d–-]+(?:\s*ขึ้นไป)?)\s+(?:จอง)?(รอบ\S*)\s+(\d{1,2}:\d{2})/);
+    if (m) { zone = zone || m[1] || ''; rounds.push([m[2], m[3], m[4]]); } else notes.push(x); });
   const roundT = rounds.length ? `<table class="ptbl pts-t"><caption>รอบจองตามอันดับ${zone ? ` · ${e(zone)}` : ''}</caption><thead><tr><th scope="col">อันดับ</th><th scope="col">รอบ</th><th scope="col">เวลาจอง</th></tr></thead><tbody>
     ${rounds.map(([r, n, t]) => `<tr><th scope="row">${e(r)}</th><td>${e(n)}</td><td class="on">${e(t)}</td></tr>`).join('')}</tbody></table>` : '';
-  const list = [...how, ...notes];
+  const list = [...tx.filter(x => x !== formula), ...notes];
   return `<div class="pts-g">${earnT}${roundT}</div>${list.length ? `<ul class="dots pts-n">${list.map(x => `<li>${CMS.phr(x)}</li>`).join('')}</ul>` : ''}`;
 }
 
