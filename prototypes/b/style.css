@@ -202,6 +202,13 @@ img{display:block;max-width:100%}
 .ptbl tr.td>*{background:var(--ok-bg)}
 .ptbl .tag{display:inline-block;margin-left:8px;font-size:12px;font-weight:600;padding:1px 9px;border-radius:999px;background:var(--acc);color:var(--acc-ink);vertical-align:middle}
 .spot+.spot{margin-top:18px}
+/* การ์ดเวลาตามโซน (หน้าวิธีจอง/ระเบียบ) */
+.ztimes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;margin-top:22px}
+.ztc{border-radius:20px;overflow:hidden;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow)}
+.ztc .zt{font-size:18px;padding:12px 18px}
+.ztc .ptbl{margin:14px;width:calc(100% - 28px)}
+.ptbl.tt th{width:38%;white-space:normal;font-size:14px;font-weight:600;color:var(--sub);background:var(--card2)}
+.ptbl.tt td{font-size:16px;font-weight:600;color:var(--head);line-height:1.5}
 /* ตัวอย่างล็อก (ภาพเรนเดอร์ 3D) */
 .lots{margin-top:18px}
 .lots figure{margin:8px 0 0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}

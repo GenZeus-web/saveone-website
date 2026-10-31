@@ -102,6 +102,11 @@ function branchTabs(C, cur, all = false) {
 // ปิดดรอปดาวน์เมื่อแตะข้างนอก / กด Esc
 addEventListener('click', e => document.querySelectorAll('details.bpick[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
 addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('details.bpick[open]').forEach(d => { d.open = false; d.querySelector('summary').focus(); }); });
+// เวลา (จอง/วันขาย) = การ์ดละโซน · ในการ์ดเป็นตารางเส้นทึบ 2 คอลัมน์ (หัวข้อ | เวลา) → มือถือไม่ต้องเลื่อนข้าง (เจ้าของ 31 ต.ค. 69)
+// list = [[zoneKey, ชื่อโซน, [[หัวข้อ, ค่า(HTML)], …]], …]
+const zoneTimes = list => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${esc(name)}</div>
+  <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
+const ZIC = { food: 'food', boot: 'car', court: 'food' };
 const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
 function header() {
