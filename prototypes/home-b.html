@@ -8,13 +8,13 @@
      ส่วนร่วมอยู่ b/style.css + b/common.js · ข้อมูลจาก content/ ชุดเดียวกับ home.html -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031zd">
+<link rel="stylesheet" href="b/style.css?v=20261031zh">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/parts.js?v=20261031n"></script>
-<script src="b/common.js?v=20261031n"></script>
+<script src="b/parts.js?v=20261031p"></script>
+<script src="b/common.js?v=20261031o"></script>
 <script>
 page((C) => {
   const sg = C.sg, hours = sg.facts[0]?.[2] || '16:00–23:00', st = openStatus(hours);
@@ -46,6 +46,7 @@ page((C) => {
     <span class="kick">${ic('bag')} ${esc(C.gate.cus.title)}</span><h2 class="h2">มาเดินตลาด</h2>
     <div class="doors">
       ${door('branches-b.html', 'pin', 'สาขาและเวลาเปิด', 'ที่ตั้ง นำทาง ที่จอดรถ ดูกล้อง และผังตลาด 3D')}
+      ${door('branches-b.html#map', 'map', 'ผังตลาด 3D', 'ดูโซน ห้องน้ำ ที่จอดรถ ก่อนมา')}
       ${door('contact-b.html', 'phone', 'ติดต่อตลาด', 'เบอร์โทร LINE ของแต่ละสาขา')}
     </div>
   </div></section>

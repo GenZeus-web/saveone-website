@@ -114,11 +114,11 @@ function rankGuide(G, zones) {
   const zs = Object.keys(G.zones).filter(z => G.zones[z]?.length && zOn(z));
   // โซนที่ไม่มีดาว (เปิดท้าย) = เงื่อนไข 2 ขั้น: จ.–พฤ. ทำรอบคัดกรองครบ 2 วัน → ศ.–อา. ได้สิทธิ์รอบคัดกรองต่อ
   const flowT = (z, F) => `<div class="qflow z-${z}"><p class="qcap">${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</p>
-    <div class="qbox"><p class="qh">${e(F.title)}</p><div class="qr">${(F.rounds || []).map(([n, t], i) => `<span class="${i ? 'gen' : 'scr'}"><b>${e(t)}</b>${e(n)}</span>`).join('')}</div>
-    ${qsimHTML()}
+    <div class="qbox"><p class="qh">${e(F.title)}</p><div class="qbody"><div class="ql"><div class="qr">${(F.rounds || []).map(([n, t], i) => `<span class="${i ? 'gen' : 'scr'}"><b>${e(t)}</b>${e(n)}</span>`).join('')}</div>
+    ${qsimHTML()}</div><div class="qrt">
     ${F.steps.map((st, i) => `${i ? `<div class="qarr" aria-hidden="true">ทำครบ 2 วัน ↓</div>` : ''}<div class="qstep"><span class="qn">ขั้น ${i + 1}</span><span class="qday">${e(st.when)}</span>
       <p class="qwho">${e(st.who)}</p><p class="qget">${e(st.get)}</p><p class="qrest">${e(st.rest)}</p>${st.miss ? `<p class="qmiss">${e(st.miss)}</p>` : ''}</div>`).join('')}
-    ${F.other ? `<p class="qother">${e(F.other)}</p>` : ''}</div></div>`;
+    ${F.other ? `<p class="qother">${e(F.other)}</p>` : ''}</div></div></div></div>`;
   return `<div class="rguide"><h3 class="rg-h">${e(G.title)}<small>${e(G.sub || '')}</small></h3><div class="pts-g">${zs.map(z => `<table class="ptbl pts-t rg z-${z}"><caption>${ic(ZIC[z] || 'pin')} ${e(zones?.[z]?.name || z)}</caption>
     <thead><tr>${G.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>${G.zones[z].map((r, i) => `<tr${i ? '' : ' class="first"'}><th scope="row">${star(r[0])}</th><td>${e(r[1])}</td><td class="on">${e(r[2])}</td></tr>`).join('')}</tbody></table>`).join('')}${Object.entries(G.flows || {}).filter(([z]) => zOn(z)).map(([z, F]) => flowT(z, F)).join('')}</div></div>`;
 }
@@ -134,7 +134,7 @@ function pointsBlock(P, zones) {
     const R = P.rounds, roundT = R?.rows?.length ? `<div class="pts-r"><table class="ptbl pts-t stack"><caption>${e(R.title)}</caption><thead><tr>${R.head.map(h => `<th scope="col">${e(h)}</th>`).join('')}</tr></thead><tbody>
       ${R.rows.map(r => `<tr>${r.map((c, i) => i ? `<td data-h="${e(R.head[i])}">${e(c)}</td>` : `<th scope="row">${e(c)}</th>`).join('')}</tr>`).join('')}</tbody></table>
       ${R.notes?.length ? `<ul class="dots pts-n">${R.notes.filter(Boolean).map(x => `<li>${e(x)}</li>`).join('')}</ul>` : ''}</div>` : '';
-    return `${rankGuide(P.guide, zones)}<div class="pts-g" style="margin-top:22px">${earnT}${kv('การจัดอันดับ', P.rank)}</div>${kv('ข้อควรรู้', P.watch, 'warn')}${roundT}`;
+    return `${rankGuide(P.guide, zones)}<div class="pts-g" style="margin-top:24px">${earnT}${kv('การจัดอันดับ', P.rank)}</div>${kv('ข้อควรรู้', P.watch, 'warn')}${roundT}`;
   }
   // ข้อมูลแบบเก่า: note ข้อ "อันดับ … รอบ… 10:00" → ตารางรอบจอง · ที่เหลือเป็นหมายเหตุ
   let zone = ''; const rounds = [], notes = [];

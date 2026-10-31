@@ -10,7 +10,7 @@
      ไอคอนวาดเอง (ICON ด้านล่าง) · ผัง 3D ในกรอบบนรับเนื้อหาชุดเดียวกันผ่าน postMessage -->
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031zd">
+<link rel="stylesheet" href="b/style.css?v=20261031zh">
 <link rel="stylesheet" href="b/map.css?v=20261031e">
 </head>
 <body>
@@ -31,7 +31,7 @@
 <footer id="foot"></footer>
 
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/parts.js?v=20261031n"></script>
+<script src="b/parts.js?v=20261031p"></script>
 <script>
 const { EDIT, esc, get, T, del, add } = CMS;
 const $ = id => document.getElementById(id);
@@ -120,7 +120,7 @@ function renderCus() {
   $('g-cus').innerHTML = `<div class="wrap">
     <section class="sec"><h2>${T(C, 'customer.title')}${brName()}</h2>${T(C, `${P}.customer.sub`, 'p', 'sub')}${quick(`${P}.customer.quick`)}${pics(`${P}.customer.photos`)}</section>
     <section class="sec"><div class="card"><h3>${ic('pin')}${T(C, `${P}.name`)}</h3>${T(C, `${P}.where`, 'p', 'sub')}
-      <div class="facts" style="margin-top:10px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${j}.1`)}</small>${T(C, `${P}.facts.${j}.2`, 'b')}</div>`).join('')}</div></div>
+      <div class="facts" style="margin-top:12px">${b.facts.map((f, j) => `<div class="f"><small>${ic(f[0])}${T(C, `${P}.facts.${j}.1`)}</small>${T(C, `${P}.facts.${j}.2`, 'b')}</div>`).join('')}</div></div>
       ${T(C, `${P}.customer.note`, 'p', 'note')}<div>${otherBranches()}</div></section></div>`;
 }
 
@@ -144,7 +144,7 @@ function renderVen() {
   const kinds = zs.map(z => { const Z = V.zones[z];
     const cover = Z.photos.find(([src]) => src);   // รูปแรกของโซน = ภาพปก
     return `<div class="kind">${cover ? `<img src="${esc(cover[0])}" alt="${esc(cover[1])}" loading="lazy">` : ''}<div><b>${ic(R[z].ic)}${T(C, `vendor.rules.${z}.name`)}</b>${T(C, `vendor.rules.${z}.sub`, 'small')}
-      <small style="margin-top:8px">ขายได้</small>${chipList(`vendor.rules.${z}.ok`, 'ok')}${show(filled(R[z].no)) ? `<small style="margin-top:6px">ห้ามขาย</small>${chipList(`vendor.rules.${z}.no`, 'no')}` : ''}</div></div>`; }).join('');
+      <small style="margin-top:8px">ขายได้</small>${chipList(`vendor.rules.${z}.ok`, 'ok')}${show(filled(R[z].no)) ? `<small style="margin-top:8px">ห้ามขาย</small>${chipList(`vendor.rules.${z}.no`, 'no')}` : ''}</div></div>`; }).join('');
   const rights = V.rights.map((r, i) => `<div class="card"><h3>${ic(r.ic)}${T(C, `${P}.rights.${i}.title`)}</h3>${dots(`${P}.rights.${i}.items`)}</div>`).join('');
   const faq = V.faq.map((_, i) => `<details${EDIT ? ' open' : ''}><summary>${T(C, `${P}.faq.${i}.0`)}${del(`${P}.faq.${i}`)}</summary><div>${T(C, `${P}.faq.${i}.1`)}</div></details>`).join('');
   const phones = get(C, `${BR}.contact.phones`);
