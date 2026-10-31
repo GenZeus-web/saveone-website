@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>เลือกหน้าเปิด A+D</title>
+<!-- 31 ต.ค. 69: เจ้าของว่าโลโก้ 3D หน้าเปิด A+D ดูแปลก + ทิ้งที่ว่าง → 3 ทางเลือก (home-ad.html?op=1|2|3) · เลือกแล้วลบไฟล์นี้ -->
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#0c0a1a;color:#fff;font-family:Prompt,sans-serif;padding:28px 16px 60px}
+h1{text-align:center;font-size:26px}
+.lead{text-align:center;color:#c9c3df;margin:8px 0 26px}
+.row{display:flex;flex-wrap:wrap;justify-content:center;gap:28px}
+.opt{width:330px}
+.opt h2{font-size:19px;color:#84e62d}.opt h2 span{color:#ffcf6b}
+.opt p{color:#c9c3df;font-size:14px;margin:4px 0 12px;min-height:42px}
+.dev{width:330px;height:714px;padding:10px;border-radius:38px;background:#05040c;box-shadow:inset 0 0 0 2px #2a2456;overflow:hidden}
+.dev iframe{width:390px;height:844px;border:0;border-radius:30px;transform:scale(.7949);transform-origin:0 0}
+.opt a{display:block;margin-top:12px;padding:10px;border-radius:999px;background:#2a2456;color:#fff;text-align:center;text-decoration:none;font-weight:600}
+.opt a:hover{background:#3d2878}
+</style>
+</head>
+<body>
+<h1>หน้าเปิดแบบ A+D · เลือก 1 แบบ</h1>
+<p class="lead">ลองเลื่อนในกรอบได้ · กด "ดูเต็มจอคอม" เพื่อดูขนาดจอใหญ่</p>
+<div class="row">
+  <div class="opt"><h2><span>1</span> ภาพผังเต็มจอ</h2><p>ภาพผัง 3D ซูมใกล้แล้วค่อยๆ ถอย · ภาพตอนนี้ยังแตก (รอถ่ายใหม่ 2K)</p>
+    <div class="dev"><iframe src="home-ad.html?op=1" title="แบบ 1" loading="lazy"></iframe></div><a href="home-ad.html?op=1" target="_blank">ดูเต็มจอคอม ↗</a></div>
+  <div class="opt"><h2><span>2</span> โลโก้กลางจอ + ไฟตลาด</h2><p>โลโก้แบนคมๆ ตรงกลาง ฉากหลังไฟระยิบ ไม่ใช้รูป</p>
+    <div class="dev"><iframe src="home-ad.html?op=2" title="แบบ 2" loading="lazy"></iframe></div><a href="home-ad.html?op=2" target="_blank">ดูเต็มจอคอม ↗</a></div>
+  <div class="opt"><h2><span>3</span> ข้อความ + การ์ดผังเอียง</h2><p>ภาพผังในกรอบเอียง + ป้ายเวลาเปิด/ราคาลอยอยู่</p>
+    <div class="dev"><iframe src="home-ad.html?op=3" title="แบบ 3" loading="lazy"></iframe></div><a href="home-ad.html?op=3" target="_blank">ดูเต็มจอคอม ↗</a></div>
+</div>
+</body>
+</html>
