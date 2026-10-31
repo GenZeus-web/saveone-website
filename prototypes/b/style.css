@@ -571,3 +571,17 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .vg-c .arr{font-size:20px;color:var(--link)}
 .vg-skip,.vg-back{margin-top:18px;padding:6px 10px;border:0;background:none;color:var(--sub);font:inherit;font-size:15px;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 @media (max-width:560px){.vgate{padding:22px 16px 16px;border-radius:24px}.vg-who{grid-template-columns:1fr;gap:10px}.vg-w ul{display:none}.vg-w{grid-template-columns:auto 1fr;align-items:center}.vg-w b{font-size:19px}}
+/* หัวโซน = รูปบรรยากาศจริง */
+.zt.zmood{position:relative;display:block;height:230px;padding:0;overflow:hidden;background:#15122b}
+.zmood img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.1);transition:opacity 1.2s;cursor:zoom-in}
+.zmood img.on{opacity:1;animation:kb 9s ease-out forwards}
+@keyframes kb{from{transform:scale(1.12)}to{transform:scale(1)}}
+.zmood::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,11,29,0) 35%,rgba(13,11,29,.82));pointer-events:none}
+.zmt{position:absolute;z-index:2;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:16px 18px;color:#fff;font-size:22px;font-weight:700;pointer-events:none}
+.zmt>.i{width:26px;height:26px;padding:5px;box-sizing:content-box;border-radius:10px;background:var(--zc,#ff8a3d);color:#fff}
+.zone.z-boot .zmt>.i{background:#7b4fd6}
+.zmt span{display:grid;line-height:1.15}
+.zmt small{font-size:12px;font-weight:600;opacity:.8;letter-spacing:.02em}
+.zmt .where{pointer-events:auto;margin-left:auto}
+@media (max-width:640px){.zt.zmood{height:180px}.zmt{font-size:19px;padding:12px 14px}}
+@media (prefers-reduced-motion:reduce){.zmood img.on{animation:none;transform:none}}

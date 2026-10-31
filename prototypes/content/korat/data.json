@@ -277,6 +277,12 @@
               }
             ]
           }
+        ],
+        "mood": [
+          [
+            "content/korat/img/food-stalls.jpg",
+            "แผงอาหารตลาดเซฟวันโคราช"
+          ]
         ]
       },
       "boot": {
@@ -441,6 +447,12 @@
               }
             ]
           }
+        ],
+        "mood": [
+          [
+            "content/korat/img/goods-stalls.jpg",
+            "แผงขายสินค้าตลาดเซฟวันโคราช"
+          ]
         ]
       },
       "court": {
@@ -515,7 +527,8 @@
             ""
           ]
         ],
-        "pending": "รอข้อมูล"
+        "pending": "รอข้อมูล",
+        "mood": []
       }
     },
     "steps": {

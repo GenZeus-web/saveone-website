@@ -83,7 +83,7 @@ new MutationObserver(() => document.querySelectorAll('[data-gal=""]').forEach(ga
 // แตะรูปกลาง = ขยายเต็มจอ (มือถือ: รูปสูง 60% จอ ปัดซ้ายขวาดูได้) · แตะรูปข้างๆ = เลื่อนมาตรงกลาง
 // .kind img = รูปปก "ขายอะไรได้บ้าง" ในแบบ 2 (โดนตัด → แตะดูเต็ม)
 addEventListener('click', e => {
-  const im = e.target.closest('.gal img, .kind img'); if (!im) return;
+  const im = e.target.closest('.gal img, .kind img, .zmood img'); if (!im) return;
   const gs = im.closest('.gs');
   if (gs && gs.dataset.d !== '0') { const g = gs.closest('[data-gal]'); galSet(g, +gs.dataset.i); g._t = Date.now(); return; }
   let d = document.getElementById('zoomDlg');
@@ -209,3 +209,17 @@ function qsimInit(q) {
   new IntersectionObserver((es, io) => { if (es[0].isIntersecting) { io.disconnect(); qsimRun(q, 'ok'); } }, { threshold: .5 }).observe(q);
 }
 new MutationObserver(() => document.querySelectorAll('[data-qsim=""]').forEach(qsimInit)).observe(document.documentElement, { childList: true, subtree: true });
+
+// ── หัวโซนเป็นรูปบรรยากาศจริง (zones.<z>.mood) · หลายรูป = ค่อยๆ ซูม + สลับเองทุก 5 วิ · แตะ = ขยาย · ไม่มีรูป = หัวสีเดิม ──
+function zoneHead(z, Z, icon, extra = '') {
+  const m = (Z.mood || []).filter(([src]) => src), e = CMS.esc;
+  if (!m.length) return `<div class="zt">${ic(icon)} ${e(Z.name)}${extra}</div>`;
+  return `<div class="zt zmood" data-mood="">${m.map(([src, alt], i) => `<img src="${e(src)}" alt="${e(alt || 'บรรยากาศโซน' + Z.name)}" loading="lazy"${i ? '' : ' class="on"'}>`).join('')}
+    <div class="zmt">${ic(icon)} <span>${e(Z.name)}<small>บรรยากาศจริง</small></span>${extra}</div></div>`;
+}
+function moodInit(el) {
+  el.dataset.mood = '1';
+  const ims = [...el.querySelectorAll('img')]; if (ims.length < 2 || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let i = 0; setInterval(() => { if (document.hidden) return; ims[i].classList.remove('on'); i = (i + 1) % ims.length; ims[i].classList.add('on'); }, 5000);
+}
+new MutationObserver(() => document.querySelectorAll('[data-mood=""]').forEach(moodInit)).observe(document.documentElement, { childList: true, subtree: true });
