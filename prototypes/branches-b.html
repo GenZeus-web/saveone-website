@@ -6,12 +6,12 @@
 <title>สาขา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031d">
+<link rel="stylesheet" href="b/style.css?v=20261031e">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031c"></script>
+<script src="b/common.js?v=20261031e"></script>
 <script>
 // ไม่ระบุสาขา = ทุกสาขาเรียงในหน้าเดียว · ?b=<สาขา> = เฉพาะสาขานั้น + แท็บสลับ + ผัง 3D เปิดที่สาขานั้น (เจ้าของ 30 ต.ค. 69)
 // ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน (โคราช)
@@ -31,7 +31,7 @@ page((C) => {
         <div><p class="lead" style="margin-top:0">${phr(b.customer.sub)}</p>${quickCards(C, k, b.customer.quick)}${b.customer.note ? `<p class="note">${phr(b.customer.note)}</p>` : ''}</div>
       </div></div></section>`; };
   return `${pageHead('สาขา', 'pin', 'สาขาและเวลาเปิด', keys.length > 1 ? `${C.keys.length} สาขา · เปิดทุกวัน` : '')}
-  ${keys.length > 1 ? '' : `<div class="wrap">${branchTabs(C, only)}</div>`}
+  <div class="wrap">${branchTabs(C, keys.length > 1 ? '' : only, true)}</div>
   ${keys.map(branch).join('')}
 
   <section class="sec" id="map"><div class="wrap">

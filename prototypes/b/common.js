@@ -87,12 +87,21 @@ function quickCards(C, k, list) {
 const pageHead = (kick, icon, title, lead = '') => `<section class="phead"><div class="wrap">
   <span class="kick">${ic(icon)} ${esc(kick)}</span><h1>${title}</h1>${lead ? `<p class="lead">${lead}</p>` : ''}</div></section>`;
 
-// แท็บสาขา = ลิงก์ ?b=… (เก็บพารามิเตอร์อื่นไว้)
-function branchTabs(C, cur) {
-  return `<nav class="tabs" aria-label="เลือกสาขา">${C.keys.map(k => {
-    const u = new URLSearchParams(location.search); u.set('b', k);
-    return `<a href="?${u}"${k === cur ? ' class="on" aria-current="true"' : ''}>${esc(C[k].name)}</a>`; }).join('')}</nav>`;
+// ดรอปดาวน์เลือกสาขา (เจ้าของ 31 ต.ค. 69 แทนแท็บเดิม) = ลิงก์ ?b=… (เก็บพารามิเตอร์อื่นไว้) · จัดกลุ่มตามบริษัท · บอกสถานะเปิด/ปิดตอนนี้
+// all = มีตัวเลือก "ทุกสาขา" (หน้าสาขา) · cur ว่าง = กำลังดูทุกสาขา
+function branchTabs(C, cur, all = false) {
+  const href = k => { const u = new URLSearchParams(location.search); k ? u.set('b', k) : u.delete('b'); return `?${u}`.replace(/\?$/, location.pathname.split('/').pop() || './'); };
+  const B = C.story?.brand || {}, co = k => /market/i.test(B[k] || '') ? 'Saveone Market' : 'เซฟวัน โก';
+  const st = k => { const h = C[k].facts?.find(f => f[0] === 'food')?.[2]; if (!h || !h.includes('–')) return '';
+    const o = openStatus(h); return `<span class="bst${o.open ? ' open' : ''}"><i></i>${o.open ? 'เปิดอยู่' : esc(o.text)}</span>`; };
+  const item = k => `<a href="${href(k)}"${k === cur ? ' class="on" aria-current="true"' : ''}>${ic('pin')}<span><b>${esc(C[k].name)}</b>${st(k)}</span>${k === cur ? '<em>✓</em>' : ''}</a>`;
+  const groups = [...new Set(C.keys.map(co))].map(g => `<p class="bg">${g}</p>${C.keys.filter(k => co(k) === g).map(item).join('')}`).join('');
+  return `<details class="bpick"><summary aria-label="เลือกสาขา"><small>สาขา</small><b>${cur ? esc(C[cur].name) : 'ทุกสาขา'}</b><span class="chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span></summary>
+    <div class="bmenu">${all ? `<a href="${href('')}"${cur ? '' : ' class="on" aria-current="true"'}>${ic('map')}<span><b>ทุกสาขา</b><span class="bst">${C.keys.length} สาขา</span></span>${cur ? '' : '<em>✓</em>'}</a>` : ''}${groups}</div></details>`;
 }
+// ปิดดรอปดาวน์เมื่อแตะข้างนอก / กด Esc
+addEventListener('click', e => document.querySelectorAll('details.bpick[open]').forEach(d => { if (!d.contains(e.target)) d.open = false; }));
+addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('details.bpick[open]').forEach(d => { d.open = false; d.querySelector('summary').focus(); }); });
 const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
 function header() {
