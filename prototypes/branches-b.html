@@ -6,12 +6,12 @@
 <title>สาขา · ตลาดเซฟวัน โก</title>
 <script>{ let t; try { t = localStorage.getItem('theme'); } catch {} document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }</script>
 <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="b/style.css?v=20261031f">
+<link rel="stylesheet" href="b/style.css?v=20261031h">
 </head>
 <body>
 <main id="main"></main>
 <script src="content/cms.js?v=20261030a"></script>
-<script src="b/common.js?v=20261031f"></script>
+<script src="b/common.js?v=20261031h"></script>
 <script>
 // ไม่ระบุสาขา = ทุกสาขาเรียงในหน้าเดียว · ?b=<สาขา> = เฉพาะสาขานั้น + แท็บสลับ + ผัง 3D เปิดที่สาขานั้น (เจ้าของ 30 ต.ค. 69)
 // ลิงก์ด่วนลูกค้า · ผัง 3D (แตะก่อนถึงโหลด) · เช่าลาน (โคราช)
@@ -47,7 +47,7 @@ page((C) => {
       <div class="cta"><a class="btn pri" href="tel:${digits(ev.tel)}">${ic('phone')} สอบถาม ${esc(ev.tel)}</a></div></div></div></div></section>` : ''}`;
 }, (C) => {
   $('mapCover').onclick = () => {
-    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261029a';
+    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261031b';
     f.onload = () => {
       try { f.contentWindow.postMessage({ pinGroup: null, content: C }, location.origin); } catch {}
       // เลือกสาขามา → พลิกผังไปสาขานั้น (ผังยังโหลดไม่เสร็จจะไม่รับ → ส่งซ้ำจนผังตอบว่าอยู่สาขานั้นแล้ว)

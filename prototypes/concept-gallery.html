@@ -326,7 +326,7 @@ function render() {
   $('vTabs').onclick = e => { const b = e.target.closest('button'); if (b) { VB = b.dataset.b; vendor(); } };
   visit('sg'); vendor();
   $('mapCover').onclick = () => {
-    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261029a';
+    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261031b';
     f.onload = () => { try { f.contentWindow.postMessage({ pinGroup: null, content: C }, location.origin); } catch {} };
     $('mapbox').prepend(f); $('mapbox').classList.add('live');
   };

@@ -377,7 +377,7 @@ function render() {
   vendor();
   // ผัง 3D: โหลดเมื่อแตะ (ไม่ให้แย่งการเลื่อนจอ และไม่โหลดหนักตั้งแต่เปิดหน้า)
   $('mapCover').onclick = () => {
-    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261029a';
+    const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261031b';
     f.onload = () => { try { f.contentWindow.postMessage({ pinGroup: null, content: C }, location.origin); } catch {} };
     $('mapbox').prepend(f); $('mapbox').classList.add('live');
   };

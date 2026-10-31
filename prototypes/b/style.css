@@ -212,7 +212,7 @@ img{display:block;max-width:100%}
 /* ตัวอย่างล็อก (ภาพเรนเดอร์ 3D) */
 .lots{margin-top:18px}
 .lots figure{margin:8px 0 0;border-radius:16px;overflow:hidden;border:1px solid var(--line)}
-.lots img{display:block;width:100%;height:auto}
+.lots img{display:block;width:100%;height:auto;cursor:zoom-in}
 .lots figcaption{display:grid;gap:6px;padding:10px 12px;background:var(--card2);font-size:13px;color:var(--sub);text-align:center}
 .lots figcaption b{display:block;font-size:15px;color:var(--head)}
 .lnote{font-size:12px;color:var(--sub);margin-top:6px}
@@ -355,3 +355,29 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 .sea.dim .sn{color:var(--sub)}
 /* ข้อมูลที่ยังไม่ยืนยัน (เจ้าของ: ใช้ที่มีไปก่อน ใส่ "รอข้อมูล") */
 .wait{display:inline-block;padding:1px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--kick-bg);color:var(--kick);white-space:nowrap}
+
+/* ปุ่ม "อยู่ตรงไหน?" บนหัวการ์ดโซน + ผัง 3D แบบป๊อปอัป (31 ต.ค. 69) */
+.zt .where{margin-left:auto;display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 14px;border-radius:999px;border:0;cursor:pointer;font:inherit;font-size:14px;font-weight:600;background:rgba(255,255,255,.92);color:#15122b;box-shadow:0 2px 8px rgba(0,0,0,.15);transition:transform .15s}
+.zt .where:hover{transform:translateY(-1px)}
+.zt .where .i{width:16px;height:16px}
+.mapdlg{margin:auto;inset:0;position:fixed;width:min(1100px,96vw);height:min(760px,88vh);padding:0;border:0;border-radius:24px;overflow:hidden;background:var(--card);color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.mapdlg[open]{display:flex;flex-direction:column;animation:bdrop .25s ease-out}
+.mapdlg::backdrop{background:rgba(10,8,25,.6);backdrop-filter:blur(3px)}
+.mapdlg .mh{display:flex;align-items:center;gap:12px;padding:12px 14px 12px 20px;border-bottom:1px solid var(--line)}
+.mapdlg .mh b{font-size:16px;color:var(--head)}
+.mapdlg .mx{margin-left:auto;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;font-size:18px;background:var(--card2);color:var(--head)}
+.mapdlg .mf{flex:1;position:relative}
+.mapdlg iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+@media (max-width:600px){.mapdlg{width:100vw;height:100dvh;max-width:none;max-height:none;border-radius:0}}
+/* รูปขยายเต็มจอ */
+.zoomdlg{margin:auto;inset:0;position:fixed;width:100vw;height:100dvh;max-width:none;max-height:none;padding:16px;border:0;background:transparent;cursor:zoom-out}
+.zoomdlg[open]{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;animation:bdrop .2s ease-out}
+.zoomdlg::backdrop{background:rgba(8,6,20,.92)}
+.zoomdlg .zw{max-width:100%;max-height:calc(100% - 70px);overflow:auto;border-radius:14px}
+.zoomdlg img{display:block;max-width:100%;max-height:calc(100dvh - 110px);object-fit:contain;border-radius:14px}
+/* มือถือ: รูปกว้างจะเล็กเกินไป → ขยายสูง 60% จอ ปัดซ้ายขวาดูได้ */
+@media (max-width:700px){.zoomdlg .zw{width:100%}.zoomdlg img{height:min(60dvh,560px);width:auto;max-width:none;max-height:none}}
+.zoomdlg p{color:#fff;font-size:15px;font-weight:600;text-align:center}
+.zoomdlg .mx{position:absolute;top:14px;right:14px;width:46px;height:46px;border-radius:50%;border:0;cursor:pointer;font-size:20px;background:rgba(255,255,255,.16);color:#fff}
+.lots figure{position:relative}
+.lots figure::after{content:"แตะเพื่อขยาย";position:absolute;top:10px;right:10px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(21,18,43,.7);color:#fff;pointer-events:none}

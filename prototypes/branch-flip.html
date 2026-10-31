@@ -119,7 +119,14 @@ small small,b small,span small{font-weight:400;color:var(--muted)}
 .warn{margin-top:12px;font-size:12px;color:var(--warn)}
 /* ช่องรูปจริง (ใส่ทีหลัง) · ช่องข้อมูลที่ยังไม่มี = กรอบเส้นประ */
 .ph{margin-top:12px;display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:14px}
-.ph img{flex:none;width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:14px;scroll-snap-align:start}
+/* รูปเต็ม ไม่ตัด (เจ้าของ 31 ต.ค. 69: "มันตัดอยู่") · แตะ = ขยายเต็มจอ */
+.ph{align-items:flex-start}
+.ph img{flex:none;width:100%;height:auto;border-radius:14px;scroll-snap-align:start;cursor:zoom-in;background:rgba(255,255,255,.04)}
+.zoom{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;background:rgba(8,6,20,.92);cursor:zoom-out;animation:zin .2s ease-out}
+.zoom img{max-width:100%;max-height:calc(100% - 60px);object-fit:contain;border-radius:12px}
+.zoom p{color:#fff;font-size:14px;text-align:center}
+.zoom button{position:absolute;top:12px;right:12px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:20px;cursor:pointer}
+@keyframes zin{from{opacity:0}}
 .ph.empty{aspect-ratio:16/9;border:1.5px dashed var(--line);display:grid;place-items:center;text-align:center;color:var(--muted);font-size:13px;background:rgba(246,241,231,.03)}
 .ph.empty small{display:block;font-size:11px;margin-top:2px}
 .fact.todo{background:none;border:1px dashed var(--line)}
@@ -1363,7 +1370,17 @@ addEventListener('message', e => {
   if ('pinGroup' in e.data) pinGroup = e.data.pinGroup;
   if (e.data.content) SITE = e.data.content;   // หน้าแรก/admin ส่งเนื้อหาชุดล่าสุดมา (รวมที่แก้ค้างไว้)
   if (e.data.goBranch) goBranch(e.data.goBranch);   // ปุ่ม "ดูสาขา…" ในหน้าแรก
+  if (e.data.focus) { focusWant = e.data.focus; tryFocus(); }   // ปุ่ม "อยู่ตรงไหน?" หน้าราคา/วิธีจอง/ระเบียบ (31 ต.ค. 69)
 });
+// เปิดการ์ดโซนที่ขอ เมื่อผังพลิกมาถึงสาขานั้นและโหลดเสร็จ · focus = { b: สาขา, kind: food|boot, id?: รหัสโซน (ศูนย์อาหารโคราช = food-in) }
+let focusWant = null;
+function tryFocus() {
+  const f = focusWant; if (!f || busy || $('loading') || brKey(cur) !== f.b) return;
+  const ok = q => q.p.kind === f.kind && (f.id ? q.p.id === f.id : q.p.id !== 'food-in');
+  const q = pinEls.find(ok) || pinEls.find(q => q.p.kind === f.kind);
+  focusWant = null; if (q) openCard(q.p, q.el);
+}
+setInterval(tryFocus, 300);
 // รหัสสาขา (ตรงกับโฟลเดอร์ content/<รหัส>/) · บอกหน้าแรกทุกครั้งที่พลิกเสร็จ → เนื้อหาข้างล่างเปลี่ยนตาม
 const brKey = i => BRANCHES[i].sg ? 'sg' : BRANCHES[i].korat ? 'korat' : 'sb';
 const tellBranch = () => { if (parent !== window) parent.postMessage({ branch: brKey(cur) }, location.origin); };
@@ -1624,6 +1641,18 @@ function keepOnBoard() {
 }
 renderer.setAnimationLoop(now => { runTweens(now); controls.update(); keepOnBoard(); placePins(); showAngle(); composer.render(); });
 window.__flip = { go, setMode: m => (mode = m), platform, tiles, camera, controls, pins: () => pinEls, home, zoomLim };   // ใช้ทดสอบจากคอนโซล
+</script>
+<script>
+// แตะรูปในการ์ด = ขยายเต็มจอ · แตะที่ไหนก็ได้/Esc = ปิด
+document.addEventListener('click', e => {
+  const im = e.target.closest('.ph img'); if (!im) return;
+  const z = document.createElement('div'); z.className = 'zoom'; z.setAttribute('role', 'dialog'); z.setAttribute('aria-label', 'ดูรูปขยาย');
+  z.innerHTML = '<button type="button" aria-label="ปิด">✕</button><img alt=""><p></p>';
+  z.querySelector('img').src = im.currentSrc || im.src; z.querySelector('img').alt = im.alt; z.querySelector('p').textContent = im.alt;
+  const close = () => { z.remove(); removeEventListener('keydown', esc, true); };
+  const esc = ev => { if (ev.key === 'Escape') { ev.stopPropagation(); close(); } };
+  z.onclick = close; addEventListener('keydown', esc, true); document.body.append(z); z.querySelector('button').focus();
+});
 </script>
 </body>
 </html>

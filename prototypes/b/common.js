@@ -104,9 +104,43 @@ addEventListener('click', e => document.querySelectorAll('details.bpick[open]').
 addEventListener('keydown', e => { if (e.key === 'Escape') document.querySelectorAll('details.bpick[open]').forEach(d => { d.open = false; d.querySelector('summary').focus(); }); });
 // เวลา (จอง/วันขาย) = การ์ดละโซน · ในการ์ดเป็นตารางเส้นทึบ 2 คอลัมน์ (หัวข้อ | เวลา) → มือถือไม่ต้องเลื่อนข้าง (เจ้าของ 31 ต.ค. 69)
 // list = [[zoneKey, ชื่อโซน, [[หัวข้อ, ค่า(HTML)], …]], …]
-const zoneTimes = list => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${esc(name)}</div>
+const zoneTimes = (list, k = '') => `<div class="ztimes">${list.map(([z, name, rows]) => `<div class="ztc z-${z} rv"><div class="zt">${ic(ZIC[z] || 'pin')} ${esc(name)}${whereBtn(k, z)}</div>
   <table class="ptbl tt"><tbody>${rows.map(([h, v]) => `<tr><th scope="row">${esc(h)}</th><td>${v}</td></tr>`).join('')}</tbody></table></div>`).join('')}</div>`;
 const ZIC = { food: 'food', boot: 'car', court: 'food' };
+// ── "อยู่ตรงไหน?" = เปิดผัง 3D ของสาขานั้น บินไปที่โซน (เจ้าของ 31 ต.ค. 69: คนดูงงว่าโซนอยู่ตรงไหน) ──
+// MAP_READY = สาขาที่ผังเป็นของจริงแล้ว · บางนายังเป็นผังสมมติ → ไม่โชว์ปุ่ม (ไม่ชี้ผิดที่)
+const MAP_READY = ['sg', 'korat'];
+const whereBtn = (k, z) => MAP_READY.includes(k) && ['food', 'boot', 'court'].includes(z)
+  ? `<button type="button" class="where" data-where="${k}:${z}">${ic('map')} อยู่ตรงไหน?</button>` : '';
+addEventListener('click', e => {
+  const t = e.target.closest('[data-where]'); if (!t) return;
+  const [b, z] = t.dataset.where.split(':'), focus = { b, kind: z === 'court' ? 'food' : z, ...(z === 'court' ? { id: 'food-in' } : {}) };
+  let d = document.getElementById('mapDlg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'mapDlg'; d.className = 'mapdlg';
+    d.innerHTML = `<div class="mh"><b></b><button type="button" class="mx" aria-label="ปิดผัง">✕</button></div><div class="mf"></div>`;
+    d.querySelector('.mx').onclick = () => d.close(); d.onclick = ev => { if (ev.target === d) d.close(); };
+    d.addEventListener('close', () => { d.querySelector('.mf').innerHTML = ''; clearInterval(d._t); });
+    document.body.append(d); }
+  const zt = t.closest('.zt'); d.querySelector('b').textContent = `${zt ? [...zt.childNodes].filter(x => x !== t).map(x => x.textContent).join('').trim() : 'โซน'} อยู่ตรงนี้ · ผังตลาด 3D`;
+  const f = document.createElement('iframe'); f.title = 'ผังตลาด 3D'; f.src = 'branch-flip.html?v=20261031b';
+  // ผังยังโหลดไม่เสร็จจะไม่รับ → ส่งซ้ำจนผังตอบว่าพลิกมาถึงสาขานั้น แล้วส่ง focus
+  f.onload = () => { let n = 0; clearInterval(d._t);
+    d._t = setInterval(() => { if (++n > 50) return clearInterval(d._t); try { f.contentWindow.postMessage({ pinGroup: 'ven', goBranch: b }, location.origin); } catch {} }, 600); };
+  addEventListener('message', function on(ev) { if (ev.source !== f.contentWindow || ev.data?.branch !== b) return;
+    clearInterval(d._t); removeEventListener('message', on); f.contentWindow.postMessage({ focus }, location.origin); });
+  d.querySelector('.mf').append(f); d.showModal();
+});
+// แตะรูปตัวอย่างล็อก (หน้าราคา) = ขยายเต็มจอ ดูรายละเอียดได้ (เจ้าของ 31 ต.ค. 69)
+addEventListener('click', e => {
+  const im = e.target.closest('.lots img'); if (!im) return;
+  let d = document.getElementById('zoomDlg');
+  if (!d) { d = document.createElement('dialog'); d.id = 'zoomDlg'; d.className = 'zoomdlg';
+    d.innerHTML = '<button type="button" class="mx" aria-label="ปิด">✕</button><div class="zw"><img alt=""></div><p></p>';
+    d.onclick = () => d.close(); document.body.append(d); }
+  const cap = [...(im.closest('figure')?.querySelector('figcaption')?.children || [])].map(x => x.innerText.replace(/\s+/g, ' ').trim()).join('  ·  ') || im.alt;
+  d.querySelector('img').src = im.currentSrc || im.src; d.querySelector('img').alt = im.alt; d.querySelector('p').textContent = cap;
+  d.showModal();
+});
 const pickBranch = C => { const b = new URLSearchParams(location.search).get('b'); return C.keys.includes(b) ? b : C.keys[0]; };
 
 function header() {
