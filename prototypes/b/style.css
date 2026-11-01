@@ -3,7 +3,7 @@
 
 /* ── สี 2 ธีม (ความหมายสีเหมือนกัน: ราคา = โทนอุ่น · ปุ่ม = เขียว GO · โซน = สีหมุดบนผัง) ── */
 :root,[data-theme="dark"]{color-scheme:dark;
-  --bg:#15122b;--bg2:#100d22;--card:#2c2660;--card2:#3a3277;--line:rgba(255,255,255,.20);--shadow:0 10px 28px rgba(0,0,0,.45);
+  --bg:#15122b;--bg2:#100d22;--card:#362e75;--card2:#453b8c;--line:rgba(255,255,255,.26);--shadow:0 12px 32px rgba(0,0,0,.55);
   --head:#ffffff;--ink:#f1eef8;--sub:#c9c3df;
   --acc:#84e62d;--acc-ink:#15122b;--link:#a6f06a;
   --price:#ffcf6b;--kick-bg:rgba(255,207,107,.16);--kick:#ffcf6b;
@@ -12,13 +12,13 @@
   --hero:radial-gradient(90% 120% at 85% 0%,#4a2f8a 0%,#15122b 62%);--wm-ink:#fff;--wm-go:#84e62d;
   --info-bg:#84e62d;--info-ink:#1d3a0c;--info-head:#15122b}
 [data-theme="light"]{color-scheme:light;
-  --bg:#ebe7f6;--bg2:#ffffff;--card:#ffffff;--card2:#f1eef9;--line:rgba(21,18,43,.14);--shadow:0 1px 2px rgba(21,18,43,.06),0 8px 24px rgba(21,18,43,.10);
+  --bg:#e1dcf0;--bg2:#ffffff;--card:#ffffff;--card2:#f1eef9;--line:rgba(21,18,43,.18);--shadow:0 1px 3px rgba(21,18,43,.08),0 10px 28px rgba(21,18,43,.14);
   --head:#15122b;--ink:#2a2640;--sub:#565070;
   --acc:#84e62d;--acc-ink:#15122b;--link:#2f7a0f;
   --price:#b45309;--kick-bg:#fff1d6;--kick:#9a5b00;
   --food:#ff8a3d;--food-ink:#2a1205;--boot:#7b4fd0;--boot-ink:#ffffff;--court:#14a08e;--court-ink:#ffffff;
   --ok-bg:#e9f9dc;--ok:#2f6b12;--no-bg:#ffe5e5;--no:#b42318;
-  --hero:radial-gradient(90% 120% at 85% 0%,#dccfff 0%,#ebe7f6 62%);--wm-ink:#15122b;--wm-go:#3f9a12;
+  --hero:radial-gradient(90% 120% at 85% 0%,#d3c4ff 0%,#e1dcf0 62%);--wm-ink:#15122b;--wm-go:#3f9a12;
   --info-bg:#15122b;--info-ink:#cfcbe6;--info-head:#ffffff}
 
 *{box-sizing:border-box;margin:0}
