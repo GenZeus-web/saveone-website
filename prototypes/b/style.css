@@ -594,3 +594,20 @@ html.inphone,html.inphone *{scrollbar-width:none}html.inphone ::-webkit-scrollba
 [data-zp]:not([hidden]){display:block;columns:2 340px;column-gap:16px}
 [data-zp]>.card{break-inside:avoid;margin-bottom:16px}
 .pickwrap{padding-top:32px}.pickwrap+.sec{padding-top:48px}   /* หน้าสาขา: ระยะเท่าหน้าอื่น (หัวหน้า → แถบสาขา 32 → เนื้อหา 48) */
+
+/* ── เปลี่ยนธีมแบบพระอาทิตย์ตก/ขึ้น (b/themefx.js) ── ทดลอง 3 แบบ ?fx=1|2|3 */
+.tfx{position:fixed;inset:0;z-index:9999;pointer-events:none;overflow:hidden}
+.tfx-sky .l,.tfx-sky .stars{position:absolute;inset:0}
+.tfx-sky .day{background:linear-gradient(#bcdcff 0%,#e9e3ff 55%,#fff0d8 100%)}
+.tfx-sky .dusk{background:linear-gradient(#2e2366 0%,#8a3a8c 34%,#ff5e7e 60%,#ff9a3d 80%,#ffd36b 100%)}
+.tfx-sky .night{background:linear-gradient(#0b0920 0%,#15122b 55%,#2b1f5e 100%)}
+.tfx-sky .sun{position:absolute;left:50%;top:22vh;width:min(30vmin,220px);aspect-ratio:1;border-radius:50%;
+  background:radial-gradient(circle at 50% 45%,#fff7d6 0%,#ffd36b 42%,#ff8a3d 100%);box-shadow:0 0 70px 28px rgba(255,160,70,.55),0 0 160px 70px rgba(255,110,90,.25)}
+.tfx-sky .town{position:absolute;left:0;right:0;bottom:0;height:max(20vh,120px)}
+.tfx-sky .town svg{width:100%;height:100%;display:block}
+.tfx-sky .roof{fill:#120f26}
+.tfx-sky .wire{fill:none;stroke:#120f26;stroke-width:2}
+.tfx-sky .b{fill:#ffd27a;filter:drop-shadow(0 0 6px #ffb347)}
+.tfx-ring{position:fixed;left:0;top:0;width:0;height:0;border-radius:50%;transform:translate(-50%,-50%)}
+.tfx-sweep>i{position:absolute;left:0;right:0;height:200vh}
+.tfx-sweep.down>i{top:0}.tfx-sweep.up>i{top:-100vh}

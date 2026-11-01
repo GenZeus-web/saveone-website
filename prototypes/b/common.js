@@ -187,7 +187,7 @@ function header() {
     </button>
     <a class="btn pri sm" href="booking-b.html">จองล็อก</a></div>`;
   document.body.prepend(top);
-  $('themeBtn').onclick = toggleTheme;
+  $('themeBtn').onclick = e => window.themeFx ? themeFx(e) : toggleTheme();   // b/themefx.js = แอนิเมชันพระอาทิตย์ตก/ขึ้น
   // ☰ เปิด-ปิดแผงเมนู · กดนอกแถบบน / Esc = ปิด
   const bg = top.querySelector('.burger');
   const shut = () => { top.classList.remove('open'); bg.setAttribute('aria-expanded', 'false'); };
